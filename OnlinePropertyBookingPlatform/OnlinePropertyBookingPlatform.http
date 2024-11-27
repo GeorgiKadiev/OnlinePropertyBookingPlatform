@@ -1,0 +1,6 @@
+@OnlinePropertyBookingPlatform_HostAddress = http://localhost:5076
+
+GET {{OnlinePropertyBookingPlatform_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

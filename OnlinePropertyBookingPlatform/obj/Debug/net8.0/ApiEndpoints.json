@@ -1,0 +1,12 @@
+[
+  {
+    "ContainingType": "OnlinePropertyBookingPlatform.Controllers.TestController",
+    "Method": "TestConnection",
+    "RelativePath": "api/Test/test-connection",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

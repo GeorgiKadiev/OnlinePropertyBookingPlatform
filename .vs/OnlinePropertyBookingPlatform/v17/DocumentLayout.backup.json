@@ -1,0 +1,215 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Projects\\OnlinePropertyBookingPlatform\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\.env||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\.env||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\controllers\\valuescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\controllers\\valuescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\propertymanagementcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\propertymanagementcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\models\\estate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\models\\estate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\models\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\models\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|d:\\projects\\onlinepropertybookingplatform\\onlinepropertybookingplatform\\models\\amenity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD2A281D-457A-4C77-9E20-25418B51FEC5}|OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform.csproj|solutionrelative:onlinepropertybookingplatform\\models\\amenity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": ".env",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\.env",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\.env",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\.env",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\.env",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-11-27T15:17:49.086Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": ".gitignore",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\.gitignore",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\.gitignore",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\.gitignore",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\.gitignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAF8SURBVDhPjVNLTgJBEG1lwpoFB3GNK9fieA48hD8iwT/ihwgSDAIHgAGXXsEV18CNzL/LquqZdsYM6kteXqcy3fWqpmpNRBgOhyABBEgpAFVKPIMUcYzUyOU\u002BXM/b2qtU3vkSfRjjZTCAMAw1A2LwzdFoBPP5HNqdzuL27n4juibWI\u002BUshBA1DIkhEx9iEorFotgslQqGYbxxAGFEqt1MxmPWJLbLZdZ\u002Bv89q5PMFPiTR6z2zdaxR0fXA0XTBcVywkb4fwHXjRteecIDNQ7UmExVYAdPcxYaqclN46na5WenMKjtlVnTYwcXlVYaDqImW9beD5N/TeGy32QHXm6hZ03ZgiSQHp2fnWQ4oBmJqWSqwAqZpZjt4aLXAD4J0VqyZsmoubfB8H2r1eoaD6NXZ9HcHO\u002BSA3f4AjifXl8rItOETM8ckB9WTWpYD9RdeZ1PWVWAHWXPQaDb59f/w8LiqHeh1pvGkCaP6qB8yXusoxmuNZ7XmII4O9vGuEF86osuDYRkpYQAAAABJRU5ErkJggg==",
+              "WhenOpened": "2024-11-27T15:08:59.248Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\Properties\\launchSettings.json",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Properties\\launchSettings.json",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\Properties\\launchSettings.json",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAUwCkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-11-27T14:35:02.398Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ValuesController.cs",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Controllers\\ValuesController.cs",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\Controllers\\ValuesController.cs",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Controllers\\ValuesController.cs",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\Controllers\\ValuesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAABUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-27T14:09:35.12Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\appsettings.Development.json",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\appsettings.Development.json",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-11-27T13:54:12.725Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Payment.cs",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Models\\Payment.cs",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\Models\\Payment.cs",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Models\\Payment.cs",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\Models\\Payment.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-27T13:28:33.929Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Estate.cs",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Models\\Estate.cs",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\Models\\Estate.cs",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Models\\Estate.cs",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\Models\\Estate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-27T13:28:33.15Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Amenity.cs",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Models\\Amenity.cs",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\Models\\Amenity.cs",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Models\\Amenity.cs",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\Models\\Amenity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-27T13:28:31.261Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "PropertyManagementContext.cs",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\PropertyManagementContext.cs",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\PropertyManagementContext.cs",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\PropertyManagementContext.cs",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\PropertyManagementContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-27T13:15:18.296Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Program.cs",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\Program.cs",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Program.cs",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\Program.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABQAAABWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-27T13:05:46.574Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\appsettings.json",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\appsettings.json",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\appsettings.json",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-11-27T13:01:34.908Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "User.cs",
+              "DocumentMoniker": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Models\\User.cs",
+              "RelativeDocumentMoniker": "OnlinePropertyBookingPlatform\\Models\\User.cs",
+              "ToolTip": "D:\\Projects\\OnlinePropertyBookingPlatform\\OnlinePropertyBookingPlatform\\Models\\User.cs",
+              "RelativeToolTip": "OnlinePropertyBookingPlatform\\Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-27T14:05:58.57Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\OnlinePropertyBookingPlatform.props" />
-</Project>

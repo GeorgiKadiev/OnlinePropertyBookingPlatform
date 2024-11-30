@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using DotNetEnv; // Import for loading .env files
 using System;
 using OnlinePropertyBookingPlatform;
+using OnlinePropertyBookingPlatform.Repositories; // Include the namespace for CrudRepository
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,8 @@ try
             connectionString,
             new MySqlServerVersion(new Version(8, 0, 40))
         ));
+
+    builder.Services.AddScoped(typeof(CrudRepository<>));
 }
 catch (Exception ex)
 {

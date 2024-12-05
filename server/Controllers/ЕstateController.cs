@@ -46,14 +46,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
             //{
             //    return BadRequest();
             //}
-            _context.Update(estate);
+            Estate e = _context.Estates.Where(e => e.Id == estate.Id).First();
+            e.Title = estate.Title;
+            e.PricePerNight = estate.PricePerNight;
+            e.Location = estate.Location;
+            //etc. etc.
+            _context.Update(e);
             _context.SaveChanges();
 
 
 
             return Ok();
         }
-        [HttpPost("{id}")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             if(!_context.Estates.Any(e=>e.Id==id))
@@ -81,7 +86,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
         }
 
-        [HttpGet("Details/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Estate>> GetEstateDetails(int id)
         {
             try

@@ -15,6 +15,8 @@ public partial class Estate
 
     public int? EstateOwnerId { get; set; }
 
+
+
     public virtual ICollection<Amenity> Amenities { get; set; } = new List<Amenity>();
 
     public virtual User? EstateOwner { get; set; }

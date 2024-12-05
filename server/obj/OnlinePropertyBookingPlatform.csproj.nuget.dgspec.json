@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Programs\\OnlinePropertyBookingPlatform\\server\\OnlinePropertyBookingPlatform.csproj": {}
+    "C:\\Users\\Dido\\OneDrive\\Документи\\GitHub\\OnlinePropertyBookingPlatform\\server\\OnlinePropertyBookingPlatform.csproj": {}
   },
   "projects": {
-    "D:\\Programs\\OnlinePropertyBookingPlatform\\server\\OnlinePropertyBookingPlatform.csproj": {
+    "C:\\Users\\Dido\\OneDrive\\Документи\\GitHub\\OnlinePropertyBookingPlatform\\server\\OnlinePropertyBookingPlatform.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programs\\OnlinePropertyBookingPlatform\\server\\OnlinePropertyBookingPlatform.csproj",
+        "projectUniqueName": "C:\\Users\\Dido\\OneDrive\\Документи\\GitHub\\OnlinePropertyBookingPlatform\\server\\OnlinePropertyBookingPlatform.csproj",
         "projectName": "OnlinePropertyBookingPlatform",
-        "projectPath": "D:\\Programs\\OnlinePropertyBookingPlatform\\server\\OnlinePropertyBookingPlatform.csproj",
-        "packagesPath": "C:\\Users\\Buffed_nutt\\.nuget\\packages\\",
-        "outputPath": "D:\\Programs\\OnlinePropertyBookingPlatform\\server\\obj\\",
+        "projectPath": "C:\\Users\\Dido\\OneDrive\\Документи\\GitHub\\OnlinePropertyBookingPlatform\\server\\OnlinePropertyBookingPlatform.csproj",
+        "packagesPath": "C:\\Users\\Dido\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Dido\\OneDrive\\Документи\\GitHub\\OnlinePropertyBookingPlatform\\server\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Buffed_nutt\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Dido\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -38,13 +34,7 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "all"
-        },
-        "SdkAnalysisLevel": "9.0.100"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -53,6 +43,10 @@
             "DotNetEnv": {
               "target": "Package",
               "version": "[3.1.1, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.2, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
@@ -65,6 +59,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.2, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[8.0.7, )"
             },
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
@@ -94,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

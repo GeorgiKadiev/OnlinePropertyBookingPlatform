@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
@@ -9,11 +10,22 @@ namespace OnlinePropertyBookingPlatform.Controllers
     [Route("api/[controller]")]
     public class UserController : Controller
     {
+        private readonly Utility.IEmailSender _emailSender;
         private readonly PropertyManagementContext _context;
 
-        public UserController(PropertyManagementContext context)
+        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender)
         {
+            _emailSender = emailSender;
             _context = context;
+        }
+        [HttpPost("index")]
+        public async Task<IActionResult> Index()
+        {
+            var receiver = "del40ismost@gmail.com";
+            var subject = "Test";
+            var message = "Hello World";
+            await _emailSender.SendEmailAsync(receiver,subject,message);
+            return Ok();
         }
         [HttpPost("create")]
         public IActionResult Create(User user)

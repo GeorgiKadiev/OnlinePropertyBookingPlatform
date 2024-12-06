@@ -18,6 +18,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpPost]
         public IActionResult Create(Review review)
         {
+            //трябва да се добави Id-то на потребителят, към ревюто
             _context.Reviews.Add(review);
             _context.SaveChanges();
             return Ok();
@@ -56,7 +57,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllreviews()
+        public async Task<ActionResult<IEnumerable<User>>> GetAllReviews()
         {
             try
             {
@@ -69,7 +70,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<Estate>> GetreviewDetails(int id)
+        public async Task<ActionResult<Estate>> GetReviewDetails(int id)
         {
             try
             {
@@ -81,6 +82,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 }
 
                 return Ok(estate);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("user-reviews/{userId}")]
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUserReviews(int userId)
+        {
+            try
+            {
+                var users = await _context.Reviews.Where(r=>r.AuthorId==userId).ToListAsync();
+                return Ok(users);
             }
             catch (Exception ex)
             {

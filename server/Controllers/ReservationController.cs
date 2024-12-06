@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
+using System.Security.Claims;
 
 namespace OnlinePropertyBookingPlatform.Controllers
 {
@@ -19,6 +20,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpPost("{estateId}")]
         public IActionResult Create(Reservation reservation, int estateId)
         {
+            //тук трябва да се добави и Id-то на потребителят,
+            //който създава резервацията
             reservation.EstateId = estateId;
             _context.Reservations.Add(reservation);
             _context.SaveChanges();
@@ -62,27 +65,41 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             try
             {
-                var users = await _context.Reservations.ToListAsync();
-                return Ok(users);
+                var reservations = await _context.Reservations.ToListAsync();
+                return Ok(reservations);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        [HttpGet("{id}")]
+
+        [HttpGet("user-reservations/{userId}")]
+        public async Task<ActionResult<IEnumerable<User>>> GetAllReservationsFromAnUser(int userId)
+        {
+            try
+            {
+                var reservations = await _context.Reservations.Where(r=>r.CustomerId==userId).ToListAsync();
+                return Ok(reservations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("details/{id}")]
         public async Task<ActionResult<Estate>> GetReservationDetails(int id)
         {
             try
             {
-                var estate = await _context.Reservations.FindAsync(id);
+                var reservation = await _context.Reservations.FindAsync(id);
 
-                if (estate == null)
+                if (reservation == null)
                 {
                     return NotFound($"Reservation with ID {id} not found.");
                 }
 
-                return Ok(estate);
+                return Ok(reservation);
             }
             catch (Exception ex)
             {

@@ -67,7 +67,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        [HttpGet("{roomId}")]
+        [HttpGet("details/{roomId}")]
         public async Task<ActionResult<Estate>> GetRoomDetails(int roomId)
         {
             try

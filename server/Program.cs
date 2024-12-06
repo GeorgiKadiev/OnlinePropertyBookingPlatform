@@ -4,10 +4,17 @@ using Microsoft.Extensions.Logging;
 using DotNetEnv; // Import for loading .env files
 using System;
 using OnlinePropertyBookingPlatform;
-using OnlinePropertyBookingPlatform.Repositories; // Include the namespace for CrudRepository
+using OnlinePropertyBookingPlatform.Repositories;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using OnlinePropertyBookingPlatform.Utility; // Include the namespace for CrudRepository
+public class Program
+{ 
+
+public static void Main(string[] args)
+{
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddTransient<OnlinePropertyBookingPlatform.Utility.IEmailSender, EmailSender>();
 Env.Load();
 
 // Add services to the container
@@ -62,4 +69,7 @@ catch (Exception ex)
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
     logger.LogCritical(ex, "An error occurred during application startup.");
     throw;
+}
+}
+
 }

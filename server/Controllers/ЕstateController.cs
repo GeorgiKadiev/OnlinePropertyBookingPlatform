@@ -53,9 +53,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             //etc. etc.
             _context.Update(e);
             _context.SaveChanges();
-
-
-
             return Ok();
         }
         [HttpDelete("{id}")]
@@ -68,7 +65,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             Estate estate = _context.Estates.Where(e=>e.Id==id).First();
             _context.Remove(estate);
             _context.SaveChanges();
-
             return Ok();
         }
         [HttpGet]

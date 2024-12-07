@@ -17,18 +17,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             _emailSender = emailSender;
             _context = context;
-        }
-        [HttpPost("index")]
-        public async Task<IActionResult> Index()
-        {
-            var receiver = "del40ismost@gmail.com";
-            var subject = "Test";
-            var message = "Hello World";
-            await _emailSender.SendEmailAsync(receiver,subject,message);
-            return Ok();
+
         }
         [HttpPost("create")]
-        public IActionResult Create(User user)
+        public async Task<ActionResult> Create([FromBody] User user)
         {
             if (!ModelState.IsValid)
             {
@@ -40,13 +32,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
             _context.Add(user);
             _context.SaveChanges();
-
+            //за редактиране
+            await _emailSender.SendEmailAsync(user.Email, "Confirm your email", "hello");
 
 
             return Ok();
         }
         [HttpPost("edit")]
-        public IActionResult Edit(User user)
+        public IActionResult Edit([FromBody] User user)
         {
 
             if (!ModelState.IsValid)
@@ -79,7 +72,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
         }
         [HttpPost("login")]
-        public IActionResult Login(LoginModel model)
+        public IActionResult Login([FromBody]LoginModel model)
         {
             if(!_context.Users.Any(u=>u.Email==model.Email))
             {
@@ -89,6 +82,29 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("Invalid password");
             }
+            return Ok();
+        }
+        [HttpPost("register")]
+        public async Task<ActionResult> Register([FromBody]RegisterModel model)
+        {
+            if (_context.Users.Any(u => u.Email == model.Email))
+            {
+                return BadRequest("Email is already in use");
+            }
+            if(model.password1!=model.password2)
+            {
+                return BadRequest("Passwords don't match");
+            }
+            User user = new User() 
+            { 
+                Email = model.Email,
+                Password = model.password1,
+                Role = "Customer"
+            };
+            _context.Add(user);
+            _context.SaveChanges();
+            // да се направи автентикация тук
+            await _emailSender.SendEmailAsync(model.Email, "Confirm your email", "hello");
             return Ok();
         }
         [HttpGet]

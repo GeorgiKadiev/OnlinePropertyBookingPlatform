@@ -16,7 +16,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Review review)
+        public IActionResult Create([FromBody] Review review)
         {
             //трябва да се добави Id-то на потребителят, към ревюто
             _context.Reviews.Add(review);
@@ -26,7 +26,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         }
         [HttpPost("edit")]
-        public IActionResult Edit(Review review)
+        public IActionResult Edit([FromBody] Review review)
         {
 
             if (!ModelState.IsValid)

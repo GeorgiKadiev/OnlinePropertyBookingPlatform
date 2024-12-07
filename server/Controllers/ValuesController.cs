@@ -9,10 +9,12 @@ namespace OnlinePropertyBookingPlatform.Controllers
     public class TestController : ControllerBase
     {
         private readonly PropertyManagementContext _context;
+        private readonly Utility.IEmailSender _sender;
 
-        public TestController(PropertyManagementContext context)
+        public TestController(PropertyManagementContext context, Utility.IEmailSender sender)
         {
             _context = context;
+            _sender = sender;
         }
 
         [HttpGet("test-connection")]
@@ -27,6 +29,22 @@ namespace OnlinePropertyBookingPlatform.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Database connection failed: {ex.Message}");
+            }
+        }
+
+        //направено с цел тестване на изпращането на мейл
+        [HttpGet("email")]
+        public IActionResult EmailSend()
+        {
+            try
+            {
+
+                _sender.SendEmailAsync("hutchyy@abv.bg", "asd", "asd");
+                return Ok("email sent");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Sendin email failed: {ex.Message}");
             }
         }
     }

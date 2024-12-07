@@ -1,17 +1,29 @@
 ﻿using System.Net.Mail;
 using System.Net;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using DotNetEnv;
 
 namespace OnlinePropertyBookingPlatform.Utility
 {
     public class EmailSender : IEmailSender
     {
-        public Task SendEmailAsync(string email, string subject, string message)
+        public string SendGridSecret { get;set; }
+        public EmailSender(IConfiguration _config) 
         {
-        string mail = "del40ismost@gmail.com";
-        string pw = "Test12345678!";
-        SmtpClient client = new SmtpClient("smtp.office365.com", 587)
-        {EnableSsl = true, Credentials = new NetworkCredential(mail,pw)};
-            return client.SendMailAsync(new MailMessage(from: mail, to: email, subject, message));
+            Env.Load();
+            SendGridSecret = Environment.GetEnvironmentVariable("SENDGRIDAPIKEY");
+        }
+        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+
+            var client = new SendGrid.SendGridClient(SendGridSecret);
+            var frmo = new EmailAddress("delyanboyanov@hotmail.com", "BookingPlatform");
+            var to = new EmailAddress(email);
+            var message = MailHelper.CreateSingleEmail(frmo, to, subject, "", htmlMessage);
+            return client.SendEmailAsync(message);
+            
+
         }
 
     }

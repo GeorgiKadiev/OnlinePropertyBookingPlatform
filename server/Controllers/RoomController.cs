@@ -15,7 +15,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context = context;
         }
         [HttpPost("{estateId}")]
-        public IActionResult Create(Room room, int estateId)
+        public IActionResult Create([FromBody] Room room, int estateId)
         {
             room.EstateId = estateId;
             _context.Rooms.Add(room);
@@ -24,7 +24,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         }
         [HttpPost("edit")]
-        public IActionResult Edit(Room room)
+        public IActionResult Edit([FromBody] Room room)
         {
 
             if (!ModelState.IsValid)

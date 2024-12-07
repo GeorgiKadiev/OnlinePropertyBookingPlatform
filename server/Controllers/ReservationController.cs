@@ -30,7 +30,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         }
         [HttpPost("edit")]
-        public IActionResult Edit(Reservation reservation)
+        public IActionResult Edit([FromBody] Reservation reservation)
         {
 
             if (!ModelState.IsValid)

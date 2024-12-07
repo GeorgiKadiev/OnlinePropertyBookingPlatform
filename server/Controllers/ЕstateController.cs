@@ -15,7 +15,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context = context;
         }
         [HttpPost("create")]
-        public IActionResult Create(Estate estate)
+        public IActionResult Create([FromBody] Estate estate)
         {
             //if (!ModelState.IsValid)
             //{
@@ -36,7 +36,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
         }
         [HttpPost("edit")]
-        public IActionResult Edit(Estate estate)
+        public IActionResult Edit([FromBody] Estate estate)
         {
             //if (!ModelState.IsValid)
             //{

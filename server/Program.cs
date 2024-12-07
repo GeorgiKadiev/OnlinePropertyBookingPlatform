@@ -14,9 +14,8 @@ public static void Main(string[] args)
 {
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddTransient<OnlinePropertyBookingPlatform.Utility.IEmailSender, EmailSender>();
+builder.Services.AddScoped<OnlinePropertyBookingPlatform.Utility.IEmailSender, EmailSender>();
 Env.Load();
-
 // Add services to the container
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole(); // Add Console logging

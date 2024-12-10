@@ -6,9 +6,11 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import "./LandingPage.css";
+import CarouselProperties from "../../components/Carousel/Carousel"
 
 export default function LandingPage() {
   return (
+    <div>
     <div className="title-search">
       <h2>Book your stay now</h2>
       <Box
@@ -36,6 +38,8 @@ export default function LandingPage() {
           <SearchIcon />
         </IconButton>
       </Box>
+    </div>
+    <CarouselProperties/>
     </div>
   );
 }

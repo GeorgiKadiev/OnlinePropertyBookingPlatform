@@ -40,7 +40,7 @@ function CarouselProperties() {
   }, []);
   return (
     <div className="carousel-box">
-      <Typography variant="h5">Sugested properties</Typography>
+      <h2>Sugested properties</h2>
       <div className="carousel">
         <Carousel
           showStatus={false}

@@ -6,69 +6,100 @@ using System;
 using OnlinePropertyBookingPlatform;
 using OnlinePropertyBookingPlatform.Repositories;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using OnlinePropertyBookingPlatform.Utility; // Include the namespace for CrudRepository
+using OnlinePropertyBookingPlatform.Utility;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text; // Include the namespace for CrudRepository
 public class Program
 { 
 
 public static void Main(string[] args)
-{
+        {
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddScoped<OnlinePropertyBookingPlatform.Utility.IEmailSender, EmailSender>();
-Env.Load();
-// Add services to the container
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole(); // Add Console logging
-builder.Logging.AddDebug();
+            var builder = WebApplication.CreateBuilder(args);
+            // Зареждане на appsettings.json
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true); //добавяне от Панчо
 
-builder.Services.AddControllers();
+            builder.Services.AddScoped<OnlinePropertyBookingPlatform.Utility.IEmailSender, EmailSender>();
+    Env.Load();
+    // Add services to the container
+    builder.Logging.ClearProviders();
+    builder.Logging.AddConsole(); // Add Console logging
+    builder.Logging.AddDebug();
 
-try
-{
-    var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+    builder.Services.AddControllers();
 
-    if (string.IsNullOrEmpty(connectionString))
+    try
     {
-        throw new Exception("Database connection string is not set in environment variables.");
+        var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new Exception("Database connection string is not set in environment variables.");
+        }
+
+        builder.Services.AddDbContext<PropertyManagementContext>(options =>
+            options.UseMySql(
+                connectionString,
+                new MySqlServerVersion(new Version(8, 0, 40))
+            ));
+
+        builder.Services.AddScoped(typeof(CrudRepository<>));
+    }
+    catch (Exception ex)
+    {
+        var logger = LoggerFactory.Create(logging => logging.AddConsole()).CreateLogger("Startup");
+        logger.LogError(ex, "An error occurred while configuring the database connection.");
+        throw;
     }
 
-    builder.Services.AddDbContext<PropertyManagementContext>(options =>
-        options.UseMySql(
-            connectionString,
-            new MySqlServerVersion(new Version(8, 0, 40))
-        ));
+    var app = builder.Build();
 
-    builder.Services.AddScoped(typeof(CrudRepository<>));
-}
-catch (Exception ex)
-{
-    var logger = LoggerFactory.Create(logging => logging.AddConsole()).CreateLogger("Startup");
-    logger.LogError(ex, "An error occurred while configuring the database connection.");
-    throw;
-}
+    // Configure middleware
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
 
-var app = builder.Build();
+            app.UseHttpsRedirection();
+            // Добавяне на middleware за автентикация
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.MapControllers();
 
-// Configure middleware
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
+                try
+                {
+                    app.Run();
+                }
+                catch (Exception ex)
+                {
+                    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+                    logger.LogCritical(ex, "An error occurred during application startup.");
+                    throw;
+                }
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
+                //подръжка за JWT
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+            .AddJwtBearer(options =>
+            {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            };
+            });
 
-try
-{
-    app.Run();
-}
-catch (Exception ex)
-{
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogCritical(ex, "An error occurred during application startup.");
-    throw;
-}
-}
+                builder.Services.AddAuthorization();
 
-}
+            }
+
+        }

@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace OnlinePropertyBookingPlatform.Controllers
 {
@@ -12,6 +16,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
     {
         private readonly Utility.IEmailSender _emailSender;
         private readonly PropertyManagementContext _context;
+        private readonly IConfiguration _config; //добавям за generateJwtToken
+
 
         public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender)
         {
@@ -19,6 +25,42 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context = context;
 
         }
+
+        private string GenerateJwtToken(User user)
+        {
+            // Проверка дали Jwt:Key е зададен
+            var jwtKey = _config["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                throw new InvalidOperationException("JWT ключът не е конфигуриран.");
+            }
+
+            // Създаване на SymmetricSecurityKey
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            // Дефиниране на claims (атрибути в токена)
+            var claims = new[]
+            {
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role),
+        new Claim("UserId", user.Id.ToString())
+    };
+
+            // Създаване на токена
+            var token = new JwtSecurityToken(
+                _config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddHours(3),
+                signingCredentials: credentials);
+
+            // Връщане на токена като низ
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+
+
         [HttpPost("create")]
         public async Task<ActionResult> Create([FromBody] User user)
         {
@@ -72,6 +114,20 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
         }
         [HttpPost("login")]
+        //Редактиран вариант ПАНЧО
+        public IActionResult Login([FromBody] LoginModel model)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
+            if (user == null || user.Password != model.Password)
+            {
+                return Unauthorized("Invalid email or password");
+            }
+
+            var token = GenerateJwtToken(user);
+            return Ok(new { Token = token });
+        }
+
+        /* ТОВА Е СТАРИЯТ ВАРИАНТ
         public IActionResult Login([FromBody]LoginModel model)
         {
             if(!_context.Users.Any(u=>u.Email==model.Email))
@@ -84,6 +140,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
             return Ok();
         }
+        */
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody]RegisterModel model)
         {
@@ -104,9 +161,50 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.Add(user);
             _context.SaveChanges();
             // да се направи автентикация тук
+
             await _emailSender.SendEmailAsync(model.Email, "Confirm your email", "hello");
             return Ok();
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] string email)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            // Generate a reset token (can be a GUID or JWT)
+            var resetToken = Guid.NewGuid().ToString();
+
+            // Save token to database (or send it via email directly)
+            user.ResetPasswordToken = resetToken;
+            _context.SaveChanges();
+
+            // Send email
+            var resetLink = $"https://yourapp.com/reset-password?token={resetToken}";
+            await _emailSender.SendEmailAsync(email, "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
+
+            return Ok("Password reset link sent to your email.");
+        }
+
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword(string token, string newPassword)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
+            if (user == null)
+            {
+                return BadRequest("Invalid token");
+            }
+
+            user.Password = newPassword;
+            user.ResetPasswordToken = null; // Clear the token
+            _context.SaveChanges();
+
+            return Ok("Password reset successfully.");
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
         {

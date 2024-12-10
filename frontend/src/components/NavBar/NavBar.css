@@ -1,0 +1,10 @@
+.home-button {
+  align-items: flex-start;
+}
+
+.navbar {
+  /* background-color: #d21985; */
+  display: flex; /* Flexbox layout */
+  justify-content: space-between;
+  padding: 0 16px;
+}

@@ -47,6 +47,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Sendin email failed: {ex.Message}");
             }
         }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         [HttpGet("user")]
         public async Task<ActionResult<string>> GetUserId()
         {
@@ -62,6 +66,9 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Sendin email failed: {ex.Message}");
             }
         }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     }
 }

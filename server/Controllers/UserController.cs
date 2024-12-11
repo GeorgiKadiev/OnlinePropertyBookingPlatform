@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
+using Org.BouncyCastle.Crypto.Generators;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -43,18 +45,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
             // Дефиниране на claims (атрибути в токена)
             var claims = new[]
             {
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.Role),
-        new Claim("UserId", user.Id.ToString())
-    };
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim("UserId", user.Id.ToString())
+            };
 
             // Създаване на токена
-            var token = new JwtSecurityToken(
-                _config["Jwt:Issuer"],
-                _config["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddHours(3),
-                signingCredentials: credentials);
+                    var token = new JwtSecurityToken(
+               issuer: _config["Jwt:Issuer"],
+               audience: _config["Jwt:Audience"],
+               claims: claims,
+               expires: DateTime.Now.AddHours(3),
+               signingCredentials: credentials
+    );
 
             // Връщане на токена като низ
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -84,7 +87,30 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpPost("edit")]
         public IActionResult Edit([FromBody] User user)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (!_context.Users.Any(u => u.Id == user.Id))
+            {
+                return BadRequest("User doesn't exist");
+            }
+            User user1 = _context.Users.Where(u => u.Id == user.Id).First();
+            user1.Email = user.Email;
 
+            // Хеширане на новата парола, ако има промяна
+            if (!string.IsNullOrEmpty(user.Password))
+            {
+                user1.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            }
+
+            user1.Role = user.Role;
+            _context.Update(user1);
+            _context.SaveChanges();
+
+            return Ok();
+
+            /* стар вариант
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -101,6 +127,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
 
             return Ok();
+            */
         }
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -118,12 +145,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
         //Редактиран вариант ПАНЧО
         public IActionResult Login([FromBody] LoginModel model)
         {
+            // Намери потребител по имейл
             var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
-            if (user == null || user.Password != model.Password)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
             {
                 return Unauthorized("Invalid email or password");
             }
 
+            // Генериране на JWT токен
             var token = GenerateJwtToken(user);
             return Ok(new { Token = token });
         }
@@ -142,29 +171,163 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
         }
         */
+
+        // Не съм много сигурен дали е така някой да провери от тук до
+        [HttpPost("refresh-token")]
+        public IActionResult RefreshToken([FromBody] string token)
+        {
+            var principal = GetPrincipalFromExpiredToken(token);
+            if (principal == null)
+            {
+                return BadRequest("Invalid token");
+            }
+
+            var userId = principal.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found.");
+            }
+
+            var newToken = GenerateJwtToken(new User
+            {
+                Id = int.Parse(userId!),
+                Email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!,
+                Role = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value!
+            });
+
+            return Ok(new { Token = newToken });
+        }
+        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)),
+                    ValidateLifetime = false // Позволява изтекли токени
+                };
+
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
+
+                if (validatedToken is JwtSecurityToken jwtToken && jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return principal;
+                }
+            }
+            catch
+            {
+                // В случай на грешка се връща null
+            }
+
+            return null;
+
+            /*  един вариант
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false, // You might want to validate the audience and issuer
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"])),
+                ValidateLifetime = false // Allow expired tokens
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
+            if (!(securityToken is JwtSecurityToken jwtSecurityToken) || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+
+            return principal;
+            */
+        }
+
+        //до тук :)
+
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody]RegisterModel model)
         {
+            // не съм сигурен за това
+                // Проверка дали имейлът вече се използва
+                if (_context.Users.Any(u => u.Email == model.Email))
+                {
+                    return BadRequest("Email is already in use");
+                }
+
+                // Проверка дали паролите съвпадат
+                if (model.password1 != model.password2)
+                {
+                    return BadRequest("Passwords don't match");
+                }
+
+                // Хеширане на паролата с BCrypt
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.password1);
+
+                // Създаване на нов потребител
+                User user = new User()
+                {
+                    Email = model.Email,
+                    Password = hashedPassword,
+                    Role = "Customer"
+                };
+
+                _context.Add(user);
+                await _context.SaveChangesAsync(); // Съхраняваме потребителя
+
+                // Генериране на JWT токен
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes("YourSecretKeyHere"); // Използвайте вашия секретен ключ
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+
+                // Изпращане на имейл за потвърждение
+                await _emailSender.SendEmailAsync(model.Email, "Confirm your email", "hello");
+
+                // Връщане на токена
+                return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." });
+
+
+            /*  стар вариант
             if (_context.Users.Any(u => u.Email == model.Email))
             {
                 return BadRequest("Email is already in use");
             }
-            if(model.password1!=model.password2)
+
+            if (model.password1 != model.password2)
             {
                 return BadRequest("Passwords don't match");
             }
-            User user = new User() 
-            { 
+
+            // Хеширане на паролата
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.password1);
+
+            User user = new User()
+            {
                 Email = model.Email,
-                Password = model.password1,
+                Password = hashedPassword,
                 Role = "Customer"
             };
-            _context.Add(user);
-            _context.SaveChanges();
-            // да се направи автентикация тук
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
             await _emailSender.SendEmailAsync(model.Email, "Confirm your email", "hello");
-            return Ok();
+            return Ok("Registration successful. Please check your email to confirm your account.");*/
         }
 
         [HttpPost("forgot-password")]
@@ -190,7 +353,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok("Password reset link sent to your email.");
         }
 
-        [HttpPost("reset-password")]
+        [HttpPost("reset-password/{token}")]
         public IActionResult ResetPassword(string token, string newPassword)
         {
             var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
@@ -199,11 +362,25 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return BadRequest("Invalid token");
             }
 
-            user.Password = newPassword;
-            user.ResetPasswordToken = null; // Clear the token
+            // Хеширане на новата парола
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.ResetPasswordToken = null; // Изчистване на токена
             _context.SaveChanges();
 
             return Ok("Password reset successfully.");
+
+            // стар вариант
+            //var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
+            //if (user == null)
+            //{
+            //    return BadRequest("Invalid token");
+            //}
+
+            //user.Password = newPassword;
+            //user.ResetPasswordToken = null; // Clear the token
+            //_context.SaveChanges();
+
+            //return Ok("Password reset successfully.");
         }
 
         [HttpGet]

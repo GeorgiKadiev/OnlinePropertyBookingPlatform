@@ -4,6 +4,7 @@ using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using OnlinePropertyBookingPlatform.Repositories;
 
 
 namespace OnlinePropertyBookingPlatform.Controllers
@@ -13,10 +14,13 @@ namespace OnlinePropertyBookingPlatform.Controllers
     public class ReservationController : Controller
     {
         private readonly PropertyManagementContext _context;
+        private readonly CrudRepository<Reservation> _reservationRepository;
 
-        public ReservationController(PropertyManagementContext context)
+
+        public ReservationController(PropertyManagementContext context, CrudRepository<Reservation> reservationRepository)
         {
             _context = context;
+            _reservationRepository = reservationRepository ?? throw new ArgumentNullException(nameof(reservationRepository));
         }
 
         // Създаване на резервация (само клиенти)
@@ -44,7 +48,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         // Редактиране на резервация (само собственици и администратори)
         [Authorize(Roles = "EstateOwner,Admin")]
         [HttpPost("edit")]
-        public IActionResult Edit([FromBody] Reservation reservation)
+        public async Task<IActionResult> Edit([FromBody] Reservation reservation)
         {
             // нов вариант
             if (!ModelState.IsValid)
@@ -52,7 +56,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return BadRequest(ModelState);
             }
 
-            var reservationToEdit = _context.Reservations.FirstOrDefault(r => r.Id == reservation.Id);
+            var reservationToEdit = await _reservationRepository.GetByIdAsync(reservation.Id);
             if (reservationToEdit == null)
             {
                 return BadRequest("Reservation doesn't exist.");
@@ -60,9 +64,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             reservationToEdit.CheckInDate = reservation.CheckInDate;
             reservationToEdit.CheckOutDate = reservation.CheckOutDate;
-            _context.Update(reservationToEdit);
-            _context.SaveChanges();
 
+            await _reservationRepository.UpdateAsync(reservationToEdit); // Използвайте CRUD репозитория за актуализация
             return Ok();
 
             
@@ -142,7 +145,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
+        
+        //Създаване на обяви()
         [Authorize(Roles = "EstateOwner,Admin")]
         [HttpPost("create")]
         public IActionResult CreateEstate([FromBody] Estate estate)
@@ -154,6 +158,18 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
         }
+
+        [Authorize(Roles = "Customer")]
+        [HttpPost]
+        public async Task<IActionResult> CreateReservation([FromBody] Reservation reservation)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            await _reservationRepository.AddAsync(reservation);
+            return CreatedAtAction(nameof(CreateReservation), new { id = reservation.Id }, reservation);
+        }
+
 
 
     }

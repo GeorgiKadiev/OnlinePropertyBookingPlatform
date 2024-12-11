@@ -33,18 +33,20 @@ public static void Main(string[] args)
     {
         var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
-        if (string.IsNullOrEmpty(connectionString))
+            if (string.IsNullOrEmpty(connectionString))
         {
             throw new Exception("Database connection string is not set in environment variables.");
         }
 
-        builder.Services.AddDbContext<PropertyManagementContext>(options =>
+            // Регистрация на DbContext с MySQL
+            builder.Services.AddDbContext<PropertyManagementContext>(options =>
             options.UseMySql(
                 connectionString,
                 new MySqlServerVersion(new Version(8, 0, 40))
             ));
 
-        builder.Services.AddScoped(typeof(CrudRepository<>));
+            // Регистрация на CrudRepository
+            builder.Services.AddScoped(typeof(CrudRepository<>));
     }
     catch (Exception ex)
     {
@@ -61,11 +63,13 @@ public static void Main(string[] args)
             app.UseDeveloperExceptionPage();
         }
 
+
             app.UseHttpsRedirection();
             // Добавяне на middleware за автентикация
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+            app.UseMiddleware<RateLimitingMiddleware>();
 
                 try
                 {

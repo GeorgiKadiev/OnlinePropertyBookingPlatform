@@ -22,7 +22,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             try
             {
-
+                
                 var estateCount = _context.Estates.Count();
                 return Ok($"Database connection successful! Total estates: {estateCount}");
             }
@@ -47,5 +47,21 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Sendin email failed: {ex.Message}");
             }
         }
+        [HttpGet("user")]
+        public async Task<ActionResult<string>> GetUserId()
+        {
+            try
+            {
+                var userId = User.FindFirst("UserId")?.Value;
+                if (userId == string.Empty)
+                    return BadRequest("no user");
+                return Ok(userId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Sendin email failed: {ex.Message}");
+            }
+        }
+
     }
 }

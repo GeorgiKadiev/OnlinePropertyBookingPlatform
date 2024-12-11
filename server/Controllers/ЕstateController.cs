@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
 
@@ -14,6 +15,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             _context = context;
         }
+        [Authorize(Roles = "EstateOwner")]
         [HttpPost("create")]
         public IActionResult Create([FromBody] Estate estate)
         {
@@ -26,7 +28,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             //    return BadRequest();
             //}
 
-            //трябва да се сложи id-то на owner-a, не съм сигурен как
+            estate.EstateOwnerId = int.Parse(User.FindFirst("UserId")?.Value);
 
             _context.Add(estate);
             _context.SaveChanges();
@@ -35,6 +37,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             return Ok();
         }
+        [Authorize(Roles = "EstateOwner")]
         [HttpPost("edit")]
         public IActionResult Edit([FromBody] Estate estate)
         {
@@ -55,6 +58,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
         }
+        [Authorize(Roles = "EstateOwner")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

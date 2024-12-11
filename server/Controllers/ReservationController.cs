@@ -22,7 +22,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         // Създаване на резервация (само клиенти)
         [Authorize(Roles = "Customer")]
         [HttpPost("{estateId}")]
-        public IActionResult Create(Reservation reservation, int estateId)
+        public IActionResult Create([FromBody]Reservation reservation, int estateId)
         {
             //тук трябва да се добави и Id-то на потребителят,
             //който създава резервацията
@@ -65,22 +65,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             return Ok();
 
-            /* предишен вариант
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            if (!_context.Reservations.Any(r => r.Id == reservation.Id))
-            {
-                return BadRequest("Reservation doesn't exist");
-            }
-            Reservation reservation1 = _context.Reservations.Where(r => r.Id == reservation.Id).First();
-            _context.Update(reservation1);
-            _context.SaveChanges();
-
-            return Ok();
-
-            */
+            
         }
         // Изтриване на резервация (само администратори)
         [Authorize(Roles = "Admin")]
@@ -99,16 +84,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
 
 
-            /* Предишен варианнт
-            if (!_context.Reservations.Any(r => r.Id == id))
-            {
-                return BadRequest("Reservation doesn't exist");
-            }
-            Reservation reservation = _context.Reservations.Where(r => r.Id == id).First();
-            _context.Reservations.Remove(reservation);
-            _context.SaveChanges();
-            return Ok();
-            */
+            
         }
 
         // Извличане на всички резервации (само администратори)

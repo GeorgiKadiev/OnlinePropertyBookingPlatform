@@ -19,8 +19,9 @@ namespace OnlinePropertyBookingPlatform.Controllers
         private readonly IConfiguration _config; //добавям за generateJwtToken
 
 
-        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender)
+        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender,IConfiguration config)
         {
+            _config = config;
             _emailSender = emailSender;
             _context = context;
 

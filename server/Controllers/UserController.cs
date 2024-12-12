@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NuGet.Common;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
 using Org.BouncyCastle.Crypto.Generators;
@@ -300,9 +301,9 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] string email)
+        public async Task<IActionResult> ForgotPassword([FromBody] EmailModel model)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
             if (user == null)
             {
                 return BadRequest("User not found");
@@ -318,13 +319,13 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             // Send email
             var resetLink = $"https://yourapp.com/reset-password?token={resetToken}";
-            await _emailSender.SendEmailAsync(email, "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
+            await _emailSender.SendEmailAsync("hutchyy@abv.bg", "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
 
-            return Ok("Password reset link sent to your email.");
+            return Ok("Password reset link sent to your email. " + resetToken);
         }
 
         [HttpPost("reset-password/{token}")]
-        public IActionResult ResetPassword(string token, string newPassword)
+        public IActionResult ResetPassword(string token,PasswordModel model)
         {
             var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
             if (user == null)
@@ -333,12 +334,12 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
 
 
-            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.Password = BCrypt.Net.BCrypt.HashPassword(model.newPassword);
             user.ResetPasswordToken = null;
             _context.Update(user);
             _context.SaveChanges();
 
-            return Ok("Password reset successfully.");
+            return Ok("Password reset successfully."+ token);
 
         }
 

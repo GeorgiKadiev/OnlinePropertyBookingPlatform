@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
@@ -154,24 +155,17 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             // Генериране на JWT токен
             var token = GenerateJwtToken(user);
+            Response.Cookies.Append("jwt", token, new CookieOptions
+            {
+                HttpOnly = true, // Prevents access via JavaScript
+                Secure = true,   // Ensures the cookie is sent only over HTTPS
+                SameSite = SameSiteMode.Strict, // Prevents CSRF by ensuring the cookie is only sent on same-site requests
+                Expires = DateTime.UtcNow.AddHours(3) // Sets an expiration time for the cookie
+            });
             return Ok(new { Token = token });
         }
 
-        /* ТОВА Е СТАРИЯТ ВАРИАНТ
-        public IActionResult Login([FromBody]LoginModel model)
-        {
-            if(!_context.Users.Any(u=>u.Email==model.Email))
-            {
-                return BadRequest("Email is not valid");
-            }
-            if(_context.Users.Where(u=>u.Email== model.Email).First().Password!=model.Password) 
-            {
-                return BadRequest("Invalid password");
-            }
-            return Ok();
-        }
-        */
-
+        
         // Не съм много сигурен дали е така някой да провери от тук до
         [HttpPost("refresh-token")]
         public IActionResult RefreshToken([FromBody] string token)
@@ -273,7 +267,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 {
                     Email = model.Email,
                     Password = hashedPassword,
-                    Role = "Customer"
+                    Role = model.Role
                 };
 
                 _context.Add(user);
@@ -281,7 +275,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
                 // Генериране на JWT токен
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes("YourSecretKeyHere"); // Използвайте вашия секретен ключ
+                var key = Encoding.UTF8.GetBytes("your-very-strong-secret-key-of-at-least-32-bytes"); // Използвайте вашия секретен ключ
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new Claim[]
@@ -302,32 +296,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." });
 
 
-            /*  стар вариант
-            if (_context.Users.Any(u => u.Email == model.Email))
-            {
-                return BadRequest("Email is already in use");
-            }
-
-            if (model.password1 != model.password2)
-            {
-                return BadRequest("Passwords don't match");
-            }
-
-            // Хеширане на паролата
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.password1);
-
-            User user = new User()
-            {
-                Email = model.Email,
-                Password = hashedPassword,
-                Role = "Customer"
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            await _emailSender.SendEmailAsync(model.Email, "Confirm your email", "hello");
-            return Ok("Registration successful. Please check your email to confirm your account.");*/
+            
         }
 
         [HttpPost("forgot-password")]
@@ -344,6 +313,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             // Save token to database (or send it via email directly)
             user.ResetPasswordToken = resetToken;
+            _context.Update(user);
             _context.SaveChanges();
 
             // Send email
@@ -362,25 +332,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return BadRequest("Invalid token");
             }
 
-            // Хеширане на новата парола
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            user.ResetPasswordToken = null; // Изчистване на токена
+            user.ResetPasswordToken = null;
+            _context.Update(user);
             _context.SaveChanges();
 
             return Ok("Password reset successfully.");
 
-            // стар вариант
-            //var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
-            //if (user == null)
-            //{
-            //    return BadRequest("Invalid token");
-            //}
-
-            //user.Password = newPassword;
-            //user.ResetPasswordToken = null; // Clear the token
-            //_context.SaveChanges();
-
-            //return Ok("Password reset successfully.");
         }
 
         [HttpGet]
@@ -414,6 +373,22 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+        [Authorize]
+        [HttpGet("get-user-id")]
+        public IActionResult GetUserId()
+        {
+            // Extract the UserId claim
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
+            var userId = userIdClaim.Value;
+
+            return Ok(new { UserId = userId });
         }
 
     }

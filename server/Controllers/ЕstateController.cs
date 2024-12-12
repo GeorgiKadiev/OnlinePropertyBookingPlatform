@@ -71,7 +71,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
         }
-        [HttpGet]
+        [Authorize(Roles = "EstateOwner")]
+        [HttpGet("get")]
         public async Task<ActionResult<IEnumerable<Estate>>> GetAllEstates()
         {
             try

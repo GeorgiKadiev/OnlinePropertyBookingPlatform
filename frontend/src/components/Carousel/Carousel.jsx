@@ -17,8 +17,10 @@ const accountData = [
 ];
 
 const numAccounts = accountData.length;
-const showMultipleAccounts = numAccounts >= 3; // Display 3 slides only if there are 3 or more items
 
+// ??NOT WORKING
+// eslint-disable-next-line no-unused-vars
+const showMultipleAccounts = numAccounts >= 3; // Display 3 slides only if there are 3 or more items ??NOT WORKING
 
 function CarouselProperties() {
   const [showMultipleAccounts, setShowMultipleAccounts] = useState(true);

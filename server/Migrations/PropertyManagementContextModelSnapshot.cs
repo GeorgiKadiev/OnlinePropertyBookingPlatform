@@ -214,10 +214,20 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("EmailVerificationToken")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
+
+                    b.Property<short>("PhoneNumber")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("ResetPasswordToken")
                         .HasColumnType("longtext");
@@ -225,6 +235,10 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("enum('Customer','EstateOwner','Admin')");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");

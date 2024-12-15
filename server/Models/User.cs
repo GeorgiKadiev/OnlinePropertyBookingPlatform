@@ -21,8 +21,6 @@ public partial class User
     public string Role { get; set; } = null!;
 
     public string? ResetPasswordToken { get; set; }
-    public bool IsEmailVerified { get; set; } = false;
-    public string EmailVerificationToken { get; set; }
 
     public virtual ICollection<Estate> Estates { get; set; } = new List<Estate>();
 

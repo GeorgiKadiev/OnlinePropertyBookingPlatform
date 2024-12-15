@@ -318,7 +318,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
 
             // Send email
-            var resetLink = $"https://yourapp.com/reset-password/{resetToken}";
+            var resetLink = $"https://yourapp.com/reset-password?token={resetToken}";
             await _emailSender.SendEmailAsync("hutchyy@abv.bg", "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
 
             return Ok("Password reset link sent to your email. " + resetToken);

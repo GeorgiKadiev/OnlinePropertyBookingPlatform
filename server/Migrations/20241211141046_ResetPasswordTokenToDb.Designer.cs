@@ -12,8 +12,8 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    [Migration("20241215123540_emailToUser")]
-    partial class emailToUser
+    [Migration("20241211141046_ResetPasswordTokenToDb")]
+    partial class ResetPasswordTokenToDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -217,20 +217,10 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("EmailVerificationToken")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("IsEmailVerified")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
-
-                    b.Property<short>("PhoneNumber")
-                        .HasColumnType("smallint");
 
                     b.Property<string>("ResetPasswordToken")
                         .HasColumnType("longtext");
@@ -238,10 +228,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("enum('Customer','EstateOwner','Admin')");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");

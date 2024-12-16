@@ -137,7 +137,7 @@ public partial class PropertyManagementContext : DbContext
                 .HasConstraintName("room_ibfk_1");
         });
 
-        modelBuilder.Entity<User>(entity =>
+        object value = modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 

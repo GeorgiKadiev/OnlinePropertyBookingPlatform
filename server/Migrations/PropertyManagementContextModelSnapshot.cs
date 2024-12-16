@@ -214,7 +214,21 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+                    b.Property<string>("PasswordHash")
+=======
+                    b.Property<string>("EmailVerificationToken")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("tinyint(1)");
+
+=======
+>>>>>>> b20a9abec4863ff50fa01583b0ed660304cc5c0c
                     b.Property<string>("Password")
+>>>>>>> 6fc7979225388f82ee54d92cca65241536245f26
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");

@@ -14,7 +14,19 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OnlinePropertyBookingPlatform")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5339b9459b2ec3f236dd59697542482a81a8fade")]
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e7e0e620df8be00222d12bd19ea6084156a587b2")]
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eb1d610f8cd1dbef3e98c84883c133c8872bf2f4")]
+>>>>>>> 6fc7979225388f82ee54d92cca65241536245f26
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e7e0e620df8be00222d12bd19ea6084156a587b2")]
+>>>>>>> b20a9abec4863ff50fa01583b0ed660304cc5c0c
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e7e0e620df8be00222d12bd19ea6084156a587b2")]
+>>>>>>> b20a9abec4863ff50fa01583b0ed660304cc5c0c
 [assembly: System.Reflection.AssemblyProductAttribute("OnlinePropertyBookingPlatform")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OnlinePropertyBookingPlatform")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

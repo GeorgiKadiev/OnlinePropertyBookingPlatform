@@ -5,6 +5,9 @@ using OnlinePropertyBookingPlatform.Models.DataModels;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using OnlinePropertyBookingPlatform.Repositories;
+using OnlinePropertyBookingPlatform.Utility;
+using System.ComponentModel.DataAnnotations; // За EmailAddress валидация
+using BCrypt.Net; // За хеширане на пароли
 
 
 namespace OnlinePropertyBookingPlatform.Controllers
@@ -15,36 +18,119 @@ namespace OnlinePropertyBookingPlatform.Controllers
     {
         private readonly PropertyManagementContext _context;
         private readonly CrudRepository<Reservation> _reservationRepository;
+        private readonly SecureRepository _secureRepository;
+        private readonly ILogger<UserController> _logger;
 
 
-        public ReservationController(PropertyManagementContext context, CrudRepository<Reservation> reservationRepository)
+
+        public ReservationController(PropertyManagementContext context, CrudRepository<Reservation> reservationRepository, SecureRepository secureRepository, ILogger<UserController> logger)
         {
             _context = context;
             _reservationRepository = reservationRepository ?? throw new ArgumentNullException(nameof(reservationRepository));
+            _secureRepository = secureRepository ?? throw new ArgumentNullException(nameof(secureRepository));
+            _logger = logger;
         }
 
         // Създаване на резервация (само клиенти)
         [Authorize(Roles = "Customer")]
         [HttpPost("{estateId}")]
-        public IActionResult Create([FromBody]Reservation reservation, int estateId)
+        [ValidateAntiForgeryToken] // CSRF защита
+        public async Task<IActionResult> Create([FromBody] Reservation reservation, int estateId)
         {
-            //тук трябва да се добави и Id-то на потребителят,
-            //който създава резервацията
+            // XSS защита
+            reservation.Comment = InputValidator.SanitizeInput(reservation.Comment);
+
+            // Проверка за валидност на коментар
+            if (reservation.Comment.Length > 500)
+            {
+                return BadRequest("Comment cannot exceed 500 characters.");
+            }
+
+            // Проверка дали датите са валидни
+            if (reservation.CheckInDate == default || reservation.CheckOutDate == default)
+            {
+                return BadRequest("Check-in and Check-out dates are required.");
+            }
+
+            // Уверяване, че CheckOutDate е след CheckInDate
+            if (reservation.CheckOutDate <= reservation.CheckInDate)
+            {
+                return BadRequest("Check-out date must be after the Check-in date.");
+            }
+
+            // Проверка за валидност на estateId
+            var estate = await _context.Estates.FindAsync(estateId);
+            if (estate == null)
+            {
+                return NotFound("The specified estate does not exist.");
+            }
+
+            // Проверка за наличност на ID на потребителя
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found.");
+            }
+
+            // Свързване на потребителски и имотни данни
+            reservation.CustomerId = int.Parse(userId);
+            reservation.EstateId = estateId;
+
+            try
+            {
+                // Използване на SecureRepository за създаване на резервацията
+                await _secureRepository.AddReservationAsync(reservation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to create reservation for user {userId} at estate {estateId}: {ex.Message}");
+                return StatusCode(500, $"An error occurred while creating the reservation: {ex.Message}");
+            }
+
+            // Успешно съобщение
+            return Ok("Reservation created successfully.");
+
+            /*
+            // XSS защита
+            reservation.Comment = InputValidator.SanitizeInput(reservation.Comment);
+
             var userId = User.FindFirst("UserId")?.Value; // ID на текущия потребител
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User ID not found.");
             }
 
-            reservation.CustomerId = int.Parse(userId);//
+            reservation.CustomerId = int.Parse(userId); // Присвояване на ID на потребителя
             reservation.EstateId = estateId;
 
-            _context.Reservations.Add(reservation);
-            _context.SaveChanges();
-            return Ok();
-            
+            // Използваме SecureRepository
+            await _secureRepository.AddReservationAsync(reservation);
 
+            // Успешно съобщение
+            return Ok("Reservation created successfully.");
+            */
         }
+
+        //public IActionResult Create([FromBody]Reservation reservation, int estateId)
+        //{
+        //    //тук трябва да се добави и Id-то на потребителят,
+        //    //който създава резервацията
+        //    var userId = User.FindFirst("UserId")?.Value; // ID на текущия потребител
+        //    if (string.IsNullOrEmpty(userId))
+        //    {
+        //        return Unauthorized("User ID not found.");
+        //    }
+
+        //    /*
+        //    reservation.CustomerId = int.Parse(userId);
+        //    reservation.EstateId = estateId;
+        //    */
+        //    _context.Reservations.Add(reservation);
+        //    _context.SaveChanges();
+        //    return Ok();
+
+        //}
+
         // Редактиране на резервация (само собственици и администратори)
         [Authorize(Roles = "EstateOwner,Admin")]
         [HttpPost("edit")]
@@ -86,8 +172,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
 
-
-            
         }
 
         // Извличане на всички резервации (само администратори)
@@ -95,7 +179,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllReservations()
         {
-
             try
             {
                 var reservations = await _context.Reservations.ToListAsync();
@@ -105,7 +188,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-
         }
 
         // Извличане на резервации на потребител (само клиенти и администратори)
@@ -158,7 +240,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
         }
-
+            
         [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<IActionResult> CreateReservation([FromBody] Reservation reservation)

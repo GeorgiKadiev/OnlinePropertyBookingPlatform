@@ -17,7 +17,8 @@ public static void Main(string[] args)
         {
 
             var builder = WebApplication.CreateBuilder(args);
-            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            // Зареждане на appsettings.json
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true); //добавяне от Панчо
 
             builder.Services.AddScoped<OnlinePropertyBookingPlatform.Utility.IEmailSender, EmailSender>();
     Env.Load();
@@ -28,6 +29,7 @@ public static void Main(string[] args)
 
     builder.Services.AddControllers();
                 builder.Services.AddAuthorization();
+                //подръжка за JWT
                 builder.Services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -69,12 +71,14 @@ public static void Main(string[] args)
             throw new Exception("Database connection string is not set in environment variables.");
         }
 
+            // Регистрация на DbContext с MySQL
             builder.Services.AddDbContext<PropertyManagementContext>(options =>
             options.UseMySql(
                 connectionString,
                 new MySqlServerVersion(new Version(8, 0, 40))
             ));
 
+            // Регистрация на CrudRepository
             builder.Services.AddScoped(typeof(CrudRepository<>));
     }
     catch (Exception ex)
@@ -96,6 +100,7 @@ public static void Main(string[] args)
 
 
             app.UseHttpsRedirection();
+            // Добавяне на middleware за автентикация
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

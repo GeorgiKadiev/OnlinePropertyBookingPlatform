@@ -24,10 +24,4 @@ public partial class Reservation
     public virtual Estate? Estate { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
-
-    public Guid UserId { get; set; } // Свързано с потребителя, който е направил резервацията
-    public Guid RoomId { get; set; } // Свързано със стаята, която е резервирана
-    public string? Comment { get; set; }
-
-
 }

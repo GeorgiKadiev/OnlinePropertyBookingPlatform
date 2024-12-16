@@ -2,46 +2,28 @@ using System.Collections.Concurrent;
 
     public class RateLimitingMiddleware
     {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<RateLimitingMiddleware> _logger;
-    private static readonly ConcurrentDictionary<string, RateLimitInfo> _rateLimits = new();
-    private readonly int _requestLimit;
-    private readonly TimeSpan _timeWindow;
-    private static readonly SemaphoreSlim _semaphore = new(1, 1); // Асинхронен семафор
+        private readonly RequestDelegate _next;
+        private static readonly ConcurrentDictionary<string, RateLimitInfo> _rateLimits = new();
+        private static readonly TimeSpan _timeWindow = TimeSpan.FromMinutes(1); // Времеви прозорец
+        private static readonly int _requestLimit = 100; // Максимален брой заявки на потребител за времеви прозорец
 
-
-    public RateLimitingMiddleware(RequestDelegate next, IConfiguration configuration, ILogger<RateLimitingMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-
-        // Четене на конфигурация от appsettings.json
-        _requestLimit = configuration.GetValue<int>("RateLimiting:RequestLimit", 100); // По подразбиране: 100 заявки
-        _timeWindow = TimeSpan.FromSeconds(configuration.GetValue<int>("RateLimiting:TimeWindowInSeconds", 60)); // По подразбиране: 60 секунди
-    }
-
-    public async Task Invoke(HttpContext context)
+        public RateLimitingMiddleware(RequestDelegate next)
         {
-        // Получаване на IP и крайна точка
-        var ipAddress = context.Connection.RemoteIpAddress?.ToString();
-        
+            _next = next;
+        }
+
+        public async Task Invoke(HttpContext context)
+        {
+            var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+
             if (string.IsNullOrEmpty(ipAddress))
             {
-              _logger.LogWarning("Could not determine IP address.");
-               await _next(context);
-               return;
+                await _next(context);
+                return;
             }
 
-        var endpoint = context.Request.Path;
-        var key = $"{ipAddress}:{endpoint}";
+            var rateLimitInfo = _rateLimits.GetOrAdd(ipAddress, new RateLimitInfo { LastRequestTime = DateTime.UtcNow });
 
-
-        await _semaphore.WaitAsync(); // Влизане в критична секция
-        try
-        {
-            var rateLimitInfo = _rateLimits.GetOrAdd(key, k => new RateLimitInfo { LastRequestTime = DateTime.UtcNow });
-
-            // Проверка дали времевият прозорец е изтекъл
             if (DateTime.UtcNow - rateLimitInfo.LastRequestTime > _timeWindow)
             {
                 rateLimitInfo.RequestCount = 0;
@@ -50,29 +32,19 @@ using System.Collections.Concurrent;
 
             rateLimitInfo.RequestCount++;
 
-            // Проверка дали е достигнат лимитът
             if (rateLimitInfo.RequestCount > _requestLimit)
             {
-                _logger.LogWarning($"Rate limit exceeded for IP: {ipAddress} on endpoint: {endpoint} at {DateTime.UtcNow}");
                 context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync("{\"error\": \"Rate limit exceeded. Try again later.\"}");
+                await context.Response.WriteAsync("Rate limit exceeded. Try again later.");
                 return;
             }
+
+            await _next(context);
         }
-        finally
+
+        private class RateLimitInfo
         {
-            _semaphore.Release(); // Излизане от критична секция
+            public int RequestCount { get; set; }
+            public DateTime LastRequestTime { get; set; }
         }
-
-        await _next(context);
     }
-}
-
-// Клас за съхранение на информация за лимита на заявки
-    internal class RateLimitInfo
-    {
-        public int RequestCount { get; set; } // Трябва да бъде public, за да е достъпно
-        public DateTime LastRequestTime { get; set; } // Трябва да бъде public, за да е достъпно
-    }
-   

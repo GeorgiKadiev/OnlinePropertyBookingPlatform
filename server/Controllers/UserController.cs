@@ -8,17 +8,9 @@ using NuGet.Common;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
 using Org.BouncyCastle.Crypto.Generators;
-using OnlinePropertyBookingPlatform.Utility; // Добавено за InputValidator
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using OnlinePropertyBookingPlatform.Repositories;
-using System.ComponentModel.DataAnnotations; // За EmailAddress валидация
-using BCrypt.Net;
-using Microsoft.AspNetCore.RateLimiting; // За хеширане на пароли
-
-
-
 
 namespace OnlinePropertyBookingPlatform.Controllers
 {
@@ -29,33 +21,28 @@ namespace OnlinePropertyBookingPlatform.Controllers
         private readonly Utility.IEmailSender _emailSender;
         private readonly PropertyManagementContext _context;
         private readonly IConfiguration _config; //добавям за generateJwtToken
-        private readonly SecureRepository _secureRepository;
-        private readonly ILogger<UserController> _logger;
 
-        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender,
-                       IConfiguration config, SecureRepository secureRepository,
-                       ILogger<UserController> logger)
+
+        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender,IConfiguration config)
         {
             _config = config;
             _emailSender = emailSender;
             _context = context;
-            _secureRepository = secureRepository;
-            _logger = logger;
+
         }
 
         private string GenerateJwtToken(User user)
         {
             // Проверка дали Jwt:Key е зададен
             var jwtKey = _config["Jwt:Key"];
-            // Създаване на SymmetricSecurityKey
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
             if (string.IsNullOrEmpty(jwtKey))
             {
                 throw new InvalidOperationException("JWT ключът не е конфигуриран.");
             }
 
+            // Създаване на SymmetricSecurityKey
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             // Дефиниране на claims (атрибути в токена)
             var claims = new[]
@@ -81,11 +68,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
 
         [HttpPost("create")]
-        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create([FromBody] User user)
         {
-            user.Email = InputValidator.SanitizeInput(user.Email); // XSS защита
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -94,16 +78,16 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("There is an account existing with the given email");
             }
-            //_context.Add(user);
-            //_context.SaveChanges();
+            _context.Add(user);
+            _context.SaveChanges();
             //за редактиране
-            await _secureRepository.AddEntityAsync(user);
             await _emailSender.SendEmailAsync(user.Email, "Confirm your email", "hello");
 
-            return Ok("User created successfully.");
+
+            return Ok();
         }
         [HttpPost("edit")]
-        public async Task<IActionResult> Edit([FromBody] User user)
+        public IActionResult Edit([FromBody] User user)
         {
             if (!ModelState.IsValid)
             {
@@ -117,15 +101,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
             user1.Email = user.Email;
 
             // Хеширане на новата парола, ако има промяна
-            if (!string.IsNullOrEmpty(user.PasswordHash))
+            if (!string.IsNullOrEmpty(user.Password))
             {
-                user1.SetPassword(user.PasswordHash);
+                user1.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
             }
 
             user1.Role = user.Role;
-            await _secureRepository.UpdateEntityAsync(user1);
-            //_context.Update(user1);
-            //_context.SaveChanges();
+            _context.Update(user1);
+            _context.SaveChanges();
 
             return Ok();
 
@@ -149,14 +132,13 @@ namespace OnlinePropertyBookingPlatform.Controllers
             */
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
             if (!_context.Users.Any(u => u.Id == id))
             {
                 return BadRequest("User doesn't exist");
             }
             User user = _context.Users.Where(u => u.Id == id).First();
-            //await _secureRepository.DeleteEntityAsync<User>(id);
             _context.Users.Remove(user);
             _context.SaveChanges();
             return Ok();
@@ -167,7 +149,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             // Намери потребител по имейл
             var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
-            if (user == null || !user.VerifyPassword(model.Password))
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
             {
                 return Unauthorized("Invalid email or password");
             }
@@ -263,86 +245,11 @@ namespace OnlinePropertyBookingPlatform.Controllers
         //до тук :)
 
         [HttpPost("register")]
-        [ValidateAntiForgeryToken]
-        [EnableRateLimiting("RegisterLimit")] // Ако използвате rate limiting
         public async Task<ActionResult> Register([FromBody]RegisterModel model)
         {
-            // XSS защита - пречистване на входните данни
-            model.Email = InputValidator.SanitizeInput(model.Email);
-            model.password1 = InputValidator.SanitizeInput(model.password1);
-            model.password2 = InputValidator.SanitizeInput(model.password2);
-
-            // Проверка за валиден имейл формат
-            if (!new EmailAddressAttribute().IsValid(model.Email))
-            {
-                return BadRequest("Invalid email format.");
-            }
-
-            // Проверка дали паролата е с минимална дължина
-            if (model.password1.Length < 8)
-            {
-                return BadRequest("Password must be at least 8 characters long.");
-            }
-
-            // Проверка дали паролите съвпадат
-            if (model.password1 != model.password2)
-            {
-                return BadRequest("Passwords don't match.");
-            }
-
-            // Проверка дали имейлът вече се използва
-            if (_context.Users.Any(u => u.Email == model.Email))
-            {
-                _logger.LogWarning($"Attempt to register with existing email: {model.Email}");
-                return BadRequest("Email is already in use.");
-            }
-
-            // Хеширане на паролата с BCrypt
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.password1);
-
-            // Създаване на нов потребител
-            User user = new User()
-            {
-                Email = model.Email,
-                Role = model.Role
-            };
-            user.SetPassword(model.password1); // Задаване на хеширана парола
-
-            // Добавяне на потребителя в базата данни
-            _context.Add(user);
-            await _context.SaveChangesAsync();
-
-            // Генериране на JWT токен
-            var tokenHandler = new JwtSecurityTokenHandler();   
-            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]); // Използване на конфигурация за секретен ключ
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role)
-                }),
-                Expires = DateTime.UtcNow.AddHours(3), // Токенът е валиден 3 часа
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
-
-            // Изпращане на имейл за потвърждение
-            await _emailSender.SendEmailAsync(model.Email, "Confirm your email", "Please confirm your registration.");
-
-            // Връщане на токена и съобщение
-            return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." });
-
-            /*
             // не съм сигурен за това
-
-            // XSS защита
-            model.Email = InputValidator.SanitizeInput(model.Email);
-
-            // Проверка дали имейлът вече се използва
-            if (_context.Users.Any(u => u.Email == model.Email))
+                // Проверка дали имейлът вече се използва
+                if (_context.Users.Any(u => u.Email == model.Email))
                 {
                     return BadRequest("Email is already in use");
                 }
@@ -356,15 +263,15 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 // Хеширане на паролата с BCrypt
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.password1);
 
-            // Създаване на нов потребител
-            User user = new User()
-            {
-                Email = model.Email,
-                Role = model.Role
-            };
-            user.SetPassword(model.password1); // Хешира паролата
+                // Създаване на нов потребител
+                User user = new User()
+                {
+                    Email = model.Email,
+                    Password = hashedPassword,
+                    Role = model.Role
+                };
 
-            _context.Add(user);
+                _context.Add(user);
                 await _context.SaveChangesAsync(); // Съхраняваме потребителя
 
                 // Генериране на JWT токен
@@ -387,8 +294,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 await _emailSender.SendEmailAsync(model.Email, "Confirm your email", "hello");
 
                 // Връщане на токена
-                return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." }); 
-            */
+                return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." });
+
+
+            
         }
 
         [HttpPost("forgot-password")]
@@ -425,7 +334,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
 
 
-            user.SetPassword(model.newPassword); user.ResetPasswordToken = null;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(model.newPassword);
+            user.ResetPasswordToken = null;
             _context.Update(user);
             _context.SaveChanges();
 
@@ -480,47 +390,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             var userId = userIdClaim.Value;
 
             return Ok(new { UserId = userId });
-        }
-
-        [HttpGet("by-role/{role}")]
-        public async Task<IActionResult> GetUsersByRole(string role)
-        {
-            try
-            {
-                var users = await _secureRepository.GetUsersByRoleAsync(role);
-                return Ok(users);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        public async Task<bool> AddEntityAsync<T>(T entity) where T : class
-        {
-            await _context.Set<T>().AddAsync(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        public async Task<bool> UpdateEntityAsync<T>(T entity) where T : class
-        {
-            _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        public async Task<List<User>> GetUsersByRoleAsync(string role)
-        {
-            return await _context.Users.Where(u => u.Role == role).ToListAsync();
-        }
-
-        public async Task<bool> DeleteEntityAsync<T>(Guid id) where T : class
-        {
-            var entity = await _context.Set<T>().FindAsync(id);
-            if (entity == null) return false;
-
-            _context.Set<T>().Remove(entity);
-            await _context.SaveChangesAsync();
-            return true;
         }
 
     }

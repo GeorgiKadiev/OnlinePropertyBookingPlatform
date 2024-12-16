@@ -145,7 +145,8 @@ public partial class PropertyManagementContext : DbContext
 
             entity.HasIndex(e => e.Email, "Email").IsUnique();
             entity.Property(entity => entity.ResetPasswordToken);
-
+            entity.Property(e => e.IsEmailVerified);
+            entity.Property(e => e.EmailVerificationToken);
             entity.Property(e => e.Password).HasMaxLength(255);
             entity.Property(e => e.Role).HasColumnType("enum('Customer','EstateOwner','Admin')");
         });

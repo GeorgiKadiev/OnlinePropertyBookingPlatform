@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OnlinePropertyBookingPlatform")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eb1d610f8cd1dbef3e98c84883c133c8872bf2f4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1edbdc8a88c77068a0a80f607a8db7703ee52154")]
 [assembly: System.Reflection.AssemblyProductAttribute("OnlinePropertyBookingPlatform")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OnlinePropertyBookingPlatform")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

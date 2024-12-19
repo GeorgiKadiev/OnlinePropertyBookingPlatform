@@ -35,13 +35,18 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             //тук трябва да се добави и Id-то на потребителят,
             //който създава резервацията
-            var userId = User.FindFirst("UserId")?.Value; // ID на текущия потребител
-            if (string.IsNullOrEmpty(userId))
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            var userId = int.Parse(userIdClaim.Value);// ID на текущия потребител
+            if (userId == null)
             {
-                return Unauthorized("User ID not found.");
+                return Unauthorized("User ID is empty");
+            }
+            if(!_context.Users.Any(u=>u.Id==userId))
+            {
+                return BadRequest("User not found");
             }
 
-            reservation.CustomerId = int.Parse(_sanitizer.Sanitize(userId));
+            reservation.CustomerId = int.Parse(_sanitizer.Sanitize(userIdClaim.Value));
             // reservation.CustomerId = int.Parse(userId);
             reservation.EstateId = estateId;
 
@@ -56,7 +61,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         }
         // Редактиране на резервация (само собственици и администратори)
-        [Authorize(Roles = "EstateOwner,Admin")]
+        [Authorize(Roles = "Customer,Admin")]
         [HttpPost("edit")]
         public async Task<IActionResult> Edit([FromBody] Reservation reservation)
         {
@@ -162,11 +167,12 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpPost("create")]
         public IActionResult CreateEstate([FromBody] Estate estate)
         {
-            var userId = User.FindFirst("UserId")?.Value;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            var userId = int.Parse(userIdClaim.Value);// ID на текущия потребител
 
             // Sanitизиране на входните данни
             //estate.EstateOwnerId = int.Parse(userId);
-            estate.EstateOwnerId = int.Parse(_sanitizer.Sanitize(userId));
+            estate.EstateOwnerId = int.Parse(_sanitizer.Sanitize(userIdClaim.Value));
             estate.Title = _sanitizer.Sanitize(estate.Title);
             estate.Location = _sanitizer.Sanitize(estate.Location);
             estate.Description = _sanitizer.Sanitize(estate.Description);

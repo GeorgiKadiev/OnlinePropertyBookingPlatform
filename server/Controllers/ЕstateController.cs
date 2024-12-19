@@ -41,10 +41,9 @@ namespace OnlinePropertyBookingPlatform.Controllers
             estate.Location = _sanitizer.Sanitize(estate.Location);
             estate.Description = _sanitizer.Sanitize(estate.Description);
 
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
             // ID на собственика на имота
-            estate.EstateOwnerId = int.Parse(User.FindFirst("UserId")?.Value);
-            estate.EstateOwnerId = int.Parse(User.FindFirst("UserId")?.Value);
-
+            estate.EstateOwnerId = int.Parse(userIdClaim.Value);
             _context.Add(estate);
             _context.SaveChanges();
 

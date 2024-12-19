@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Utility;
@@ -18,6 +19,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context = context;
             _sanitizer = sanitizer;
         }
+        [Authorize(Roles = "EstateOwner")]
         [HttpPost("{estateId}")]
         public IActionResult Create([FromBody] Room room, int estateId)
         {
@@ -36,6 +38,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
 
         }
+        [Authorize(Roles = "EstateOwner")]
         [HttpPost("edit")]
         public IActionResult Edit([FromBody] Room room)
         {
@@ -62,6 +65,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             return Ok();
         }
+        [Authorize(Roles = "EstateOwner,Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

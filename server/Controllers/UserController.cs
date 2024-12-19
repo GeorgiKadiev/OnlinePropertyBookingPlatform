@@ -397,6 +397,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("Invalid token");
             }
+            if(IsJwtTokenExpired(token))
+            {
+                return BadRequest("Token is expired");
+            }
 
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(model.newPassword);

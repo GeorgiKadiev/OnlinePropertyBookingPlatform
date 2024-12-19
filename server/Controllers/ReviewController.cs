@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Utility;
@@ -19,6 +20,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _sanitizer = sanitizer;
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         public IActionResult Create([FromBody] Review review)
         {
@@ -29,9 +31,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             // Санитизация на данните
             review.Comment = _sanitizer.Sanitize(review.Comment);
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
 
             // Добавяне на ID на автора
-            var userId = User.FindFirst("UserId")?.Value;
+            var userId = userIdClaim.Value;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User ID not found.");
@@ -49,14 +52,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
 
 
+        [Authorize(Roles = "Customer")]
         [HttpPost("edit")]
         public IActionResult Edit([FromBody] Review review)
         {
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (review.AuthorId != int.Parse(userIdClaim.Value))
+            {
+                return BadRequest("cannot edit a review that is not yours");
+            }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
             var reviewToEdit = _context.Reviews.FirstOrDefault(r => r.Id == review.Id);
             if (reviewToEdit == null)
             {
@@ -91,6 +99,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
             */
         }
+        [Authorize(Roles = "Customer")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

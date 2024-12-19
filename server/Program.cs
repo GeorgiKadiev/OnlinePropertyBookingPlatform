@@ -24,7 +24,10 @@ public class Program
         builder.Services.AddSingleton<OnlinePropertyBookingPlatform.Utility.InputSanitizer>();
 
         // Регистриране на services
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+        }); ;
 
         // Регистрация на IEmailSender
         builder.Services.AddScoped<OnlinePropertyBookingPlatform.Utility.IEmailSender, EmailSender>();
@@ -45,7 +48,7 @@ public class Program
                           .AllowAnyMethod();
                 });
         });
-
+    
         // Rate Limiting
         builder.Services.AddRateLimiter(options =>
         {

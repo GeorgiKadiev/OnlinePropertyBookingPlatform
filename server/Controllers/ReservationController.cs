@@ -30,7 +30,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         // Създаване на резервация (само клиенти)
         [Authorize(Roles = "Customer")]
-        [HttpPost("{estateId}")]
+        [HttpPost("create/{estateId}")]
         public IActionResult Create([FromBody]Reservation reservation, int estateId)
         {
             //тук трябва да се добави и Id-то на потребителят,
@@ -60,38 +60,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
             
 
         }
-        // Редактиране на резервация (само собственици и администратори)
-        [Authorize(Roles = "Customer,Admin")]
-        [HttpPost("edit")]
-        public async Task<IActionResult> Edit([FromBody] Reservation reservation)
-        {
-            // нов вариант
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
-            var reservationToEdit = await _reservationRepository.GetByIdAsync(reservation.Id);
-            if (reservationToEdit == null)
-            {
-                return BadRequest("Reservation doesn't exist.");
-            }
-
-            reservationToEdit.CheckInDate = reservation.CheckInDate;
-            reservationToEdit.CheckOutDate = reservation.CheckOutDate;
-
-            // Sanitизиране на входните данни
-            reservationToEdit.CheckInDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckInDate.ToString()));
-            reservationToEdit.CheckOutDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckOutDate.ToString()));
-
-            await _reservationRepository.UpdateAsync(reservationToEdit); // Използвайте CRUD репозитория за актуализация
-            return Ok();
-
-            
-        }
-        // Изтриване на резервация (само администратори)
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
+        // Изтриване на резервация 
+        [Authorize(Roles = "Admin,Customer")]
+        [HttpDelete("delete/{id}")]
         public IActionResult Delete(int id)
         {
             //добавено Панчо
@@ -108,7 +80,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         // Извличане на всички резервации (само администратори)
         [Authorize(Roles = "Admin")]
-        [HttpGet]
+        [HttpGet("get-all-reservations")]
         public async Task<ActionResult<IEnumerable<User>>> GetAllReservations()
         {
 
@@ -162,41 +134,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
         }
         
-        //Създаване на обяви()
-        [Authorize(Roles = "EstateOwner,Admin")]
-        [HttpPost("create")]
-        public IActionResult CreateEstate([FromBody] Estate estate)
-        {
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
-            var userId = int.Parse(userIdClaim.Value);// ID на текущия потребител
-
-            // Sanitизиране на входните данни
-            //estate.EstateOwnerId = int.Parse(userId);
-            estate.EstateOwnerId = int.Parse(_sanitizer.Sanitize(userIdClaim.Value));
-            estate.Title = _sanitizer.Sanitize(estate.Title);
-            estate.Location = _sanitizer.Sanitize(estate.Location);
-            estate.Description = _sanitizer.Sanitize(estate.Description);
-
-            _context.Estates.Add(estate);
-            _context.SaveChanges();
-            return Ok();
-        }
-
-        [Authorize(Roles = "Customer")]
-        [HttpPost]
-        public async Task<IActionResult> CreateReservation([FromBody] Reservation reservation)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            // Sanitизиране на входните данни
-            reservation.CheckInDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckInDate.ToString()));
-            reservation.CheckOutDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckOutDate.ToString()));
-
-            await _reservationRepository.AddAsync(reservation);
-            return CreatedAtAction(nameof(CreateReservation), new { id = reservation.Id }, reservation);
-        }
-
 
 
     }

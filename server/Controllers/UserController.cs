@@ -26,7 +26,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
 
 
-        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender,IConfiguration config, InputSanitizer sanitizer)
+        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender, IConfiguration config, InputSanitizer sanitizer)
         {
             _config = config;
             _emailSender = emailSender;
@@ -56,17 +56,18 @@ namespace OnlinePropertyBookingPlatform.Controllers
             };
 
             // Създаване на токена
-                    var token = new JwtSecurityToken(
-               issuer: _config["Jwt:Issuer"],
-               audience: _config["Jwt:Audience"],
-               claims: claims,
-               expires: DateTime.Now.AddHours(3),
-               signingCredentials: credentials
-    );
+            var token = new JwtSecurityToken(
+       issuer: _config["Jwt:Issuer"],
+       audience: _config["Jwt:Audience"],
+       claims: claims,
+       expires: DateTime.Now.AddHours(3),
+       signingCredentials: credentials
+);
 
             // Връщане на токена като низ
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        
 
 
 
@@ -168,6 +169,9 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return Unauthorized("Invalid email or password");
             }
+            if (!user.IsEmailVerified)
+                return Unauthorized("Please open your email to verify your account");
+            
 
             // Генериране на JWT токен
             var token = GenerateJwtToken(user);
@@ -267,7 +271,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         //до тук :)
 
         [HttpPost("register")]
-        public async Task<ActionResult> Register([FromBody]RegisterModel model)
+        public async Task<ActionResult> Register([FromBody] RegisterModel model)
         {
 
             // Санитизираме входните данни
@@ -278,55 +282,84 @@ namespace OnlinePropertyBookingPlatform.Controllers
             // не съм сигурен за това
             // Проверка дали имейлът вече се използва
             if (_context.Users.Any(u => u.Email == model.Email))
+            {
+                return BadRequest("Email is already in use");
+            }
+
+            // Проверка дали паролите съвпадат
+            if (model.password1 != model.password2)
+            {
+                return BadRequest("Passwords don't match");
+            }
+
+            // Хеширане на паролата с BCrypt
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.password1);
+
+            // Създаване на нов потребител
+
+            User user = new User()
+            {
+                Username = model.Username,
+                PhoneNumber = model.PhoneNumber,
+                Email = model.Email,
+                Password = hashedPassword,
+                Role = model.Role
+            };
+
+
+            // Генериране на JWT токен
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes("your-very-strong-secret-key-of-at-least-32-bytes"); // Използвайте вашия секретен ключ
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
                 {
-                    return BadRequest("Email is already in use");
-                }
-
-                // Проверка дали паролите съвпадат
-                if (model.password1 != model.password2)
-                {
-                    return BadRequest("Passwords don't match");
-                }
-
-                // Хеширане на паролата с BCrypt
-                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.password1);
-
-                // Създаване на нов потребител
-
-                User user = new User()
-                {
-                    Username = model.Username,
-                    PhoneNumber = model.PhoneNumber,
-                    Email = model.Email,
-                    Password = hashedPassword,
-                    Role = model.Role
-                };
-
-                _context.Add(user);
-                await _context.SaveChangesAsync(); // Съхраняваме потребителя
-
-                // Генериране на JWT токен
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes("your-very-strong-secret-key-of-at-least-32-bytes"); // Използвайте вашия секретен ключ
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new Claim[]
-                    {
                 new Claim(ClaimTypes.Name, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
-                    }),
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
 
-                // Изпращане на имейл за потвърждение
-                await _emailSender.SendEmailAsync(model.Email, "Confirm your email", "hello");
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+            var verifyLink = $"https://yourapp.com/reset-password/{tokenString}";
+            user.EmailVerificationToken = tokenString;
+            _context.Add(user);
+            await _context.SaveChangesAsync(); // Съхраняваме потребителя
+            // Изпращане на имейл за потвърждение
+            await _emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Click <a href='{verifyLink}'>here</a> to verify your account.");
 
-                // Връщане на токена
-                return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." });
-   
+            // Връщане на токена
+            return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." });
+
+        }
+        [HttpPost("verify-user/{token}")]
+        public async Task<ActionResult> verifyUser(string token)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.EmailVerificationToken == token);
+            if(user == null)
+            {
+                return BadRequest("Token doesn't exist");
+            }
+            if(user.IsEmailVerified)
+            {
+                return BadRequest("User already verified");
+            }
+            if(IsJwtTokenExpired(token))
+            {
+                RefreshToken(token);
+                user.EmailVerificationToken = token;
+                _context.Update(user);
+                await _context.SaveChangesAsync(); // Съхраняваме потребителя                                    // Изпращане на имейл за потвърждение
+                await _emailSender.SendEmailAsync(user.Email, "Confirm your email", $"Click <a href='{token}'>here</a> to verify your account.");
+                return Ok("Token expired, new message is sent to your email");
+            }
+            user.IsEmailVerified = true;
+            user.EmailVerificationToken = null;
+            _context.Update(user);
+            _context.SaveChanges();
+            return Ok();
         }
 
         [HttpPost("forgot-password")]
@@ -444,6 +477,26 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 Username = user.Username,
                 Role = user.Role
             });
+        }
+        static bool IsJwtTokenExpired(string token)
+        {
+            
+                var jwtHandler = new JwtSecurityTokenHandler();
+
+                if (!jwtHandler.CanReadToken(token))
+                {
+                    throw new ArgumentException("Invalid JWT token format.");
+                }
+
+                var jwtToken = jwtHandler.ReadJwtToken(token);
+
+                // Extract the expiration time (exp claim)
+                DateTime? expiry = jwtToken.ValidTo;
+
+                // Check if the token is expired
+                return expiry < DateTime.UtcNow;
+            
+            
         }
 
     }

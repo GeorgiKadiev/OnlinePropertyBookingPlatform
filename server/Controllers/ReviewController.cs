@@ -21,9 +21,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
 
         [Authorize(Roles = "Customer")]
-        [HttpPost]
-        public IActionResult Create([FromBody] Review review)
+        [HttpPost("create/{estateId}")]
+        public IActionResult Create([FromBody] Review review, int estateId)
         {
+            if (!_context.Estates.Any(e => e.Id == estateId)) return BadRequest("Estate doesn't exist");
             if (review == null)
             {
                 return BadRequest("Invalid input.");
@@ -40,6 +41,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return Unauthorized("User ID not found.");
             }
             review.AuthorId = int.Parse(userId);
+            review.EstateId = estateId;
 
             // Настройване на датата на ревюто
             review.Date = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -56,19 +58,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpPost("edit")]
         public IActionResult Edit([FromBody] Review review)
         {
+            var reviewToEdit = _context.Reviews.FirstOrDefault(r => r.Id == review.Id);
+            if (reviewToEdit == null)
+            {
+                return BadRequest("Review doesn't exist.");
+            }
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
-            if (review.AuthorId != int.Parse(userIdClaim.Value))
+            if (reviewToEdit.AuthorId != int.Parse(userIdClaim.Value))
             {
                 return BadRequest("cannot edit a review that is not yours");
             }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }
-            var reviewToEdit = _context.Reviews.FirstOrDefault(r => r.Id == review.Id);
-            if (reviewToEdit == null)
-            {
-                return BadRequest("Review doesn't exist.");
             }
 
             // Санитизация на входните данни
@@ -99,7 +101,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
             */
         }
-        [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer,Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -112,7 +114,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllReviews()
         {

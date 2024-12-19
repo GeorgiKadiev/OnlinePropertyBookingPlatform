@@ -23,14 +23,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] Estate estate)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-            //if (_context.Estates.Any(u => u.Title == estate.Title))
-            //{
-            //    return BadRequest();
-            //}
+            if (_context.Estates.Any(u => u.Title == estate.Title))
+            {
+               return BadRequest("Estate title already exists");
+            }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -107,8 +103,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
         }
-        [Authorize(Roles = "EstateOwner")]
-        [HttpGet("get")]
+        [Authorize(Roles = "Admin")]
+        [HttpGet("get-all-estates")]
         public async Task<ActionResult<IEnumerable<Estate>>> GetAllEstates()
         {
             try

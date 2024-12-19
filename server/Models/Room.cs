@@ -11,7 +11,7 @@ public partial class Room
 
     public string? Description { get; set; }
 
-    public int? EstateId { get; set; }
+    public int EstateId { get; set; }
 
     public string? RoomType { get; set; }
 

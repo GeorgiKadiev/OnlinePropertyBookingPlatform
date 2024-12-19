@@ -155,7 +155,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
         }
-        [HttpPost("login")]
+        [HttpGet("login")]
         //Редактиран вариант ПАНЧО
         public IActionResult Login([FromBody] LoginModel model)
         {
@@ -397,10 +397,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("Invalid token");
             }
-            if(IsJwtTokenExpired(token))
-            {
-                return BadRequest("Token is expired");
-            }
 
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(model.newPassword);
@@ -412,7 +408,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         }
 
-        [HttpGet]
+        [HttpGet("get-all-users")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
         {
             try

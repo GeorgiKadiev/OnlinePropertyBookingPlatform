@@ -100,7 +100,7 @@ public partial class PropertyManagementContext : DbContext
 
             entity.HasOne(d => d.Estate).WithMany(p => p.Reservations)
                 .HasForeignKey(d => d.EstateId)
-                .HasConstraintName("reservation_ibfk_2");
+                .HasConstraintName("reservation_ibfk_2").OnDelete(DeleteBehavior.Cascade); 
         });
 
         modelBuilder.Entity<Review>(entity =>
@@ -136,7 +136,7 @@ public partial class PropertyManagementContext : DbContext
 
             entity.HasOne(d => d.Estate).WithMany(p => p.Rooms)
                 .HasForeignKey(d => d.EstateId)
-                .HasConstraintName("room_ibfk_1");
+                .HasConstraintName("room_ibfk_1").OnDelete(DeleteBehavior.Cascade);
             entity.Property(e => e.Description);
             entity.Property(e => e.Name);
         });

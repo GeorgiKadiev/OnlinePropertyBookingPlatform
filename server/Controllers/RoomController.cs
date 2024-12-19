@@ -48,19 +48,25 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return BadRequest(ModelState);
             }
 
-            var roomToEdit = _context.Rooms.FirstOrDefault(r => r.Id == room.Id);
-
             if (!_context.Rooms.Any(r => r.Id == room.Id))
             {
                 return BadRequest("room doesn't exist");
             }
+            var roomToEdit = _context.Rooms.FirstOrDefault(r => r.Id == room.Id);
+
             // Санитизация на входните данни
             roomToEdit.Name = _sanitizer.Sanitize(room.Name); // Санитизация на името на стаята
-            roomToEdit.Description = _sanitizer.Sanitize(room.Description); // Санитизация на описанието
+            roomToEdit.Description = _sanitizer.Sanitize(room.Description);
+            if(room.RoomType != null)
+            roomToEdit.RoomType = _sanitizer.Sanitize(room.RoomType);
+            if(room.MaxGuests!=null)// Санитизация на името на стаята
+            roomToEdit.MaxGuests = int.Parse(_sanitizer.Sanitize(room.MaxGuests.ToString()));
+            if(room.BedCount!=null) 
+            roomToEdit.BedCount =  int.Parse(_sanitizer.Sanitize(room.BedCount.ToString())); // Санитизация на името на стаята// Санитизация на описанието
 
             Room room1 = _context.Rooms.Where(r => r.Id == room.Id).First();
 
-            _context.Update(room1);
+            _context.Update(roomToEdit);
             _context.SaveChanges();
 
             return Ok();
@@ -79,12 +85,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{estateId}")]
         public async Task<ActionResult<IEnumerable<Room>>> GetAllRoomsForAnEstate(int estateId)
         {
             try
             {
+                if(!_context.Users.Any(e=>e.Id == estateId))
+                {
+                    return BadRequest("No estate with given id");
+                }
                 var rooms = await _context.Rooms.Where(r=>r.EstateId==estateId).ToListAsync();
+                if (rooms.Count == 0)
+                    return BadRequest("Estate doesn't have any rooms");
                 return Ok(rooms);
             }
             catch (Exception ex)
@@ -93,7 +106,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
         }
         [HttpGet("details/{roomId}")]
-        public async Task<ActionResult<Estate>> GetRoomDetails(int roomId)
+        public async Task<ActionResult<Room>> GetRoomDetails(int roomId)
         {
             try
             {
@@ -104,7 +117,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     return NotFound($"room with ID {roomId} not found.");
                 }
 
-                return Ok(roomId);
+                return Ok(room);
             }
             catch (Exception ex)
             {

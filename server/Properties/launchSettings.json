@@ -37,5 +37,10 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
-  }
+  },
+
+    "EstateId": 1,
+    "Rating": 5,
+    "Comment": "<script>alert('XSS Attack!');</script>"
+  
 }

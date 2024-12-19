@@ -20,6 +20,9 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
+        //inputsanitizer
+        builder.Services.AddSingleton<OnlinePropertyBookingPlatform.Utility.InputSanitizer>();
+
         // Регистриране на services
         builder.Services.AddControllers();
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
+using OnlinePropertyBookingPlatform.Utility;
 
 namespace OnlinePropertyBookingPlatform.Controllers
 {
@@ -9,15 +10,27 @@ namespace OnlinePropertyBookingPlatform.Controllers
     public class RoomController : Controller
     {
         private readonly PropertyManagementContext _context;
+        private readonly InputSanitizer _sanitizer;
 
-        public RoomController(PropertyManagementContext context)
+
+        public RoomController(PropertyManagementContext context,InputSanitizer sanitizer)
         {
             _context = context;
+            _sanitizer = sanitizer;
         }
         [HttpPost("{estateId}")]
         public IActionResult Create([FromBody] Room room, int estateId)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Санитизация на входните данни
             room.EstateId = estateId;
+            room.Name = _sanitizer.Sanitize(room.Name);  // Санитизация на името на стаята
+            room.Description = _sanitizer.Sanitize(room.Description); // Санитизация на описанието
+
             _context.Rooms.Add(room);
             _context.SaveChanges();
             return Ok();
@@ -31,11 +44,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest(ModelState);
             }
+
+            var roomToEdit = _context.Rooms.FirstOrDefault(r => r.Id == room.Id);
+
             if (!_context.Rooms.Any(r => r.Id == room.Id))
             {
                 return BadRequest("room doesn't exist");
             }
+            // Санитизация на входните данни
+            roomToEdit.Name = _sanitizer.Sanitize(room.Name); // Санитизация на името на стаята
+            roomToEdit.Description = _sanitizer.Sanitize(room.Description); // Санитизация на описанието
+
             Room room1 = _context.Rooms.Where(r => r.Id == room.Id).First();
+
             _context.Update(room1);
             _context.SaveChanges();
 

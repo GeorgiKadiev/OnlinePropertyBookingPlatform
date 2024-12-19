@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
@@ -61,7 +62,8 @@ public partial class PropertyManagementContext : DbContext
 
             entity.Property(e => e.Location).HasMaxLength(255);
             entity.Property(e => e.Title).HasMaxLength(255);
-
+            entity.Property(e => e.Description);
+            
             entity.HasOne(d => d.EstateOwner).WithMany(p => p.Estates)
                 .HasForeignKey(d => d.EstateOwnerId)
                 .HasConstraintName("estate_ibfk_1");
@@ -135,6 +137,8 @@ public partial class PropertyManagementContext : DbContext
             entity.HasOne(d => d.Estate).WithMany(p => p.Rooms)
                 .HasForeignKey(d => d.EstateId)
                 .HasConstraintName("room_ibfk_1");
+            entity.Property(e => e.Description);
+            entity.Property(e => e.Name);
         });
 
         modelBuilder.Entity<User>(entity =>

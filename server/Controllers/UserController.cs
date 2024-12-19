@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using OnlinePropertyBookingPlatform.Utility; // Добави namespace за InputSanitizer
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
@@ -21,14 +22,16 @@ namespace OnlinePropertyBookingPlatform.Controllers
         private readonly Utility.IEmailSender _emailSender;
         private readonly PropertyManagementContext _context;
         private readonly IConfiguration _config; //добавям за generateJwtToken
+        private readonly InputSanitizer _sanitizer; // Добавяме InputSanitizer
 
 
-        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender,IConfiguration config)
+
+        public UserController(PropertyManagementContext context, Utility.IEmailSender emailSender,IConfiguration config, InputSanitizer sanitizer)
         {
             _config = config;
             _emailSender = emailSender;
             _context = context;
-
+            _sanitizer = sanitizer;
         }
 
         private string GenerateJwtToken(User user)
@@ -70,6 +73,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpPost("create")]
         public async Task<ActionResult> Create([FromBody] User user)
         {
+            // Санитизираме входните данни
+            user.Email = _sanitizer.Sanitize(user.Email);
+            user.Username = _sanitizer.Sanitize(user.Username);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -78,17 +85,21 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("There is an account existing with the given email");
             }
+
             _context.Add(user);
             _context.SaveChanges();
+
             //за редактиране
+
             await _emailSender.SendEmailAsync(user.Email, "Confirm your email", "hello");
-
-
             return Ok();
         }
         [HttpPost("edit")]
         public IActionResult Edit([FromBody] User user)
         {
+            // Санитизираме входните данни
+            user.Email = _sanitizer.Sanitize(user.Email);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -147,6 +158,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
         //Редактиран вариант ПАНЧО
         public IActionResult Login([FromBody] LoginModel model)
         {
+            // Санитизираме входните данни
+            model.Email = _sanitizer.Sanitize(model.Email);
+            model.Password = _sanitizer.Sanitize(model.Password);
+
             // Намери потребител по имейл
             var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
@@ -166,7 +181,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok(new { Token = token });
         }
 
-        
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("jwt"); // Изтрива JWT cookie
+            return Ok(new { message = "Successfully logged out" });
+        }
+
+
         // Не съм много сигурен дали е така някой да провери от тук до
         [HttpPost("refresh-token")]
         public IActionResult RefreshToken([FromBody] string token)
@@ -247,9 +269,15 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody]RegisterModel model)
         {
+
+            // Санитизираме входните данни
+            model.Email = _sanitizer.Sanitize(model.Email);
+            model.password1 = _sanitizer.Sanitize(model.password1);
+            model.password2 = _sanitizer.Sanitize(model.password2);
+
             // не съм сигурен за това
-                // Проверка дали имейлът вече се използва
-                if (_context.Users.Any(u => u.Email == model.Email))
+            // Проверка дали имейлът вече се използва
+            if (_context.Users.Any(u => u.Email == model.Email))
                 {
                     return BadRequest("Email is already in use");
                 }
@@ -264,8 +292,11 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.password1);
 
                 // Създаване на нов потребител
+
                 User user = new User()
                 {
+                    Username = model.Username,
+                    PhoneNumber = model.PhoneNumber,
                     Email = model.Email,
                     Password = hashedPassword,
                     Role = model.Role
@@ -295,14 +326,15 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
                 // Връщане на токена
                 return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." });
-
-
-            
+   
         }
 
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] EmailModel model)
         {
+            // Санитизираме входните данни
+            model.Email = _sanitizer.Sanitize(model.Email);
+
             var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
             if (user == null)
             {
@@ -390,6 +422,28 @@ namespace OnlinePropertyBookingPlatform.Controllers
             var userId = userIdClaim.Value;
 
             return Ok(new { UserId = userId });
+        }
+
+        [HttpPost("Authenticate")]
+        public IActionResult Authenticate([FromBody] LoginModel model)
+        {
+            if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
+                return BadRequest("Username or password is required.");
+
+            // Търсене на потребителя в базата данни
+            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email && u.Password == model.Password);
+            if (user == null)
+                return Unauthorized("Invalid username or password.");
+
+            // Генериране на JWT токен
+            var token = GenerateJwtToken(user);
+
+            return Ok(new
+            {
+                Token = token,
+                Username = user.Username,
+                Role = user.Role
+            });
         }
 
     }

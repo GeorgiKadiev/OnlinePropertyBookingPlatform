@@ -5,6 +5,7 @@ using OnlinePropertyBookingPlatform.Models.DataModels;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using OnlinePropertyBookingPlatform.Repositories;
+using OnlinePropertyBookingPlatform.Utility;
 
 
 namespace OnlinePropertyBookingPlatform.Controllers
@@ -15,12 +16,16 @@ namespace OnlinePropertyBookingPlatform.Controllers
     {
         private readonly PropertyManagementContext _context;
         private readonly CrudRepository<Reservation> _reservationRepository;
+        private readonly InputSanitizer _sanitizer;
 
 
-        public ReservationController(PropertyManagementContext context, CrudRepository<Reservation> reservationRepository)
+
+        public ReservationController(PropertyManagementContext context, CrudRepository<Reservation> reservationRepository, InputSanitizer sanitizer)
         {
             _context = context;
             _reservationRepository = reservationRepository ?? throw new ArgumentNullException(nameof(reservationRepository));
+            _sanitizer = sanitizer;
+
         }
 
         // Създаване на резервация (само клиенти)
@@ -36,8 +41,13 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return Unauthorized("User ID not found.");
             }
 
-            reservation.CustomerId = int.Parse(userId);//
+            reservation.CustomerId = int.Parse(_sanitizer.Sanitize(userId));
+            // reservation.CustomerId = int.Parse(userId);
             reservation.EstateId = estateId;
+
+            // Sanitизиране на входните данни
+            reservation.CheckInDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckInDate.ToString()));
+            reservation.CheckOutDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckOutDate.ToString()));
 
             _context.Reservations.Add(reservation);
             _context.SaveChanges();
@@ -65,6 +75,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
             reservationToEdit.CheckInDate = reservation.CheckInDate;
             reservationToEdit.CheckOutDate = reservation.CheckOutDate;
 
+            // Sanitизиране на входните данни
+            reservationToEdit.CheckInDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckInDate.ToString()));
+            reservationToEdit.CheckOutDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckOutDate.ToString()));
+
             await _reservationRepository.UpdateAsync(reservationToEdit); // Използвайте CRUD репозитория за актуализация
             return Ok();
 
@@ -84,10 +98,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             _context.Reservations.Remove(reservation);
             _context.SaveChanges();
-            return Ok();
-
-
-            
+            return Ok(); 
         }
 
         // Извличане на всички резервации (само администратори)
@@ -152,7 +163,13 @@ namespace OnlinePropertyBookingPlatform.Controllers
         public IActionResult CreateEstate([FromBody] Estate estate)
         {
             var userId = User.FindFirst("UserId")?.Value;
-            estate.EstateOwnerId = int.Parse(userId);
+
+            // Sanitизиране на входните данни
+            //estate.EstateOwnerId = int.Parse(userId);
+            estate.EstateOwnerId = int.Parse(_sanitizer.Sanitize(userId));
+            estate.Title = _sanitizer.Sanitize(estate.Title);
+            estate.Location = _sanitizer.Sanitize(estate.Location);
+            estate.Description = _sanitizer.Sanitize(estate.Description);
 
             _context.Estates.Add(estate);
             _context.SaveChanges();
@@ -165,6 +182,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            // Sanitизиране на входните данни
+            reservation.CheckInDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckInDate.ToString()));
+            reservation.CheckOutDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckOutDate.ToString()));
 
             await _reservationRepository.AddAsync(reservation);
             return CreatedAtAction(nameof(CreateReservation), new { id = reservation.Id }, reservation);

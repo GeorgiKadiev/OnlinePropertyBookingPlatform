@@ -35,6 +35,17 @@ public class Program
             options.HeaderName = "X-CSRF-TOKEN";
         });
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend",
+                policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+        });
+
         // Rate Limiting
         builder.Services.AddRateLimiter(options =>
         {

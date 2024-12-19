@@ -147,13 +147,33 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [Authorize]
         [HttpGet("user-reviews/{userId}")]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUserReviews(int userId)
         {
             try
             {
-                var users = await _context.Reviews.Where(r=>r.AuthorId==userId).ToListAsync();
-                return Ok(users);
+                if (!_context.Users.Any(u => u.Id == userId)) return BadRequest("User doesn't exist");
+                var reviews = await _context.Reviews.Where(r=>r.AuthorId==userId).ToListAsync();
+                return Ok(reviews);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [Authorize]
+        [HttpGet("estate-reviews/{estateId}")]
+        public async Task<ActionResult<IEnumerable<User>>> GetAllEstateReviews(int estateId)
+        {
+            try
+            {
+                if(!_context.Estates.Any(e=>e.Id == estateId))
+                {
+                    return BadRequest("Estate doesn't exist");
+                }
+                var reviews = await _context.Reviews.Where(r => r.EstateId == estateId).ToListAsync();
+                return Ok(reviews);
             }
             catch (Exception ex)
             {

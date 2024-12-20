@@ -6,6 +6,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using OnlinePropertyBookingPlatform.Repositories;
 using OnlinePropertyBookingPlatform.Utility;
+using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
 
 
 namespace OnlinePropertyBookingPlatform.Controllers
@@ -81,7 +82,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         // Извличане на всички резервации (само администратори)
         [Authorize(Roles = "Admin")]
         [HttpGet("get-all-reservations")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllReservations()
+        public async Task<ActionResult<IEnumerable<ReservationDto>>> GetAllReservations()
         {
 
             try
@@ -89,6 +90,18 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 var reservations = await _context.Reservations
                     .Include(r => r.Customer)   // Include Customer (User)
                      .Include(r => r.Estate)
+                     .Select(r => new ReservationDto
+                     {
+                         Id = r.Id,
+                         CustomerId = r.CustomerId,
+                         EstateId = r.EstateId,
+                         CheckInDate = r.CheckInDate,
+                         CheckOutDate = r.CheckOutDate,
+                         TotalPrice = r.TotalPrice,
+                         Status = r.Status,
+                         CustomerName = r.Customer.Username,
+                         EstateName = r.Estate.Title
+                     })
                      .ToListAsync();
                 return Ok(reservations);
             }
@@ -102,7 +115,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         // Извличане на резервации на потребител (само клиенти и администратори)
         [Authorize(Roles = "Customer,Admin")]
         [HttpGet("user-reservations/{userId}")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllReservationsFromAnUser(int userId)
+        public async Task<ActionResult<IEnumerable<ReservationDto>>> GetAllReservationsFromAnUser(int userId)
         {
             try
             {
@@ -110,6 +123,18 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     .Where(r=>r.CustomerId==userId)
                     .Include(r => r.Customer)   // Include Customer (User)
                      .Include(r => r.Estate)
+                    .Select(r => new ReservationDto
+                    {
+                        Id = r.Id,
+                        CustomerId = r.CustomerId,
+                        EstateId = r.EstateId,
+                        CheckInDate = r.CheckInDate,
+                        CheckOutDate = r.CheckOutDate,
+                        TotalPrice = r.TotalPrice,
+                        Status = r.Status,
+                        CustomerName = r.Customer.Username,
+                        EstateName = r.Estate.Title
+                    })
                      .ToListAsync();
                 return Ok(reservations);
             }
@@ -122,18 +147,35 @@ namespace OnlinePropertyBookingPlatform.Controllers
         // Детайли за резервация (само клиенти и администратори)
         [Authorize(Roles = "Customer,Admin")]
         [HttpGet("details/{id}")]
-        public async Task<ActionResult<Estate>> GetReservationDetails(int id)
+        public async Task<ActionResult<ReservationDto>> GetReservationDetails(int id)
         {
             try
             {
-                var reservation = await _context.Reservations.FindAsync(id);
-
-                if (reservation == null)
+                var r = await _context.Reservations.FindAsync(id);
+                if (r == null)
                 {
                     return NotFound($"Reservation with ID {id} not found.");
                 }
+                var dto = new ReservationDto()
+                {
+                    Id = r.Id,
+                    CustomerId = r.CustomerId,
+                    EstateId = r.EstateId,
+                    CheckInDate = r.CheckInDate,
+                    CheckOutDate = r.CheckOutDate,
+                    TotalPrice = r.TotalPrice,
+                    Status = r.Status,
+                };
+                dto.CustomerName = _context.Users
+                    .FirstOrDefault(u => u.Id == r.CustomerId)
+                    .Username;
+                dto.EstateName = _context.Estates
+                    .FirstOrDefault(e => e.Id == r.EstateId)
+                    .Title;
 
-                return Ok(reservation);
+
+
+                return Ok(dto);
             }
             catch (Exception ex)
             {

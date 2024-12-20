@@ -42,7 +42,7 @@ function CarouselProperties() {
   }, []);
   return (
     <div className="carousel-box">
-      <h2>Sugested properties</h2>
+      <h2>Eco properties</h2>
       <div className="carousel">
         <Carousel
           showStatus={false}
@@ -101,14 +101,14 @@ function CarouselProperties() {
             >
               <Paper elevation={3} sx={{ p: 4 }}>
                 <Typography variant="body1">
-                  <strong>Amount:</strong> ${account.amount}
+                  <strong>Location:</strong> ${account.amount}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Account Number:</strong> {account.accountNum}
+                  <strong>Price per night:</strong> {account.accountNum}
                 </Typography>
                 <Box mt={2}>
                   <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-                    Book
+                    More info
                   </Button>
                 </Box>
               </Paper>

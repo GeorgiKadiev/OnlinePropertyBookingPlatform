@@ -13,5 +13,6 @@
         public int? EstateOwnerId { get; set; }
 
         public string? Description { get; set; }
+        public string EstateOwnerName { get; set; }
     }
 }

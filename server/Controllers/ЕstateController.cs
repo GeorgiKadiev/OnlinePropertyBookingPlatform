@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
+using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
 using OnlinePropertyBookingPlatform.Utility;
 
 namespace OnlinePropertyBookingPlatform.Controllers
@@ -109,7 +110,20 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             try
             {
-                var users = await _context.Estates.ToListAsync();
+                var users = await _context.Estates
+                    .Include(e => e.EstateOwner)
+                    .Select(e => new EstateDto
+                    {
+                        Id = e.Id,
+                        Location = e.Location,
+                        Title = e.Title,
+                        PricePerNight
+                    = e.PricePerNight,
+                        EstateOwnerId = e.EstateOwnerId,
+                        Description = e.Description,
+                        EstateOwnerName = e.EstateOwner.Username
+
+                    }).ToListAsync();
                 return Ok(users); 
             }
             catch (Exception ex)
@@ -124,14 +138,27 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             try
             {
-                var estate = await _context.Estates.FindAsync(id);
-
-                if (estate == null)
+                var e = await _context.Estates.FindAsync(id);
+                if (e == null)
                 {
                     return NotFound($"Estate with ID {id} not found.");
                 }
+                var dto = new EstateDto()
+                {
+                    Id = e.Id,
+                    Location = e.Location,
+                    Title = e.Title,
+                    PricePerNight 
+                    = e.PricePerNight,
+                    EstateOwnerId = e.EstateOwnerId,
+                    Description = e.Description,
 
-                return Ok(estate);
+                };
+                dto.EstateOwnerName = _context.Users
+                    .FirstOrDefault(e => e.Id == dto.EstateOwnerId).Username;
+
+
+                return Ok(dto);
             }
             catch (Exception ex)
             {

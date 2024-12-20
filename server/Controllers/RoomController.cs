@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
+using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
 using OnlinePropertyBookingPlatform.Utility;
 
 namespace OnlinePropertyBookingPlatform.Controllers
@@ -111,13 +112,29 @@ namespace OnlinePropertyBookingPlatform.Controllers
             try
             {
                 var room = await _context.Rooms.FindAsync(roomId);
-
                 if (room == null)
                 {
                     return NotFound($"room with ID {roomId} not found.");
                 }
 
-                return Ok(room);
+                RoomDto dto = new RoomDto()
+                {
+                    Id = room.Id,
+                    Name = room.Name,
+                    Description = room.Description,
+                    MaxGuests = room.MaxGuests,
+                    BedCount = room.BedCount,
+                    RoomType = room.RoomType,
+                    EstateId = room.EstateId
+                };
+                string EstateName = _context.Estates.FirstOrDefault(e => e.Id == dto.EstateId).Title;
+                if(EstateName ==null)
+                {
+                    return NotFound("The room doesn't match a proper estate");
+                }
+                dto.EstateName = _context.Estates.FirstOrDefault(e => e.Id == dto.EstateId).Title;
+
+                return Ok(dto);
             }
             catch (Exception ex)
             {

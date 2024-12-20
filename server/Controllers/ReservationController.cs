@@ -86,7 +86,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             try
             {
-                var reservations = await _context.Reservations.ToListAsync();
+                var reservations = await _context.Reservations
+                    .Include(r => r.Customer)   // Include Customer (User)
+                     .Include(r => r.Estate)
+                     .ToListAsync();
                 return Ok(reservations);
             }
             catch (Exception ex)
@@ -103,7 +106,11 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             try
             {
-                var reservations = await _context.Reservations.Where(r=>r.CustomerId==userId).ToListAsync();
+                var reservations = await _context.Reservations
+                    .Where(r=>r.CustomerId==userId)
+                    .Include(r => r.Customer)   // Include Customer (User)
+                     .Include(r => r.Estate)
+                     .ToListAsync();
                 return Ok(reservations);
             }
             catch (Exception ex)

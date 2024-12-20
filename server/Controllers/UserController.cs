@@ -12,6 +12,7 @@ using Org.BouncyCastle.Crypto.Generators;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
 
 namespace OnlinePropertyBookingPlatform.Controllers
 {
@@ -410,11 +411,24 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         [HttpGet("get-all-users")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
         {
             try
             {
-                var users = await _context.Users.ToListAsync();
+                var users = await _context.Users
+                    .Include(u=>u.Reservations)
+                    .Include(u => u.Reviews)
+                    .Select(user=> new UserDto
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        Email = user.Email,
+                        Password = user.Password,
+                        Role = user.Role,
+                        PhoneNumber = user.PhoneNumber,
+                        ReviewCount = user.Reservations.Count(),
+                    })
+                    .ToListAsync();
                 return Ok(users); 
             }
             catch (Exception ex)
@@ -423,18 +437,29 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<Estate>> GetUserDetails(int id)
+        public async Task<ActionResult<UserDto>> GetUserDetails(int id)
         {
             try
             {
                 var user = await _context.Users.FindAsync(id);
+                UserDto dto = new UserDto()
+                {
+                    Id = user.Id,
+                    Username= user.Username,
+                    Email = user.Email,
+                    Password = user.Password,
+                    Role = user.Role,
+                    PhoneNumber = user.PhoneNumber
+                };
+                dto.ReviewCount = _context.Reviews.Where(r=>r.AuthorId == user.Id).Count();
+
 
                 if (user == null)
                 {
                     return NotFound($"Estate with ID {id} not found.");
                 }
 
-                return Ok(user);
+                return Ok(dto);
             }
             catch (Exception ex)
             {

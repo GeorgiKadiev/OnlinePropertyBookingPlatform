@@ -1,2 +1,4 @@
 .vs/
 /server/Controllers/ReservationController.cs
+/server/bin/
+/server/obj/

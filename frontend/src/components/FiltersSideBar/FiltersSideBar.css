@@ -1,0 +1,24 @@
+.filters-sidebar {
+    width: 400px;
+    padding: 16px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: #f9fafc;
+  }
+  
+  .filters-sidebar h6 {
+    margin-bottom: 8px;
+  }
+  
+  .filters-sidebar .autocomplete-input {
+    margin-bottom: 16px;
+  }
+  
+  .filters-sidebar .apply-button {
+    align-self: flex-end;
+  }
+  

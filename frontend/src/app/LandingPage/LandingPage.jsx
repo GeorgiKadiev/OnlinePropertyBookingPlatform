@@ -1,5 +1,5 @@
 import * as React from "react";
-import { OutlinedInput, IconButton, Box, Typography } from "@mui/material";
+import { OutlinedInput, IconButton, Box } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";

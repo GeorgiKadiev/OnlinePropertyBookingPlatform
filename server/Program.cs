@@ -141,8 +141,23 @@ public class Program
 
         builder.Services.AddScoped(typeof(CrudRepository<>));
 
-        // Създаване на приложението
+        // Add CORS policy
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend",
+                policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+        });
+
         var app = builder.Build();
+
+
+        // Use the CORS policy
+        app.UseCors("AllowFrontend");
 
         // Middleware за CSRF токен
         app.Use(async (context, next) =>

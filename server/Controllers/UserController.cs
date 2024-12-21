@@ -151,10 +151,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("User doesn't exist");
             }
-            User user = _context.Users.Where(u => u.Id == id).First();
+            User user = _context.Users.FirstOrDefault(u=>u.Id == id);
             _context.Users.Remove(user);
             _context.SaveChanges();
-            return Ok();
+            return RedirectToAction();
         }
         [HttpGet("login")]
         //Редактиран вариант ПАНЧО
@@ -324,7 +324,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
-            var verifyLink = $"https://yourapp.com/reset-password/{tokenString}";
+            var verifyLink = $"http://localhost:5076/api/user/verify-user/{tokenString}";
             user.EmailVerificationToken = tokenString;
             _context.Add(user);
             await _context.SaveChangesAsync(); // Съхраняваме потребителя
@@ -360,7 +360,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             user.EmailVerificationToken = null;
             _context.Update(user);
             _context.SaveChanges();
-            return Ok();
+            return Redirect("http://localhost:5076/api/user/login");
         }
 
         [HttpPost("forgot-password")]

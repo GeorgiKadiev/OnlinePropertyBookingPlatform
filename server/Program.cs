@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Antiforgery;
 using System.Threading.RateLimiting; // Include the namespace for CrudRepository
+using Microsoft.AspNetCore.RateLimiting;
 public class Program
 {
     public static void Main(string[] args)
@@ -43,26 +44,57 @@ public class Program
             options.AddPolicy("AllowFrontend",
                 policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000")
+                    policy.WithOrigins("http://localhost:5076")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
         });
-    
+
         // Rate Limiting
         builder.Services.AddRateLimiter(options =>
         {
+            // Логика при отхвърляне на заявка
+            options.OnRejected = (context, _) =>
+            {
+                Console.WriteLine($"Rate limit exceeded for IP: {context.HttpContext.Connection.RemoteIpAddress}");
+                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                context.HttpContext.Response.Headers["Retry-After"] = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
+                    ? retryAfter.TotalSeconds.ToString()
+                    : "60"; // 60 секунди като резервен вариант
+                return new ValueTask();
+            };
+
+            // Глобален Fixed Window Rate Limiter
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: context.Request.Path.ToString(),
+            {
+                var userIdentifier = context.User.Identity?.Name ?? context.Connection.RemoteIpAddress?.ToString();
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: userIdentifier ?? "anonymous",
                     factory: _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 10,
-                        Window = TimeSpan.FromMinutes(1),
+                        PermitLimit = 10, // Лимит на заявки
+                        Window = TimeSpan.FromSeconds(5), // Интервал
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                        QueueLimit = 2
-                    }));
+                        QueueLimit = 0 // Максимум 5 заявки в опашка
+                    });
+            });
+
+            // Добавяне на Sliding Window Limiter
+            options.AddPolicy("slidingPolicy", context =>
+            {
+                return RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+                    factory: partitionKey => new SlidingWindowRateLimiterOptions
+                    {
+                        PermitLimit = 50, // Максимум заявки
+                        Window = TimeSpan.FromSeconds(5), // В рамките на време
+                        SegmentsPerWindow = 10, //  сегмента
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 20 // Максимум  заявки в опашката
+                    });
+            });
         });
+
 
         // JWT Authentication
         builder.Services.AddAuthentication(options =>
@@ -129,14 +161,20 @@ public class Program
             app.UseDeveloperExceptionPage();
         }
 
-       // app.UseHttpsRedirection();
+        // app.UseHttpsRedirection();
+        app.UseCors("AllowFrontend");
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // Rate Limiting Middleware
+        // Use Rate Limiter Middleware
         app.UseRateLimiter();
+        app.MapControllers().RequireRateLimiting("slidingPolicy");
 
-        app.MapControllers();
+        // Map Controllers
+        app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}")
+        .RequireRateLimiting("slidingPolicy");
 
         // Стартиране на приложението
         app.Run();

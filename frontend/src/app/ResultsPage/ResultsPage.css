@@ -1,0 +1,40 @@
+/* Sidebar container */
+.sidebar-results {
+  display: flex;
+  flex-direction: row;
+  /* height: 100vh; Full height of the viewport */
+  width: 100%; /* Full width of the viewport */
+}
+
+/* Sidebar stays on the left */
+.sidebar-results > .FiltersSideBar {
+  flex: 0 0 250px; /* Sidebar takes up 250px width */
+  /* background-color: #f4f4f4; Optional: Background color */
+}
+
+/* Main results section takes the remaining space */
+.main-info {
+  flex: 1; /* Fills the remaining space */
+  display: flex;
+  justify-content: center; /* Center the content horizontally */
+  align-items: start; /* Center the content vertically */
+  /* background-color: #fff; Optional: Background color */
+}
+
+/* Search bar customization */
+.search-bar {
+  border: 1px solid #ccc; /* Optional: Border around the search bar */
+  border-radius: 4px; /* Rounded corners */
+  padding: 4px;
+  /* background-color: #f9f9f9; Optional: Background color for the search bar */
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.propetries-list {
+  align-content: flex-start;
+}

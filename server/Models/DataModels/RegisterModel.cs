@@ -7,5 +7,7 @@
         public string password2 { get; set; }
         public string Role { get; set; }
         //etc..etc..
+        public short PhoneNumber { get; set; }
+        public string Username { get; set; }
     }
 }

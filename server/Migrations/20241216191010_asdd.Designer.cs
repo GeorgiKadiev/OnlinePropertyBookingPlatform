@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlinePropertyBookingPlatform;
 
@@ -11,9 +12,11 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    partial class PropertyManagementContextModelSnapshot : ModelSnapshot
+    [Migration("20241216191010_asdd")]
+    partial class asdd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,9 +49,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
 
                     b.Property<int?>("EstateOwnerId")
                         .HasColumnType("int");
@@ -186,17 +186,11 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Property<int?>("BedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
-
                     b.Property<int?>("EstateId")
                         .HasColumnType("int");
 
                     b.Property<int?>("MaxGuests")
                         .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("RoomType")
                         .HasMaxLength(50)
@@ -298,7 +292,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.HasOne("OnlinePropertyBookingPlatform.Models.Estate", "Estate")
                         .WithMany("Reservations")
                         .HasForeignKey("EstateId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("reservation_ibfk_2");
 
                     b.Navigation("Customer");
@@ -328,7 +321,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.HasOne("OnlinePropertyBookingPlatform.Models.Estate", "Estate")
                         .WithMany("Rooms")
                         .HasForeignKey("EstateId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("room_ibfk_1");
 
                     b.Navigation("Estate");

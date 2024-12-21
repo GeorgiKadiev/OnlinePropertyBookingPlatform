@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlinePropertyBookingPlatform;
 
@@ -11,9 +12,11 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    partial class PropertyManagementContextModelSnapshot : ModelSnapshot
+    [Migration("20241219133531_RoomDeleteOnEstateDelete")]
+    partial class RoomDeleteOnEstateDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,7 +301,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.HasOne("OnlinePropertyBookingPlatform.Models.Estate", "Estate")
                         .WithMany("Reservations")
                         .HasForeignKey("EstateId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("reservation_ibfk_2");
 
                     b.Navigation("Customer");

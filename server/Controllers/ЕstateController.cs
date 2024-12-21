@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
+using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
+using OnlinePropertyBookingPlatform.Utility;
 
 namespace OnlinePropertyBookingPlatform.Controllers
 {
@@ -9,35 +12,66 @@ namespace OnlinePropertyBookingPlatform.Controllers
     public class EstateController : Controller
     {
         private readonly PropertyManagementContext _context;
+        private readonly InputSanitizer _sanitizer;
 
-        public EstateController(PropertyManagementContext context)
+
+        public EstateController(PropertyManagementContext context, InputSanitizer sanitizer)
         {
             _context = context;
+            _sanitizer = sanitizer;
         }
+        [Authorize(Roles = "EstateOwner")]
         [HttpPost("create")]
         public IActionResult Create([FromBody] Estate estate)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-            //if (_context.Estates.Any(u => u.Title == estate.Title))
-            //{
-            //    return BadRequest();
-            //}
+            if (_context.Estates.Any(u => u.Title == estate.Title))
+            {
+               return BadRequest("Estate title already exists");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            //трябва да се сложи id-то на owner-a, не съм сигурен как
+            // Санитизация на входните данни
+            estate.Title = _sanitizer.Sanitize(estate.Title);
+            estate.Location = _sanitizer.Sanitize(estate.Location);
+            estate.Description = _sanitizer.Sanitize(estate.Description);
 
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            // ID на собственика на имота
+            estate.EstateOwnerId = int.Parse(userIdClaim.Value);
             _context.Add(estate);
             _context.SaveChanges();
 
-
-
             return Ok();
         }
+        [Authorize(Roles = "EstateOwner")]
         [HttpPost("edit")]
         public IActionResult Edit([FromBody] Estate estate)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var estateToEdit = _context.Estates.FirstOrDefault(e => e.Id == estate.Id);
+            if (estateToEdit == null)
+            {
+                return BadRequest("Estate doesn't exist.");
+            }
+
+            // Санитизация на входните данни
+            estateToEdit.Title = _sanitizer.Sanitize(estate.Title);
+            estateToEdit.Location = _sanitizer.Sanitize(estate.Location);
+            estateToEdit.Description = _sanitizer.Sanitize(estate.Description);
+            estateToEdit.PricePerNight = estate.PricePerNight;
+
+            _context.Update(estateToEdit);
+            _context.SaveChanges();
+            return Ok();
+
+
             //if (!ModelState.IsValid)
             //{
             //    return BadRequest(ModelState);
@@ -46,6 +80,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             //{
             //    return BadRequest();
             //}
+            /*
             Estate e = _context.Estates.Where(e => e.Id == estate.Id).First();
             e.Title = estate.Title;
             e.PricePerNight = estate.PricePerNight;
@@ -54,7 +89,9 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.Update(e);
             _context.SaveChanges();
             return Ok();
+            */
         }
+        [Authorize(Roles = "EstateOwner")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -67,12 +104,26 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return Ok();
         }
-        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        [HttpGet("get-all-estates")]
         public async Task<ActionResult<IEnumerable<Estate>>> GetAllEstates()
         {
             try
             {
-                var users = await _context.Estates.ToListAsync();
+                var users = await _context.Estates
+                    .Include(e => e.EstateOwner)
+                    .Select(e => new EstateDto
+                    {
+                        Id = e.Id,
+                        Location = e.Location,
+                        Title = e.Title,
+                        PricePerNight
+                    = e.PricePerNight,
+                        EstateOwnerId = e.EstateOwnerId,
+                        Description = e.Description,
+                        EstateOwnerName = e.EstateOwner.Username
+
+                    }).ToListAsync();
                 return Ok(users); 
             }
             catch (Exception ex)
@@ -87,14 +138,27 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             try
             {
-                var estate = await _context.Estates.FindAsync(id);
-
-                if (estate == null)
+                var e = await _context.Estates.FindAsync(id);
+                if (e == null)
                 {
                     return NotFound($"Estate with ID {id} not found.");
                 }
+                var dto = new EstateDto()
+                {
+                    Id = e.Id,
+                    Location = e.Location,
+                    Title = e.Title,
+                    PricePerNight 
+                    = e.PricePerNight,
+                    EstateOwnerId = e.EstateOwnerId,
+                    Description = e.Description,
 
-                return Ok(estate);
+                };
+                dto.EstateOwnerName = _context.Users
+                    .FirstOrDefault(e => e.Id == dto.EstateOwnerId).Username;
+
+
+                return Ok(dto);
             }
             catch (Exception ex)
             {

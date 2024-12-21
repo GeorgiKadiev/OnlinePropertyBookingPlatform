@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OnlinePropertyBookingPlatform.Models;
+using OnlinePropertyBookingPlatform.Utility;
 using System;
 
 namespace OnlinePropertyBookingPlatform.Controllers
@@ -10,11 +11,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
     {
         private readonly PropertyManagementContext _context;
         private readonly Utility.IEmailSender _sender;
+        private readonly InputSanitizer _sanitizer;
 
-        public TestController(PropertyManagementContext context, Utility.IEmailSender sender)
+
+        public TestController(PropertyManagementContext context, Utility.IEmailSender sender, InputSanitizer sanitizer)
         {
             _context = context;
             _sender = sender;
+            _sanitizer = sanitizer;
         }
 
         [HttpGet("test-connection")]
@@ -22,7 +26,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         {
             try
             {
-
+                
                 var estateCount = _context.Estates.Count();
                 return Ok($"Database connection successful! Total estates: {estateCount}");
             }
@@ -47,5 +51,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Sendin email failed: {ex.Message}");
             }
         }
+        
+
     }
 }

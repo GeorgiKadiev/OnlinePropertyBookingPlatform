@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
@@ -61,7 +62,8 @@ public partial class PropertyManagementContext : DbContext
 
             entity.Property(e => e.Location).HasMaxLength(255);
             entity.Property(e => e.Title).HasMaxLength(255);
-
+            entity.Property(e => e.Description);
+            
             entity.HasOne(d => d.EstateOwner).WithMany(p => p.Estates)
                 .HasForeignKey(d => d.EstateOwnerId)
                 .HasConstraintName("estate_ibfk_1");
@@ -98,7 +100,7 @@ public partial class PropertyManagementContext : DbContext
 
             entity.HasOne(d => d.Estate).WithMany(p => p.Reservations)
                 .HasForeignKey(d => d.EstateId)
-                .HasConstraintName("reservation_ibfk_2");
+                .HasConstraintName("reservation_ibfk_2").OnDelete(DeleteBehavior.Cascade); 
         });
 
         modelBuilder.Entity<Review>(entity =>
@@ -134,7 +136,9 @@ public partial class PropertyManagementContext : DbContext
 
             entity.HasOne(d => d.Estate).WithMany(p => p.Rooms)
                 .HasForeignKey(d => d.EstateId)
-                .HasConstraintName("room_ibfk_1");
+                .HasConstraintName("room_ibfk_1").OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.Description);
+            entity.Property(e => e.Name);
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -144,7 +148,9 @@ public partial class PropertyManagementContext : DbContext
             entity.ToTable("user");
 
             entity.HasIndex(e => e.Email, "Email").IsUnique();
-
+            entity.Property(entity => entity.ResetPasswordToken);
+            entity.Property(e => e.IsEmailVerified);
+            entity.Property(e => e.EmailVerificationToken);
             entity.Property(e => e.Password).HasMaxLength(255);
             entity.Property(e => e.Role).HasColumnType("enum('Customer','EstateOwner','Admin')");
         });

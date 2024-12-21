@@ -12,8 +12,10 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-export default function LogInForm() {
+export default function RegisterForm() {
   const [showPassword, setShowPassword] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [error, setError] = React.useState("");
@@ -25,24 +27,37 @@ export default function LogInForm() {
     event.preventDefault();
   };
 
+  const handleUsernameChange = (event) => {
+    setUsername(event.target.value);
+    validateForm(event.target.value, email, password, confirmPassword);
+  };
+
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+    validateForm(username, event.target.value, password, confirmPassword);
+  };
+
   const handlePasswordChange = (event) => {
     const newPassword = event.target.value;
     setPassword(newPassword);
-    validatePasswords(newPassword, confirmPassword);
+    validateForm(username, email, newPassword, confirmPassword);
   };
 
   const handleConfirmPasswordChange = (event) => {
     const newConfirmPassword = event.target.value;
     setConfirmPassword(newConfirmPassword);
-    validatePasswords(password, newConfirmPassword);
+    validateForm(username, email, password, newConfirmPassword);
   };
 
-  const validatePasswords = (pass, confirmPass) => {
-    if (confirmPass && pass !== confirmPass) {
-      setError("Passwords do not match");
+  const validateForm = (uname, emailValue, pass, confirmPass) => {
+    if (!uname || !emailValue) {
+      setError("Username and email are required");
       setIsButtonDisabled(true);
     } else if (!pass || !confirmPass) {
       setError("Both password fields are required");
+      setIsButtonDisabled(true);
+    } else if (pass !== confirmPass) {
+      setError("Passwords do not match");
       setIsButtonDisabled(true);
     } else {
       setError("");
@@ -50,21 +65,78 @@ export default function LogInForm() {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Form submitted successfully!");
-    // Add your form submission logic here
+  
+    const payload = {
+      email: email,
+      password1: password,
+      password2: confirmPassword,
+      PhoneNumber: 23,
+      username: username,
+      Role: "Admin",
+    };
+  
+    try {
+      const response = await fetch("http://localhost:5076/api/user/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const contentType = response.headers.get("Content-Type");
+  
+      if (!response.ok) {
+        let errorMessage = "Registration failed";
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } else {
+          errorMessage = await response.text(); // Handle plain text errors
+        }
+        setError(errorMessage);
+        return;
+      }
+  
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log("Registration successful", data);
+      } else {
+        console.log("Registration successful, but response is not JSON");
+      }
+  
+      setError("");
+      alert("Registration successful!");
+    } catch (error) {
+      console.error("Error during registration:", error);
+      setError("An error occurred during registration.");
+    }
   };
+  
 
   return (
     <Box className="form-register" component="form" onSubmit={handleSubmit}>
       <FormControl sx={{ m: 1, width: "30ch" }}>
         <InputLabel>Username</InputLabel>
-        <OutlinedInput id="username" required label="Username" />
+        <OutlinedInput
+          id="username"
+          required
+          value={username}
+          onChange={handleUsernameChange}
+          label="Username"
+        />
       </FormControl>
       <FormControl sx={{ m: 1, width: "30ch" }}>
         <InputLabel>Email</InputLabel>
-        <OutlinedInput id="email" required label="Email" />
+        <OutlinedInput
+          id="email"
+          required
+          value={email}
+          onChange={handleEmailChange}
+          label="Email"
+        />
       </FormControl>
       <FormControl sx={{ m: 1, width: "30ch" }}>
         <InputLabel>Password</InputLabel>

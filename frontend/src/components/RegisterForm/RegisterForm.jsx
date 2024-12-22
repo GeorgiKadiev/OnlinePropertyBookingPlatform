@@ -11,8 +11,11 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+
 
 export default function RegisterForm() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [username, setUsername] = React.useState("");
@@ -108,7 +111,8 @@ export default function RegisterForm() {
       }
   
       setError("");
-      alert("Registration successful!");
+      navigate("/success");
+
     } catch (error) {
       console.error("Error during registration:", error);
       setError("An error occurred during registration.");

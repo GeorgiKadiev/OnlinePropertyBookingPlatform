@@ -5,6 +5,7 @@ import LoginForm from './components/LoginForm/LoginForm';
 import RegisterForm from './components/RegisterForm/RegisterForm';
 import { Routes, Route } from "react-router-dom";
 import HomePage from './app/HomePage/HomePage';
+import SuccessPage from './components/Success/Success';
 
 function App() {
   return (
@@ -15,6 +16,8 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/landing-page" element={<LandingPage />} />
         <Route path="/results" element={<ResultsPage />} />
+        <Route path="/success" element={<SuccessPage />} />
+
       </Routes>
     </div>
   );

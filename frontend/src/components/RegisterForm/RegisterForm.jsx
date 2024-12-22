@@ -11,13 +11,14 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 
 export default function RegisterForm() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState("");
+  const [phoneNumber, setPhone] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -40,6 +41,11 @@ export default function RegisterForm() {
     validateForm(username, event.target.value, password, confirmPassword);
   };
 
+  const handlePhoneChange = (event) => {
+    setPhone(event.target.value);
+    validateForm(username, email, password, confirmPassword, event.target.value);
+  };
+
   const handlePasswordChange = (event) => {
     const newPassword = event.target.value;
     setPassword(newPassword);
@@ -52,9 +58,9 @@ export default function RegisterForm() {
     validateForm(username, email, password, newConfirmPassword);
   };
 
-  const validateForm = (uname, emailValue, pass, confirmPass) => {
-    if (!uname || !emailValue) {
-      setError("Username and email are required");
+  const validateForm = (uname, emailValue, pass, confirmPass, phone) => {
+    if (!uname || !emailValue || !phone) {
+      setError("Username, email and phone are required");
       setIsButtonDisabled(true);
     } else if (!pass || !confirmPass) {
       setError("Both password fields are required");
@@ -75,7 +81,7 @@ export default function RegisterForm() {
       email: email,
       password1: password,
       password2: confirmPassword,
-      PhoneNumber: 23,
+      PhoneNumber: parseInt(phoneNumber, 10),
       username: username,
       Role: "Admin",
     };
@@ -143,6 +149,16 @@ export default function RegisterForm() {
         />
       </FormControl>
       <FormControl sx={{ m: 1, width: "30ch" }}>
+        <InputLabel>Phone number</InputLabel>
+        <OutlinedInput
+          id="phoneNumber"
+          required
+          value={phoneNumber}
+          onChange={handlePhoneChange}
+          label="PhoneNumber"
+        />
+      </FormControl>
+      <FormControl sx={{ m: 1, width: "30ch" }}>
         <InputLabel>Password</InputLabel>
         <OutlinedInput
           id="password"
@@ -205,6 +221,7 @@ export default function RegisterForm() {
       >
         Register
       </Button>
+      <Link to="/login">Login</Link>
     </Box>
   );
 }

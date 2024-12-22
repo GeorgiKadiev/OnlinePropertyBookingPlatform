@@ -1,5 +1,6 @@
 import "./LoginForm.css";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   InputLabel,
   OutlinedInput,
@@ -18,8 +19,9 @@ export default function LogInForm() {
     margin: 1,
   };
 
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -30,21 +32,21 @@ export default function LogInForm() {
     event.preventDefault();
   };
 
-  const handleUsernameChange = (event) => {
+  const handleEmailChange = (event) => {
     const value = event.target.value;
-    setUsername(value);
+    setEmail(value);
     validateForm(value, password);
   };
 
   const handlePasswordChange = (event) => {
     const value = event.target.value;
     setPassword(value);
-    validateForm(username, value);
+    validateForm(email, value);
   };
 
   const validateForm = (user, pass) => {
     if (!user || !pass) {
-      setError("Username and Password are required");
+      setError("email and Password are required");
       setIsButtonDisabled(true);
     } else {
       setError("");
@@ -52,21 +54,50 @@ export default function LogInForm() {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Logging in with:", { username, password });
+
+    const payload = {
+      email: email,
+      password: password,
+    };
+
+    try {
+      const response = await fetch("http://localhost:5076/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || "Login failed");
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Login successful", data);
+      setError("");
+
+      navigate("/landing-page");
+    } catch (error) {
+      console.error("Error during login:", error);
+      setError("Someting went wrong.");
+    }
   };
 
   return (
     <Box className="form-login" component="form" onSubmit={handleSubmit}>
       <FormControl sx={formControlStyles} variant="outlined">
-        <InputLabel htmlFor="username">Username</InputLabel>
+        <InputLabel htmlFor="email">email</InputLabel>
         <OutlinedInput
-          id="username"
+          id="email"
           required
-          value={username}
-          onChange={handleUsernameChange}
-          label="Username"
+          value={email}
+          onChange={handleEmailChange}
+          label="email"
         />
       </FormControl>
       <FormControl sx={formControlStyles} variant="outlined">

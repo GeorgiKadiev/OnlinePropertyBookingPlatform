@@ -1,6 +1,6 @@
 import "./LoginForm.css";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   InputLabel,
   OutlinedInput,
@@ -136,6 +136,7 @@ export default function LogInForm() {
       >
         Log In
       </Button>
+      <Link to="/register">Register</Link>
     </Box>
   );
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import {  Link } from "react-router-dom";
 
-function SuccessPage() {
+function SuccessRegister() {
   return (
     <div>
       <h1>Registration Successful!</h1>
@@ -11,4 +11,4 @@ function SuccessPage() {
   );
 }
 
-export default SuccessPage;
+export default SuccessRegister;

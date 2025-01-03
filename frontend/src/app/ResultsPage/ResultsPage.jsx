@@ -3,6 +3,8 @@ import { Box, InputBase, IconButton, Paper, Stack, Typography, Button } from "@m
 import SearchIcon from "@mui/icons-material/Search";
 import "./ResultsPage.css";
 import FiltersSideBar from "../../components/FiltersSideBar/FiltersSideBar";
+import NavBar from "../../components/NavBar/NavBar";
+import { useNavigate } from "react-router-dom";
 
 const propertyData = [
   {
@@ -24,40 +26,28 @@ const propertyData = [
     image: "https://via.placeholder.com/150",
   },
   {
-    id: 3,
+    id: 4,
     title: "Modern Studio near Park",
     price: "$90/night",
     image: "https://via.placeholder.com/150",
   },  {
-    id: 3,
-    title: "Modern Studio near Park",
-    price: "$90/night",
-    image: "https://via.placeholder.com/150",
-  },  {
-    id: 3,
-    title: "Modern Studio near Park",
-    price: "$90/night",
-    image: "https://via.placeholder.com/150",
-  },  {
-    id: 3,
-    title: "Modern Studio near Park",
-    price: "$90/night",
-    image: "https://via.placeholder.com/150",
-  },  {
-    id: 3,
-    title: "Modern Studio near Park",
-    price: "$90/night",
-    image: "https://via.placeholder.com/150",
-  },  {
-    id: 3,
+    id: 5,
     title: "Modern Studio near Park",
     price: "$90/night",
     image: "https://via.placeholder.com/150",
   },
 ];
 
+
+
 export default function ResultsPage() {
+  const navigate = useNavigate();
+  const handleMoreInfo = (id) => {
+    navigate(`/property/${id}`);
+  };
   return (
+    <div>
+    <NavBar/>
     <Box className="sidebar-results">
       {/* Sidebar Section */}
       <FiltersSideBar />
@@ -117,7 +107,8 @@ export default function ResultsPage() {
                   </Typography>
                 </Box>
                 {/* More Info Button */}
-                <Button variant="contained" color="primary">
+                <Button variant="contained" color="primary" onClick={handleMoreInfo}
+                >
                   More Info
                 </Button>
               </Paper>
@@ -126,5 +117,7 @@ export default function ResultsPage() {
         </Box>
       </div>
     </Box>
+    </div>
+
   );
 }

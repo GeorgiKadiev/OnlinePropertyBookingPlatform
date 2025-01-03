@@ -1,19 +1,17 @@
 import "./App.css";
+import { Routes, Route } from "react-router-dom";
 import LandingPage from "./app/LandingPage/LandingPage";
 import ResultsPage from "./app/ResultsPage/ResultsPage";
 import LoginForm from "./components/LoginForm/LoginForm";
 import RegisterForm from "./components/RegisterForm/RegisterForm";
-import { Routes, Route } from "react-router-dom";
 import HomePage from "./app/HomePage/HomePage";
 import SuccessRegister from "./components/Success/SuccessRegister";
 import Success from "./components/Success/GenericSuccess";
-
-import NavBar from "./components/NavBar/NavBar";
+import PropertyPage from "./app/PropertyPage/PropertyPage";
 
 function App() {
   return (
     <div className="App">
-      <NavBar />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<RegisterForm />} />
@@ -22,6 +20,7 @@ function App() {
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/successregister" element={<SuccessRegister />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/property/:id" element={<PropertyPage />} />
       </Routes>
     </div>
   );

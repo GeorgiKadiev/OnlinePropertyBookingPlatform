@@ -11,9 +11,9 @@ public partial class Reservation
 
     public int? EstateId { get; set; }
 
-    public DateOnly? CheckInDate { get; set; }
+    public DateOnly CheckInDate { get; set; }
 
-    public DateOnly? CheckOutDate { get; set; }
+    public DateOnly CheckOutDate { get; set; }
 
     public double? TotalPrice { get; set; }
 
@@ -25,5 +25,5 @@ public partial class Reservation
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     public int RoomId { get; set; }
-    public Room room { get; set; }
+    public Room? room { get; set; }
 }

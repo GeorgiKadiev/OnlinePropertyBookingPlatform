@@ -50,6 +50,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             reservation.CustomerId = int.Parse(_sanitizer.Sanitize(userIdClaim.Value));
             // reservation.CustomerId = int.Parse(userId);
             reservation.EstateId = estateId;
+            reservation.RoomId = roomId;
 
             // Sanitизиране на входните данни
             reservation.CheckInDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckInDate.ToString()));
@@ -193,17 +194,29 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
         public bool IsRoomAvailable(int roomId, DateOnly checkInDate, DateOnly checkOutDate)
         {
-            
-            var occupiedDates = _context.Reservations
-                .Where(r => r.RoomId == roomId)
-                .SelectMany(r => Enumerable.Range(0, (r.CheckOutDate.ToDateTime(TimeOnly.MinValue) - r.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
-                                            .Select(offset => r.CheckInDate.AddDays(offset)))
-                .ToHashSet(); 
 
-            
-            return !Enumerable.Range(0, (checkOutDate.ToDateTime(TimeOnly.MinValue) - checkInDate.ToDateTime(TimeOnly.MinValue)).Days)
-                              .Select(offset => checkInDate.AddDays(offset))
-                              .Any(date => occupiedDates.Contains(date));
+            var reservations = _context.Reservations
+       .Where(r => r.RoomId == roomId)
+       .ToList(); // Materialize the query to a list.
+
+            // Generate all dates for the new reservation
+            var newReservationDates = Enumerable.Range(0, (checkOutDate.ToDateTime(TimeOnly.MinValue) - checkInDate.ToDateTime(TimeOnly.MinValue)).Days)
+                                                .Select(offset => checkInDate.AddDays(offset))
+                                                .ToHashSet(); // Use HashSet for efficient lookup.
+
+            // Check for overlap
+            foreach (var reservation in reservations)
+            {
+                var occupiedDates = Enumerable.Range(0, (reservation.CheckOutDate.ToDateTime(TimeOnly.MinValue) - reservation.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
+                                              .Select(offset => reservation.CheckInDate.AddDays(offset));
+
+                if (occupiedDates.Any(date => newReservationDates.Contains(date)))
+                {
+                    return false; // Conflict found.
+                }
+            }
+
+            return true; // No conflicts.
         }
 
 

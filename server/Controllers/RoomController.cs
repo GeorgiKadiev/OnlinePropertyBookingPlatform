@@ -34,7 +34,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             room.EstateId = estateId;
             room.Name = _sanitizer.Sanitize(room.Name);  // Санитизация на името на стаята
             room.Description = _sanitizer.Sanitize(room.Description); // Санитизация на описанието
-
+            room.RoomType = _sanitizer.Sanitize(room.RoomType);
             _context.Rooms.Add(room);
             _context.SaveChanges();
             return Ok();

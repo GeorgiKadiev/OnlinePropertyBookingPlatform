@@ -17,5 +17,6 @@
         public int? MaxGuests { get; set; }
 
         public string EstateName { get; set; }
+        public List<DateOnly> DatesWhenOccupied { get; set; }
     }
 }

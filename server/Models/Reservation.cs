@@ -24,4 +24,6 @@ public partial class Reservation
     public virtual Estate? Estate { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public int RoomId { get; set; }
+    public Room room { get; set; }
 }

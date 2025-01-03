@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
 using OnlinePropertyBookingPlatform.Utility;
+using System.Security.Cryptography.X509Certificates;
 
 namespace OnlinePropertyBookingPlatform.Controllers
 {
@@ -132,7 +133,12 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 {
                     return NotFound("The room doesn't match a proper estate");
                 }
-                dto.EstateName = _context.Estates.FirstOrDefault(e => e.Id == dto.EstateId).Title;
+                List<DateOnly> occupied = _context.Reservations
+                .Where(r => r.RoomId == roomId)
+                .SelectMany(r => Enumerable.Range(0, (r.CheckOutDate.ToDateTime(TimeOnly.MinValue) - r.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
+                .Select(offset => r.CheckInDate.AddDays(offset)))
+                .ToList();
+
 
                 return Ok(dto);
             }
@@ -141,6 +147,18 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("details/{roomId}/dates")]
+        public async Task<ActionResult<List<DateOnly>>> GetEmptyDates(int roomId)
+        {
+            List<DateOnly> occupied = _context.Reservations
+                .Where(r => r.RoomId == roomId)
+                .SelectMany(r => Enumerable.Range(0, (r.CheckOutDate.ToDateTime(TimeOnly.MinValue) - r.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
+                .Select(offset => r.CheckInDate.AddDays(offset)))
+                .ToList();
+            return Ok();
+        }
+
+
 
     }
 }

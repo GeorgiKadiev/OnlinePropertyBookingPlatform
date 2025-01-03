@@ -31,8 +31,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         // Създаване на резервация (само клиенти)
         [Authorize(Roles = "Customer")]
-        [HttpPost("create/{estateId}")]
-        public IActionResult Create([FromBody]Reservation reservation, int estateId)
+        [HttpPost("create/{estateId}/{roomId}")]
+        public IActionResult Create([FromBody]Reservation reservation, int estateId, int roomId)
         {
             //тук трябва да се добави и Id-то на потребителят,
             //който създава резервацията
@@ -54,6 +54,15 @@ namespace OnlinePropertyBookingPlatform.Controllers
             // Sanitизиране на входните данни
             reservation.CheckInDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckInDate.ToString()));
             reservation.CheckOutDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckOutDate.ToString()));
+            if(reservation.CheckInDate==reservation.CheckOutDate)
+            {
+                reservation.CheckOutDate = reservation.CheckInDate.AddDays(1);
+            }
+            if(!IsRoomAvailable(roomId, reservation.CheckInDate, reservation.CheckOutDate))
+            {
+                return BadRequest("room is not avaivable for one of the given days");
+            }
+
 
             _context.Reservations.Add(reservation);
             _context.SaveChanges();
@@ -182,7 +191,21 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        
+        public bool IsRoomAvailable(int roomId, DateOnly checkInDate, DateOnly checkOutDate)
+        {
+            
+            var occupiedDates = _context.Reservations
+                .Where(r => r.RoomId == roomId)
+                .SelectMany(r => Enumerable.Range(0, (r.CheckOutDate.ToDateTime(TimeOnly.MinValue) - r.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
+                                            .Select(offset => r.CheckInDate.AddDays(offset)))
+                .ToHashSet(); 
+
+            
+            return !Enumerable.Range(0, (checkOutDate.ToDateTime(TimeOnly.MinValue) - checkInDate.ToDateTime(TimeOnly.MinValue)).Days)
+                              .Select(offset => checkInDate.AddDays(offset))
+                              .Any(date => occupiedDates.Contains(date));
+        }
+
 
 
     }

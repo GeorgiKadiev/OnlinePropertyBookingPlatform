@@ -6,10 +6,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CarouselProperties from "../../components/Carousel/Carousel";
 import "./LandingPage.css";
+import NavBar from "../../components/NavBar/NavBar";
 
 export default function LandingPage() {
   return (
     <div>
+      <NavBar/>
       <div className="title-search">
         <h1>
           Book your stay now

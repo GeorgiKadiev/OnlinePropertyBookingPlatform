@@ -70,7 +70,8 @@ export default function RegisterForm() {
     const payload = {
       username,
       email,
-      PhoneNumber: parseInt(phoneNumber, 10),
+      // PhoneNumber: parseInt(phoneNumber, 10),
+      PhoneNumber:phoneNumber,
       password1: password,
       password2: confirmPassword,
       Role: role,
@@ -94,7 +95,7 @@ export default function RegisterForm() {
       }
 
       setError("");
-      navigate("/success");
+      navigate("/successregister");
     } catch (err) {
       console.error("Error during registration:", err);
       setError("An error occurred during registration.");
@@ -154,10 +155,10 @@ export default function RegisterForm() {
           label="Select role"
           value={formData.role}
           onChange={handleChange("role")}
-          helperText="Please select user or owner"
+          helperText="Please select Customer or EstateOwner"
         >
-          <MenuItem value="user">User</MenuItem>
-          <MenuItem value="owner">Owner</MenuItem>
+          <MenuItem value="Customer">Customer</MenuItem>
+          <MenuItem value="EstateOwner">Owner</MenuItem>
         </TextField>
       </FormControl>
 

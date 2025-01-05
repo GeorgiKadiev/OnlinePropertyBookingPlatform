@@ -1,5 +1,4 @@
-import * as React from "react";
-import "./RegisterForm.css";
+import React, { useState } from "react";
 import {
   InputLabel,
   OutlinedInput,
@@ -9,210 +8,165 @@ import {
   IconButton,
   Button,
   Typography,
+  TextField,
+  MenuItem,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate, Link } from "react-router-dom";
-
+import "./RegisterForm.css";
 
 export default function RegisterForm() {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [email, setEmail] = React.useState("");
-  const [phoneNumber, setPhone] = React.useState("");
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [error, setError] = React.useState("");
-  const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
+  });
 
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
+  const handleClickShowPassword = () => setShowPassword((prev) => !prev);
+  const handleMouseDownPassword = (event) => event.preventDefault();
+
+  const handleChange = (field) => (event) => {
+    const value = event.target.value;
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    validateForm({ ...formData, [field]: value });
   };
 
-  const handleUsernameChange = (event) => {
-    setUsername(event.target.value);
-    validateForm(event.target.value, email, password, confirmPassword);
-  };
+  const validateForm = (data) => {
+    const { username, email, phoneNumber, password, confirmPassword, role } = data;
 
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-    validateForm(username, event.target.value, password, confirmPassword);
-  };
-
-  const handlePhoneChange = (event) => {
-    setPhone(event.target.value);
-    validateForm(username, email, password, confirmPassword, event.target.value);
-  };
-
-  const handlePasswordChange = (event) => {
-    const newPassword = event.target.value;
-    setPassword(newPassword);
-    validateForm(username, email, newPassword, confirmPassword);
-  };
-
-  const handleConfirmPasswordChange = (event) => {
-    const newConfirmPassword = event.target.value;
-    setConfirmPassword(newConfirmPassword);
-    validateForm(username, email, password, newConfirmPassword);
-  };
-
-  const validateForm = (uname, emailValue, pass, confirmPass, phone) => {
-    if (!uname || !emailValue || !phone) {
-      setError("Username, email and phone are required");
-      setIsButtonDisabled(true);
-    } else if (!pass || !confirmPass) {
+    if (!username) {
+      setError("Username is required");
+    } else if (!email) {
+      setError("Email is required");
+    } else if (!phoneNumber) {
+      setError("Phone number is required");
+    } else if (!role) {
+      setError("Role is required");
+    } else if (!password || !confirmPassword) {
       setError("Both password fields are required");
-      setIsButtonDisabled(true);
-    } else if (pass !== confirmPass) {
+    } else if (password !== confirmPassword) {
       setError("Passwords do not match");
-      setIsButtonDisabled(true);
     } else {
       setError("");
       setIsButtonDisabled(false);
+      return;
     }
+    setIsButtonDisabled(true);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
+    const { username, email, phoneNumber, password, confirmPassword, role } = formData;
+
     const payload = {
-      email: email,
+      username,
+      email,
+      PhoneNumber: parseInt(phoneNumber, 10),
       password1: password,
       password2: confirmPassword,
-      PhoneNumber: parseInt(phoneNumber, 10),
-      username: username,
-      Role: "Admin",
+      Role: role,
     };
-  
+
     try {
       const response = await fetch("http://localhost:5076/api/user/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-  
+
       const contentType = response.headers.get("Content-Type");
-  
       if (!response.ok) {
-        let errorMessage = "Registration failed";
-        if (contentType && contentType.includes("application/json")) {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } else {
-          errorMessage = await response.text(); // Handle plain text errors
-        }
-        setError(errorMessage);
+        const errorMessage =
+          contentType?.includes("application/json")
+            ? (await response.json()).message
+            : await response.text();
+        setError(errorMessage || "Registration failed");
         return;
       }
-  
-      if (contentType && contentType.includes("application/json")) {
-        const data = await response.json();
-        console.log("Registration successful", data);
-      } else {
-        console.log("Registration successful, but response is not JSON");
-      }
-  
+
       setError("");
       navigate("/success");
-
-    } catch (error) {
-      console.error("Error during registration:", error);
+    } catch (err) {
+      console.error("Error during registration:", err);
       setError("An error occurred during registration.");
     }
   };
-  
 
   return (
     <Box className="form-register" component="form" onSubmit={handleSubmit}>
+      {[
+        { id: "username", label: "Username", type: "text" },
+        { id: "email", label: "Email", type: "email" },
+        { id: "phoneNumber", label: "Phone Number", type: "text" },
+      ].map(({ id, label, type }) => (
+        <FormControl key={id} sx={{ m: 1, width: "30ch" }}>
+          <InputLabel>{label}</InputLabel>
+          <OutlinedInput
+            id={id}
+            type={type}
+            value={formData[id]}
+            onChange={handleChange(id)}
+            label={label}
+          />
+        </FormControl>
+      ))}
+
+      {[
+        { id: "password", label: "Password" },
+        { id: "confirmPassword", label: "Confirm Password" },
+      ].map(({ id, label }) => (
+        <FormControl key={id} sx={{ m: 1, width: "30ch" }}>
+          <InputLabel>{label}</InputLabel>
+          <OutlinedInput
+            id={id}
+            type={showPassword ? "text" : "password"}
+            value={formData[id]}
+            onChange={handleChange(id)}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label={label}
+          />
+        </FormControl>
+      ))}
+
       <FormControl sx={{ m: 1, width: "30ch" }}>
-        <InputLabel>Username</InputLabel>
-        <OutlinedInput
-          id="username"
-          required
-          value={username}
-          onChange={handleUsernameChange}
-          label="Username"
-        />
+        <TextField
+          id="role"
+          select
+          label="Select role"
+          value={formData.role}
+          onChange={handleChange("role")}
+          helperText="Please select user or owner"
+        >
+          <MenuItem value="user">User</MenuItem>
+          <MenuItem value="owner">Owner</MenuItem>
+        </TextField>
       </FormControl>
-      <FormControl sx={{ m: 1, width: "30ch" }}>
-        <InputLabel>Email</InputLabel>
-        <OutlinedInput
-          id="email"
-          required
-          value={email}
-          onChange={handleEmailChange}
-          label="Email"
-        />
-      </FormControl>
-      <FormControl sx={{ m: 1, width: "30ch" }}>
-        <InputLabel>Phone number</InputLabel>
-        <OutlinedInput
-          id="phoneNumber"
-          required
-          value={phoneNumber}
-          onChange={handlePhoneChange}
-          label="PhoneNumber"
-        />
-      </FormControl>
-      <FormControl sx={{ m: 1, width: "30ch" }}>
-        <InputLabel>Password</InputLabel>
-        <OutlinedInput
-          id="password"
-          required
-          type={showPassword ? "text" : "password"}
-          value={password}
-          onChange={handlePasswordChange}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label={
-                  showPassword ? "hide the password" : "display the password"
-                }
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          }
-          label="Password"
-        />
-      </FormControl>
-      <FormControl sx={{ m: 1, width: "30ch" }}>
-        <InputLabel>Confirm Password</InputLabel>
-        <OutlinedInput
-          id="confirm-password"
-          required
-          type={showPassword ? "text" : "password"}
-          value={confirmPassword}
-          onChange={handleConfirmPasswordChange}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label={
-                  showPassword ? "hide the password" : "display the password"
-                }
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          }
-          label="Confirm Password"
-        />
-      </FormControl>
+
       {error && (
         <Typography color="error" sx={{ m: 1 }}>
           {error}
         </Typography>
       )}
+
       <Button
         type="submit"
         variant="contained"
@@ -221,6 +175,7 @@ export default function RegisterForm() {
       >
         Register
       </Button>
+
       <Link to="/login">Login</Link>
     </Box>
   );

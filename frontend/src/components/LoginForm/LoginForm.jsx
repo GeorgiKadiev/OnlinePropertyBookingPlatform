@@ -46,7 +46,7 @@ export default function LogInForm() {
 
   const validateForm = (user, pass) => {
     if (!user || !pass) {
-      setError("email and Password are required");
+      setError("Email and Password are required");
       setIsButtonDisabled(true);
     } else {
       setError("");

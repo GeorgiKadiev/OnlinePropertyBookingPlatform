@@ -8,10 +8,10 @@ import CarouselProperties from "../../../components/Carousel/Carousel";
 import "./LandingPage.css";
 import NavBar from "../../../components/NavBar/NavBar";
 
-export default function UserLanding() {
+export default function UserLanding({token}) {
   return (
     <div>
-    <NavBar/>
+    <NavBar token={token}/>
     <div className="title-search">
       <h1>
         Book your stay now

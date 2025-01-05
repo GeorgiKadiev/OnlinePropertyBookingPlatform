@@ -14,7 +14,7 @@ import { Home } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import "./NavBar.css";
 
-export default function NavBar() {
+export default function NavBar({token}) {
   const navigate = useNavigate();
   const [state, setState] = useState({
     right: false,
@@ -35,6 +35,9 @@ export default function NavBar() {
     try {
       const response = await fetch("http://localhost:5076/api/user/logout", {
         method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {

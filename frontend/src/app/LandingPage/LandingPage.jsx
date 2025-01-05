@@ -20,11 +20,15 @@ const fetchUserId = async (token) => {
   return response.json();
 };
 
+
 // Utility function to fetch user details by ID
-const fetchUserDetails = async (userId) => {
-  userId = 17;
+const fetchUserDetails = async (userId, token) => {
+  console.log(userId);
   const response = await fetch(`http://localhost:5076/api/user/${userId}`, {
     method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,  // Pass the token in the request header
+    },
   });
   if (!response.ok) {
     throw new Error("Failed to fetch user details");
@@ -38,8 +42,6 @@ export default function LandingPage() {
   const [error, setError] = useState(null);
   const location = useLocation();  // Get the state from the router
 
-
-  // Fetch user details on component mount
   useEffect(() => {
     const { token } = location.state || {};  // Access the passed token
 
@@ -50,25 +52,23 @@ export default function LandingPage() {
 
     const loadUserDetails = async () => {
       try {
-        // Step 1: Fetch User ID
-        const { id: userId } = await fetchUserId(token);
+        const { userId: userId } = await fetchUserId(token);
         console.log("User ID:", userId);
 
-        // Step 2: Fetch User Details
-        const user = await fetchUserDetails(userId);
+        const user = await fetchUserDetails(userId, token);
         console.log("User Details:", user);
 
-        setUserDetails(user); // Update state with user details
+        setUserDetails(user);
       } catch (err) {
         console.error("Error:", err.message);
         setError(err.message);
       } finally {
-        setLoading(false); // Set loading to false
+        setLoading(false);
       }
     };
 
     loadUserDetails();
-  }, []);
+  }, [location.state]);
 
   // Loading state
   if (loading) return <div>Loading...</div>;
@@ -82,12 +82,12 @@ export default function LandingPage() {
 
   switch (role) {
     case "Admin":
-      return <AdminDashboard />;
+      return <AdminDashboard token={location.state.token}/>;
     case "Customer":
-      return <UserLanding />;
-    case "PropertyOwner":
-      return <OwnerHome />;
+      return <UserLanding token={location.state.token} />;
+    case "EstateOwner":
+      return <OwnerHome token={location.state.token}/>;
     default:
-      return <div>Unknown role</div>;
+      return <div>Something went wrong</div>;
   }
 }

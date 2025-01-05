@@ -1,62 +1,93 @@
-import * as React from "react";
-import { OutlinedInput, IconButton, Box } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import CarouselProperties from "../../components/Carousel/Carousel";
-import "./LandingPage.css";
-import NavBar from "../../components/NavBar/NavBar";
+import React, { useState, useEffect } from "react";
+import UserLanding from "../UserPages/Landing/Landing";
+import OwnerHome from "../OwnerPages/OwnerHomePage/OwnerHome";
+import AdminDashboard from "../AdminPages/AdminDashboard/AdminDashboard";
+import { useLocation } from "react-router-dom";
+
+
+// Utility function to fetch user ID
+const fetchUserId = async (token) => {
+  const response = await fetch("http://localhost:5076/api/user/get-user-id", {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,  // Pass the token in the request header
+    },
+    credentials: "include", // Use credentials if cookies are required for auth
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch user ID");
+  }
+  return response.json();
+};
+
+// Utility function to fetch user details by ID
+const fetchUserDetails = async (userId) => {
+  userId = 17;
+  const response = await fetch(`http://localhost:5076/api/user/${userId}`, {
+    method: "GET",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch user details");
+  }
+  return response.json();
+};
 
 export default function LandingPage() {
-  return (
-    <div>
-      <NavBar/>
-      <div className="title-search">
-        <h1>
-          Book your stay now
-        </h1>
-        <Box className="search-bar"
-          component="form"
-        >
-          {/* Location Input */}
-          <OutlinedInput
-            sx={{ flex: 1 }}
-            placeholder="Search for location"
-            inputProps={{ "aria-label": "search for location" }}
-          />
+  const [userDetails, setUserDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const location = useLocation();  // Get the state from the router
 
-          {/* Date Pickers */}
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="Start date"
-              sx={{ width: 180 }}
-            />
-            <DatePicker
-              label="End date"
-              sx={{ width: 180 }}
-            />
-          </LocalizationProvider>
 
-          {/* Search Button */}
-          <IconButton
-            type="button"
-            sx={{
-              p: "10px",
-              backgroundColor: "#1976d2",
-              color: "#fff",
-              "&:hover": { backgroundColor: "#145ca8" },
-              borderRadius: 1,
-            }}
-            aria-label="search"
-          >
-            <SearchIcon />
-          </IconButton>
-        </Box>
-      </div>
-      
-      {/* Carousel Section */}
-      <CarouselProperties />
-    </div>
-  );
+  // Fetch user details on component mount
+  useEffect(() => {
+    const { token } = location.state || {};  // Access the passed token
+
+    if (!token) {
+      console.error("No token found");
+      return;
+    }
+
+    const loadUserDetails = async () => {
+      try {
+        // Step 1: Fetch User ID
+        const { id: userId } = await fetchUserId(token);
+        console.log("User ID:", userId);
+
+        // Step 2: Fetch User Details
+        const user = await fetchUserDetails(userId);
+        console.log("User Details:", user);
+
+        setUserDetails(user); // Update state with user details
+      } catch (err) {
+        console.error("Error:", err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false); // Set loading to false
+      }
+    };
+
+    loadUserDetails();
+  }, []);
+
+  // Loading state
+  if (loading) return <div>Loading...</div>;
+
+  // Error state
+  if (error) return <div>Error: {error}</div>;
+
+  // Determine component to render based on role
+  const { role } = userDetails || {};
+  console.log("User Role:", role);
+
+  switch (role) {
+    case "Admin":
+      return <AdminDashboard />;
+    case "Customer":
+      return <UserLanding />;
+    case "PropertyOwner":
+      return <OwnerHome />;
+    default:
+      return <div>Unknown role</div>;
+  }
 }

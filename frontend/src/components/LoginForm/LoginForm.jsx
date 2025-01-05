@@ -80,8 +80,8 @@ export default function LogInForm() {
       const data = await response.json();
       console.log("Login successful", data);
       setError("");
+      navigate("/landing-page", { state: { token: data.token } });
 
-      navigate("/landing-page");
     } catch (error) {
       console.error("Error during login:", error);
       setError("Someting went wrong.");

@@ -1,13 +1,13 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "./app/LandingPage/LandingPage";
-import ResultsPage from "./app/ResultsPage/ResultsPage";
+import ResultsPage from "./app/UserPages/ResultsPage/ResultsPage";
 import LoginForm from "./components/LoginForm/LoginForm";
 import RegisterForm from "./components/RegisterForm/RegisterForm";
 import HomePage from "./app/HomePage/HomePage";
 import SuccessRegister from "./components/Success/SuccessRegister";
 import Success from "./components/Success/GenericSuccess";
-import PropertyPage from "./app/PropertyPage/PropertyPage";
+import PropertyPage from "./app/UserPages/PropertyPage/PropertyPage";
 
 function App() {
   return (

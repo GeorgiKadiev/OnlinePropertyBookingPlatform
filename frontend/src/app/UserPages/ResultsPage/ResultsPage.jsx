@@ -2,8 +2,8 @@ import React from "react";
 import { Box, InputBase, IconButton, Paper, Stack, Typography, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import "./ResultsPage.css";
-import FiltersSideBar from "../../components/FiltersSideBar/FiltersSideBar";
-import NavBar from "../../components/NavBar/NavBar";
+import FiltersSideBar from "../../../components/FiltersSideBar/FiltersSideBar";
+import NavBar from "../../../components/NavBar/NavBar";
 import { useNavigate } from "react-router-dom";
 
 const propertyData = [

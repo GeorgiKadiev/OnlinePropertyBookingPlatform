@@ -96,6 +96,12 @@ export default function RegisterForm() {
 
       setError("");
       navigate("/successregister");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log("Registration successful", data);
+      } else {
+        console.log("Registration successful, but response is not JSON");
+      }
     } catch (err) {
       console.error("Error during registration:", err);
       setError("An error occurred during registration.");

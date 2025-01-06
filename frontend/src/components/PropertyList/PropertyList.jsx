@@ -1,11 +1,6 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Box, Card, CardContent, Typography, Button } from "@mui/material";
 import "./PropertyList.css";
 
 const cards = [
@@ -27,14 +22,20 @@ const cards = [
 ];
 
 export default function LandingPage() {
-  const [selectedCard, setSelectedCard] = useState(null);
+  const navigate = useNavigate();
+
+  const handleAdd = () => {
+    navigate("/create-property");
+  };
 
   return (
     <Box className="cards-container">
       <Card className="card">
         <CardContent className="card-content" sx={{ width: "60%", padding: 2 }}>
           <div className="card-buttons">
-            <Button className="card-button">Add new Propery</Button>
+            <Button className="card-button" onClick={handleAdd}>
+              Add new Propery
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -50,6 +50,7 @@
   
   .card-buttons {
     display: flex;
+    justify-content: center;
     gap: 10px;
   }
   
@@ -65,6 +66,6 @@
   }
   
   .card-button:hover {
-    background-color: #1565c0;
+    background-color: #b6cbe3;
   }
   

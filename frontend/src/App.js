@@ -8,6 +8,7 @@ import HomePage from "./app/HomePage/HomePage";
 import SuccessRegister from "./components/Success/SuccessRegister";
 import Success from "./components/Success/GenericSuccess";
 import PropertyPage from "./app/UserPages/PropertyPage/PropertyPage";
+import PropertyForm from "./components/PropertyForm/PropertyForm";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/successregister" element={<SuccessRegister />} />
         <Route path="/success" element={<Success />} />
         <Route path="/property/:id" element={<PropertyPage />} />
+        <Route path="/cerate-property" element={<PropertyForm />} />
       </Routes>
     </div>
   );

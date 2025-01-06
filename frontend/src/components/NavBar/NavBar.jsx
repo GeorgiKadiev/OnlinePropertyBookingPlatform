@@ -47,6 +47,7 @@ export default function NavBar() {
       }
 
       console.log("Logged out successfully");
+      dispatch(clearToken()); 
       setState({ right: false });
       navigate("/success");
     } catch (error) {

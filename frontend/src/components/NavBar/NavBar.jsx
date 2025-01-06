@@ -15,14 +15,24 @@ import {
   Button,
 } from "@mui/material";
 import "./NavBar.css";
+import { clearRole } from "../../auth/roleSlice";
 
 export default function NavBar() {
   const token = useSelector((state) => state.token);
+  const userRole = useSelector((state) => state.role); 
+  console.log(userRole);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [state, setState] = useState({
     right: false,
   });
+
+
+  const menuItems = [
+    { text: "View Reservations", showFor: "Customer" },
+    { text: "Reset Password", showFor: "All" },
+    { text: "Log Out", showFor: "All" },
+  ];
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (
@@ -50,6 +60,7 @@ export default function NavBar() {
 
       console.log("Logged out successfully");
       dispatch(clearToken()); 
+      dispatch(clearRole()); 
       setState({ right: false });
       navigate("/success");
     } catch (error) {
@@ -86,15 +97,20 @@ export default function NavBar() {
       onClick={toggleDrawer("right", false)}
       onKeyDown={toggleDrawer("right", false)}
     >
-      <List>
-        {["View Reservations", "Reset Password", "Log Out"].map((text) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton onClick={() => handleMenuClick(text)}>
-              <ListItemText primary={text} />
+       <List>
+      {menuItems
+        .filter(
+          (item) =>
+            item.showFor === "All" || item.showFor === userRole // Filter based on user type
+        )
+        .map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton onClick={() => handleMenuClick(item.text)}>
+              <ListItemText primary={item.text} />
             </ListItemButton>
           </ListItem>
         ))}
-      </List>
+    </List>
     </Box>
   );
 

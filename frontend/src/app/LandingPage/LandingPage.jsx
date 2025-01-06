@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setRole } from "../../auth/roleSlice";
 import UserLanding from "../UserPages/Landing/Landing";
 import OwnerHome from "../OwnerPages/OwnerHomePage/OwnerHome";
 import AdminDashboard from "../AdminPages/AdminDashboard/AdminDashboard";
@@ -38,7 +39,10 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const location = useLocation();
+  const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
+  // const role = useSelector((state) => state.role);
+
 
   useEffect(() => {
     if (!token) {
@@ -74,6 +78,8 @@ export default function LandingPage() {
 
   // Determine component to render based on role
   const { role } = userDetails || {};
+  dispatch(setRole(role));
+
   console.log("User Role:", role);
 
   switch (role) {

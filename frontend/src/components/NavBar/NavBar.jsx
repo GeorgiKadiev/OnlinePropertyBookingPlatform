@@ -71,6 +71,11 @@ export default function NavBar({token}) {
     setState({ right: false }); // Close the drawer after an action
   };
 
+ const handleHome = () =>{
+  // to do : finish the token parsing first
+  // navigate("/landing-page")
+ }
+
   const list = () => (
     <Box
       role="presentation"
@@ -91,7 +96,8 @@ export default function NavBar({token}) {
 
   return (
     <Box className="navbar">
-      <Button startIcon={<Home />}>Home</Button>
+      <Button startIcon={<Home />}
+      onClick={handleHome}>Home</Button>
       <div>
         <IconButton
           onClick={toggleDrawer("right", true)} // Open "right" drawer on click

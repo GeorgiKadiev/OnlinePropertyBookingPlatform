@@ -140,6 +140,7 @@ export default function LogInForm() {
       >
         Log In
       </Button>
+      <Link to="/forgot-password">Forgot password</Link>
       <Link to="/register">Register</Link>
     </Box>
   );

@@ -60,9 +60,6 @@ export default function NavBar() {
 
   const handleMenuClick = (option) => {
     switch (option) {
-      case "Forgot Password":
-        console.log("Navigating to Forgot Password...");
-        break;
       case "Reset Password":
         console.log("Navigating to Reset Password...");
         break;
@@ -86,7 +83,7 @@ export default function NavBar() {
       onKeyDown={toggleDrawer("right", false)}
     >
       <List>
-        {["Forgot Password", "Reset Password", "Log Out"].map((text) => (
+        {["Reset Password", "Log Out"].map((text) => (
           <ListItem key={text} disablePadding>
             <ListItemButton onClick={() => handleMenuClick(text)}>
               <ListItemText primary={text} />

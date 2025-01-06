@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { Home } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Box,
   IconButton,
@@ -10,11 +13,10 @@ import {
   ListItemText,
   Button,
 } from "@mui/material";
-import { Home } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
 import "./NavBar.css";
 
-export default function NavBar({token}) {
+export default function NavBar() {
+  const token = useSelector((state) => state.token);
   const navigate = useNavigate();
   const [state, setState] = useState({
     right: false,
@@ -36,7 +38,7 @@ export default function NavBar({token}) {
       const response = await fetch("http://localhost:5076/api/user/logout", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -45,7 +47,6 @@ export default function NavBar({token}) {
       }
 
       console.log("Logged out successfully");
-      // alert("Logged out successfully!");
       setState({ right: false });
       navigate("/success");
     } catch (error) {
@@ -63,18 +64,17 @@ export default function NavBar({token}) {
         console.log("Navigating to Reset Password...");
         break;
       case "Log Out":
-        handleLogout(); // Call the logout function
+        handleLogout();
         break;
       default:
         break;
     }
-    setState({ right: false }); // Close the drawer after an action
+    setState({ right: false });
   };
 
- const handleHome = () =>{
-  // to do : finish the token parsing first
-  // navigate("/landing-page")
- }
+  const handleHome = () => {
+    navigate("/landing-page")
+  };
 
   const list = () => (
     <Box
@@ -96,11 +96,12 @@ export default function NavBar({token}) {
 
   return (
     <Box className="navbar">
-      <Button startIcon={<Home />}
-      onClick={handleHome}>Home</Button>
+      <Button startIcon={<Home />} onClick={handleHome}>
+        Home
+      </Button>
       <div>
         <IconButton
-          onClick={toggleDrawer("right", true)} // Open "right" drawer on click
+          onClick={toggleDrawer("right", true)}
           size="large"
           edge="end"
           color="inherit"

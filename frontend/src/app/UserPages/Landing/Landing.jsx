@@ -1,17 +1,17 @@
 import React from "react";
-import { OutlinedInput, IconButton, Box } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { OutlinedInput, IconButton, Box } from "@mui/material";
 import CarouselProperties from "../../../components/Carousel/Carousel";
-import "./LandingPage.css";
 import NavBar from "../../../components/NavBar/NavBar";
+import "./LandingPage.css";
 
-export default function UserLanding({token}) {
+export default function UserLanding() {
   return (
     <div>
-    <NavBar token={token}/>
+    <NavBar/>
     <div className="title-search">
       <h1>
         Book your stay now

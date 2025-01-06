@@ -1,6 +1,9 @@
 import "./LoginForm.css";
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setToken } from "../../auth/tokenSlice";
+
 import {
   InputLabel,
   OutlinedInput,
@@ -19,6 +22,7 @@ export default function LogInForm() {
     margin: 1,
   };
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -79,9 +83,10 @@ export default function LogInForm() {
 
       const data = await response.json();
       console.log("Login successful", data);
-      setError("");
-      navigate("/landing-page", { state: { token: data.token } });
+      dispatch(setToken(data.token));
 
+      setError("");
+      navigate("/landing-page");
     } catch (error) {
       console.error("Error during login:", error);
       setError("Someting went wrong.");

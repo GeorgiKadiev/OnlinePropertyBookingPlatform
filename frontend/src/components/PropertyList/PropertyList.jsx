@@ -28,6 +28,14 @@ export default function LandingPage() {
     navigate("/create-property");
   };
 
+  const handleReservaton = () => {
+    navigate("/owner-reservations");
+  }; 
+  
+  const handleReviews = () => {
+    navigate("/create-property");
+  };
+
   return (
     <Box className="cards-container">
       <Card className="card">
@@ -70,8 +78,12 @@ export default function LandingPage() {
               {card.description}
             </Typography>
             <div className="card-buttons">
-              <Button className="card-button">Button 1</Button>
-              <Button className="card-button">Button 2</Button>
+              <Button className="card-button" onClick={handleReservaton}>
+                Reservations
+              </Button>
+              <Button className="card-button" onClick={handleReviews}>
+                Reviews
+              </Button>
             </div>
           </CardContent>
         </Card>

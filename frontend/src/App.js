@@ -8,7 +8,8 @@ import HomePage from "./app/HomePage/HomePage";
 import SuccessRegister from "./components/Success/SuccessRegister";
 import Success from "./components/Success/GenericSuccess";
 import PropertyPage from "./app/UserPages/PropertyPage/PropertyPage";
-import PropertyForm from "./components/PropertyForm/PropertyForm";
+import CreateProperyPage from "./app/OwnerPages/CreatePropertyPage/CreateProperyPage";
+import ReseravtionsPage from "./app/OwnerPages/ReservationsPage/ReservationsPage";
 
 function App() {
   return (
@@ -22,7 +23,8 @@ function App() {
         <Route path="/successregister" element={<SuccessRegister />} />
         <Route path="/success" element={<Success />} />
         <Route path="/property/:id" element={<PropertyPage />} />
-        <Route path="/cerate-property" element={<PropertyForm />} />
+        <Route path="/create-property" element={<CreateProperyPage />} />
+        <Route path="/owner-reservations" element={<ReseravtionsPage />} />
       </Routes>
     </div>
   );

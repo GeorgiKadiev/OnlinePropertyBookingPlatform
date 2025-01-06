@@ -41,7 +41,14 @@ export default function PropertyPage() {
       </Grid>
 
       {/* Description and Booking */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <Box sx={{ flex: 1, pr: 2 }}>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
             {property.description}

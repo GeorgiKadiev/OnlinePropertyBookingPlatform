@@ -1,9 +1,9 @@
+import React, { useState, useEffect } from "react";
 import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Paper, Typography, Box, Button, IconButton } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import React, { useState, useEffect } from "react";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 const accountData = [
   {
@@ -25,7 +25,6 @@ const showMultipleAccounts = numAccounts >= 3; // Display 3 slides only if there
 function CarouselProperties() {
   const [showMultipleAccounts, setShowMultipleAccounts] = useState(true);
 
-  // Dynamically adjust the carousel behavior based on screen width
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth <= 600) {
@@ -36,7 +35,7 @@ function CarouselProperties() {
     };
 
     window.addEventListener("resize", handleResize);
-    handleResize(); // Run on initial load to set correct state
+    handleResize();
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);

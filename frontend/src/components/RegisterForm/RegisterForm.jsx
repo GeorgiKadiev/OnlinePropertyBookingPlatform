@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   InputLabel,
   OutlinedInput,
@@ -12,7 +13,6 @@ import {
   MenuItem,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useNavigate, Link } from "react-router-dom";
 import "./RegisterForm.css";
 
 export default function RegisterForm() {
@@ -40,7 +40,8 @@ export default function RegisterForm() {
   };
 
   const validateForm = (data) => {
-    const { username, email, phoneNumber, password, confirmPassword, role } = data;
+    const { username, email, phoneNumber, password, confirmPassword, role } =
+      data;
 
     if (!username) {
       setError("Username is required");
@@ -65,13 +66,14 @@ export default function RegisterForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const { username, email, phoneNumber, password, confirmPassword, role } = formData;
+    const { username, email, phoneNumber, password, confirmPassword, role } =
+      formData;
 
     const payload = {
       username,
       email,
       // PhoneNumber: parseInt(phoneNumber, 10),
-      PhoneNumber:phoneNumber,
+      PhoneNumber: phoneNumber,
       password1: password,
       password2: confirmPassword,
       Role: role,
@@ -86,10 +88,9 @@ export default function RegisterForm() {
 
       const contentType = response.headers.get("Content-Type");
       if (!response.ok) {
-        const errorMessage =
-          contentType?.includes("application/json")
-            ? (await response.json()).message
-            : await response.text();
+        const errorMessage = contentType?.includes("application/json")
+          ? (await response.json()).message
+          : await response.text();
         setError(errorMessage || "Registration failed");
         return;
       }

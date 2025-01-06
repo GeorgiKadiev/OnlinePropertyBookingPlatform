@@ -1,9 +1,6 @@
-import "./LoginForm.css";
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setToken } from "../../auth/tokenSlice";
-
 import {
   InputLabel,
   OutlinedInput,
@@ -15,6 +12,8 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { setToken } from "../../auth/tokenSlice";
+import "./LoginForm.css";
 
 export default function LogInForm() {
   const formControlStyles = {

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Home } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { clearToken } from '../../auth/tokenSlice';
 import {
   Box,
   IconButton,
@@ -17,6 +18,7 @@ import "./NavBar.css";
 
 export default function NavBar() {
   const token = useSelector((state) => state.token);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [state, setState] = useState({
     right: false,

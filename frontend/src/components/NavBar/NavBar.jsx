@@ -60,6 +60,10 @@ export default function NavBar() {
 
   const handleMenuClick = (option) => {
     switch (option) {
+      case "View Reservations":
+        navigate("/reservations");
+        console.log("Navigating to Reservations...");
+        break;
       case "Reset Password":
         console.log("Navigating to Reset Password...");
         break;
@@ -83,7 +87,7 @@ export default function NavBar() {
       onKeyDown={toggleDrawer("right", false)}
     >
       <List>
-        {["Reset Password", "Log Out"].map((text) => (
+        {["View Reservations", "Reset Password", "Log Out"].map((text) => (
           <ListItem key={text} disablePadding>
             <ListItemButton onClick={() => handleMenuClick(text)}>
               <ListItemText primary={text} />

@@ -25,7 +25,7 @@ function App() {
         <Route path="/success" element={<Success />} />
         <Route path="/property/:id" element={<PropertyPage />} />
         <Route path="/create-property" element={<CreateProperyPage />} />
-        <Route path="/owner-reservations" element={<ReseravtionsPage />} />
+        <Route path="/reservations" element={<ReseravtionsPage />} />
         <Route path="/forgot-password" element={<ForgotPassForm />} />
 
       </Routes>

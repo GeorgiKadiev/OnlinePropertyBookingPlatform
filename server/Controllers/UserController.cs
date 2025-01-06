@@ -393,7 +393,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             // Send email
             var resetLink = $"https://yourapp.com/reset-password/{resetToken}";
-            await _emailSender.SendEmailAsync("hutchyy@abv.bg", "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
+            await _emailSender.SendEmailAsync(user.Email, "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
 
             return Ok("Password reset link sent to your email. " + resetToken);
         }
@@ -407,8 +407,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return BadRequest("Invalid token");
             }
 
-
-            user.Password = BCrypt.Net.BCrypt.HashPassword(model.newPassword);
+            if (model.newPassword1 != model.newPassword2)
+                return BadRequest("Passwords don't match");
+            
+            user.Password = BCrypt.Net.BCrypt.HashPassword(model.newPassword1);
             user.ResetPasswordToken = null;
             _context.Update(user);
             _context.SaveChanges();

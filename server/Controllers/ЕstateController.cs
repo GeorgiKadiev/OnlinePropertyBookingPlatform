@@ -132,6 +132,22 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+            [Authorize(Roles = "EstateOwner")]
+            [HttpGet("{id}/reservations")]
+            public async Task<ActionResult<List<Reservation>>> GetEstateReservations(int id)
+            {
+                if(!_context.Estates.Any(e => e.Id==id))
+                    return BadRequest("Estate doesn't exist");
+
+                var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+
+                if (_context.Estates.First(e => e.Id == id).EstateOwnerId != int.Parse(userIdClaim.Value))
+                    return BadRequest("You don't have access to this information");
+
+                var reservations = _context.Reservations.Where(r=>r.EstateId == id).ToList();
+                    return reservations;
+
+            }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Estate>> GetEstateDetails(int id)

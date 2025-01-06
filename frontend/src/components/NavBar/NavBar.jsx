@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Home } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { clearToken } from '../../auth/tokenSlice';
+import { clearToken } from '../../utils/tokenSlice';
 import {
   Box,
   IconButton,
@@ -15,7 +15,7 @@ import {
   Button,
 } from "@mui/material";
 import "./NavBar.css";
-import { clearRole } from "../../auth/roleSlice";
+import { clearRole } from "../../utils/roleSlice";
 
 export default function NavBar() {
   const token = useSelector((state) => state.token);

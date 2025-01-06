@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
-import tokenReducer from '../auth/tokenSlice';
-import roleReducer from '../auth/roleSlice';
+import tokenReducer from '../utils/tokenSlice';
+import roleReducer from '../utils/roleSlice';
+import idReducer from '../utils/idSlice';
 
 const store = configureStore({
   reducer: {
     token: tokenReducer,
     role: roleReducer,
+    id: idReducer,
   },
 });
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { setRole } from "../../auth/roleSlice";
+import { setRole } from "../../utils/roleSlice";
+import { setId } from "../../utils/idSlice";
 import UserLanding from "../UserPages/Landing/Landing";
 import OwnerHome from "../OwnerPages/OwnerHomePage/OwnerHome";
 import AdminDashboard from "../AdminPages/AdminDashboard/AdminDashboard";
@@ -54,6 +55,7 @@ export default function LandingPage() {
       try {
         const { userId: userId } = await fetchUserId(token);
         console.log("User ID:", userId);
+        dispatch(setId(userId));
 
         const user = await fetchUserDetails(userId, token);
         console.log("User Details:", user);
@@ -79,6 +81,7 @@ export default function LandingPage() {
   // Determine component to render based on role
   const { role } = userDetails || {};
   dispatch(setRole(role));
+
 
   console.log("User Role:", role);
 

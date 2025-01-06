@@ -12,7 +12,8 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { setToken } from "../../auth/tokenSlice";
+import { setToken } from "../../utils/tokenSlice";
+
 import "./LoginForm.css";
 
 export default function LogInForm() {

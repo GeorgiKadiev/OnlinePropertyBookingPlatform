@@ -31,8 +31,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         // Създаване на резервация (само клиенти)
         [Authorize(Roles = "Customer")]
-        [HttpPost("create/{estateId}")]
-        public IActionResult Create([FromBody]Reservation reservation, int estateId)
+        [HttpPost("create/{estateId}/{roomId}")]
+        public IActionResult Create([FromBody]Reservation reservation, int estateId, int roomId)
         {
             //тук трябва да се добави и Id-то на потребителят,
             //който създава резервацията
@@ -50,10 +50,20 @@ namespace OnlinePropertyBookingPlatform.Controllers
             reservation.CustomerId = int.Parse(_sanitizer.Sanitize(userIdClaim.Value));
             // reservation.CustomerId = int.Parse(userId);
             reservation.EstateId = estateId;
+            reservation.RoomId = roomId;
 
             // Sanitизиране на входните данни
             reservation.CheckInDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckInDate.ToString()));
             reservation.CheckOutDate = DateOnly.Parse(_sanitizer.Sanitize(reservation.CheckOutDate.ToString()));
+            if(reservation.CheckInDate==reservation.CheckOutDate)
+            {
+                reservation.CheckOutDate = reservation.CheckInDate.AddDays(1);
+            }
+            if(!IsRoomAvailable(roomId, reservation.CheckInDate, reservation.CheckOutDate))
+            {
+                return BadRequest("room is not avaivable for one of the given days");
+            }
+
 
             _context.Reservations.Add(reservation);
             _context.SaveChanges();
@@ -182,7 +192,33 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        
+        public bool IsRoomAvailable(int roomId, DateOnly checkInDate, DateOnly checkOutDate)
+        {
+
+            var reservations = _context.Reservations
+       .Where(r => r.RoomId == roomId)
+       .ToList(); // Materialize the query to a list.
+
+            // Generate all dates for the new reservation
+            var newReservationDates = Enumerable.Range(0, (checkOutDate.ToDateTime(TimeOnly.MinValue) - checkInDate.ToDateTime(TimeOnly.MinValue)).Days)
+                                                .Select(offset => checkInDate.AddDays(offset))
+                                                .ToHashSet(); // Use HashSet for efficient lookup.
+
+            // Check for overlap
+            foreach (var reservation in reservations)
+            {
+                var occupiedDates = Enumerable.Range(0, (reservation.CheckOutDate.ToDateTime(TimeOnly.MinValue) - reservation.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
+                                              .Select(offset => reservation.CheckInDate.AddDays(offset));
+
+                if (occupiedDates.Any(date => newReservationDates.Contains(date)))
+                {
+                    return false; // Conflict found.
+                }
+            }
+
+            return true; // No conflicts.
+        }
+
 
 
     }

@@ -335,6 +335,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok(new { Token = tokenString, Message = "Registration successful. Please check your email to confirm your account." });
 
         }
+        [HttpGet("verify-user/{token}")]
+        public IActionResult RedirectToVerifyUser(string token)
+        {
+            var client = new HttpClient();
+            var response = client.PostAsync($"http://localhost:5076/api/user/verify-user/{token}", null);
+            return Ok();
+        }
+
         [HttpPost("verify-user/{token}")]
         public async Task<ActionResult> verifyUser(string token)
         {
@@ -359,8 +367,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
             user.IsEmailVerified = true;
             user.EmailVerificationToken = null;
             _context.Update(user);
-            _context.SaveChanges();
-            return Redirect("http://localhost:5076/api/user/login");
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
         [HttpPost("forgot-password")]

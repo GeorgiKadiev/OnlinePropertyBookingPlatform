@@ -156,7 +156,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
             return RedirectToAction();
         }
-        [HttpGet("login")]
+        [HttpPost("login")]
         //Редактиран вариант ПАНЧО
         public IActionResult Login([FromBody] LoginModel model)
         {

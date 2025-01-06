@@ -1,8 +1,11 @@
 import * as React from "react";
-import Chip from "@mui/material/Chip";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
-import { Box, Button, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  TextField,
+  Autocomplete,
+} from "@mui/material";
 import "./FiltersSideBar.css";
 
 // Sample data for Autocomplete
@@ -34,12 +37,7 @@ export default function FiltersSideBar() {
           value.map((option, index) => {
             const { key, ...tagProps } = getTagProps({ index });
             return (
-              <Chip
-                variant="outlined"
-                label={option}
-                key={key}
-                {...tagProps}
-              />
+              <Chip variant="outlined" label={option} key={key} {...tagProps} />
             );
           })
         }

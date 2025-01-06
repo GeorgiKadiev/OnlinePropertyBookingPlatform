@@ -1,22 +1,27 @@
-import './App.css';
-// import LandingPage from './app/LandingPage/LandingPage';
-// import ResultsPage from './app/ResultsPage/ResultsPage';
-// import NavBar from './components/NavBar/NavBar';
-// import LoginForm from './components/LoginForm/LoginForm';
-// import RegisterForm from './components/RegisterForm/RegisterForm';
+import "./App.css";
 import { Routes, Route } from "react-router-dom";
-
-
-// import test from './components/test/test'
+import LandingPage from "./app/LandingPage/LandingPage";
+import ResultsPage from "./app/UserPages/ResultsPage/ResultsPage";
+import LoginForm from "./components/LoginForm/LoginForm";
+import RegisterForm from "./components/RegisterForm/RegisterForm";
+import HomePage from "./app/HomePage/HomePage";
+import SuccessRegister from "./components/Success/SuccessRegister";
+import Success from "./components/Success/GenericSuccess";
+import PropertyPage from "./app/UserPages/PropertyPage/PropertyPage";
 
 function App() {
   return (
     <div className="App">
-     {/* <NavBar></NavBar> */}
-     <RegisterForm/>
-     {/* <LoginForm/> */}
-     {/* <LandingPage></LandingPage> */}
-     {/* <ResultsPage/> */}
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/landing-page" element={<LandingPage />} />
+        <Route path="/results" element={<ResultsPage />} />
+        <Route path="/successregister" element={<SuccessRegister />} />
+        <Route path="/success" element={<Success />} />
+        <Route path="/property/:id" element={<PropertyPage />} />
+      </Routes>
     </div>
   );
 }

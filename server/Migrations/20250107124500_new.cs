@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     /// <inheritdoc />
-    public partial class DbMigration1 : Migration
+    public partial class @new : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,11 +21,19 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Username = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PhoneNumber = table.Column<short>(type: "smallint", nullable: false),
                     Email = table.Column<string>(type: "varchar(255)", nullable: false, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Password = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Role = table.Column<string>(type: "enum('Customer','EstateOwner','Admin')", nullable: false, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ResetPasswordToken = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsEmailVerified = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    EmailVerificationToken = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -46,7 +54,9 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     Title = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PricePerNight = table.Column<double>(type: "double", nullable: false),
-                    EstateOwnerId = table.Column<int>(type: "int", nullable: true)
+                    EstateOwnerId = table.Column<int>(type: "int", nullable: true),
+                    Description = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -74,36 +84,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         .Annotation("MySql:IndexPrefixLength", new[] { 0, 0 });
                     table.ForeignKey(
                         name: "amenities_ibfk_1",
-                        column: x => x.EstateId,
-                        principalTable: "estate",
-                        principalColumn: "Id");
-                })
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
-
-            migrationBuilder.CreateTable(
-                name: "reservation",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    CustomerId = table.Column<int>(type: "int", nullable: true),
-                    EstateId = table.Column<int>(type: "int", nullable: true),
-                    CheckInDate = table.Column<DateOnly>(type: "date", nullable: true),
-                    CheckOutDate = table.Column<DateOnly>(type: "date", nullable: true),
-                    TotalPrice = table.Column<double>(type: "double", nullable: true),
-                    Status = table.Column<bool>(type: "tinyint(1)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PRIMARY", x => x.Id);
-                    table.ForeignKey(
-                        name: "reservation_ibfk_1",
-                        column: x => x.CustomerId,
-                        principalTable: "user",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "reservation_ibfk_2",
                         column: x => x.EstateId,
                         principalTable: "estate",
                         principalColumn: "Id");
@@ -147,7 +127,11 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    EstateId = table.Column<int>(type: "int", nullable: true),
+                    Name = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EstateId = table.Column<int>(type: "int", nullable: false),
                     RoomType = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     BedCount = table.Column<int>(type: "int", nullable: true),
@@ -160,7 +144,46 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         name: "room_ibfk_1",
                         column: x => x.EstateId,
                         principalTable: "estate",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+
+            migrationBuilder.CreateTable(
+                name: "reservation",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CustomerId = table.Column<int>(type: "int", nullable: true),
+                    EstateId = table.Column<int>(type: "int", nullable: true),
+                    CheckInDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    CheckOutDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    TotalPrice = table.Column<double>(type: "double", nullable: true),
+                    Status = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    RoomId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_reservation_room_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "room",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "reservation_ibfk_1",
+                        column: x => x.CustomerId,
+                        principalTable: "user",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "reservation_ibfk_2",
+                        column: x => x.EstateId,
+                        principalTable: "estate",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
@@ -211,6 +234,11 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 column: "EstateId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_reservation_RoomId",
+                table: "reservation",
+                column: "RoomId");
+
+            migrationBuilder.CreateIndex(
                 name: "AuthorId",
                 table: "review",
                 column: "AuthorId");
@@ -245,10 +273,10 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 name: "review");
 
             migrationBuilder.DropTable(
-                name: "room");
+                name: "reservation");
 
             migrationBuilder.DropTable(
-                name: "reservation");
+                name: "room");
 
             migrationBuilder.DropTable(
                 name: "estate");

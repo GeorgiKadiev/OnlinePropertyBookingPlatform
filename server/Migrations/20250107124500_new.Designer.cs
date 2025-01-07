@@ -12,8 +12,8 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    [Migration("20241219133649_ReservationDeleteUponEstateDelete")]
-    partial class ReservationDeleteUponEstateDelete
+    [Migration("20250107124500_new")]
+    partial class @new
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -116,16 +116,19 @@ namespace OnlinePropertyBookingPlatform.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly?>("CheckInDate")
+                    b.Property<DateOnly>("CheckInDate")
                         .HasColumnType("date");
 
-                    b.Property<DateOnly?>("CheckOutDate")
+                    b.Property<DateOnly>("CheckOutDate")
                         .HasColumnType("date");
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<int?>("EstateId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoomId")
                         .HasColumnType("int");
 
                     b.Property<bool?>("Status")
@@ -136,6 +139,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("RoomId");
 
                     b.HasIndex(new[] { "CustomerId" }, "CustomerId");
 
@@ -192,7 +197,7 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("EstateId")
+                    b.Property<int>("EstateId")
                         .HasColumnType("int");
 
                     b.Property<int?>("MaxGuests")
@@ -304,9 +309,17 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("reservation_ibfk_2");
 
+                    b.HasOne("OnlinePropertyBookingPlatform.Models.Room", "room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Customer");
 
                     b.Navigation("Estate");
+
+                    b.Navigation("room");
                 });
 
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.Review", b =>
@@ -332,6 +345,7 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         .WithMany("Rooms")
                         .HasForeignKey("EstateId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("room_ibfk_1");
 
                     b.Navigation("Estate");

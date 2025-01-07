@@ -1,43 +1,50 @@
-import * as React from "react";
-import MenuItem from "@mui/material/MenuItem";
-import MenuList from "@mui/material/MenuList";
-import Divider, { dividerClasses } from "@mui/material/Divider";
-import Box from "@mui/material/Box";
-import { useSelector } from "react-redux"; 
+import React from "react";
+import { MenuItem, MenuList, Divider, Box } from "@mui/material";
+import { useSelector } from "react-redux";
+
+const fetchReservations = async (url, token) => {
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch reservations");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching reservations:", error);
+    return null;
+  }
+};
 
 export default function MenuListComposition() {
-  const role = useSelector((state) => state.role); 
-  const userId = useSelector((state) => state.id); 
+  const role = useSelector((state) => state.role);
+  const userId = useSelector((state) => state.id);
   const token = useSelector((state) => state.token);
 
   const handleGetReservations = async () => {
+    let url;
+
     if (role === "Customer") {
-      try {
-        const response = await fetch(
-          `http://localhost:5076/api/reservation/user-reservations/${userId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, 
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch reservations");
-        }
-
-        const reservations = await response.json();
-        console.log("Reservations for Customer:", reservations);
-        
-      } catch (error) {
-        console.error("Error fetching reservations:", error);
-      }
+      url = `http://localhost:5076/api/reservation/user-reservations/${userId}`;
     } else if (role === "EstateOwner") {
-      console.log("No action for EstateOwner yet");
+      const estateId = ""; // Replace with actual estateId logic
+      url = `http://localhost:5076/api/estate/${estateId}/reservations`;
     } else {
       console.log("Invalid role");
+      return;
+    }
+
+    const reservations = await fetchReservations(url, token);
+
+    if (reservations) {
+      console.log(`Reservations for ${role}:`, reservations);
     }
   };
 
@@ -46,7 +53,7 @@ export default function MenuListComposition() {
       sx={{
         display: "flex",
         alignItems: "center",
-        [`& .${dividerClasses.root}`]: {
+        [`& .MuiDivider-root`]: {
           mx: 0.5,
         },
       }}

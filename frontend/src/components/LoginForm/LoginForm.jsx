@@ -12,7 +12,8 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { setToken } from "../../auth/tokenSlice";
+import { setToken } from "../../utils/tokenSlice";
+
 import "./LoginForm.css";
 
 export default function LogInForm() {
@@ -140,6 +141,7 @@ export default function LogInForm() {
       >
         Log In
       </Button>
+      <Link to="/forgot-password">Forgot password</Link>
       <Link to="/register">Register</Link>
     </Box>
   );

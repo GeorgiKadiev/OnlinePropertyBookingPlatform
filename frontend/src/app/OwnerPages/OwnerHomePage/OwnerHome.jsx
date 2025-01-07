@@ -1,5 +1,5 @@
 import NavBar from "../../../components/NavBar/NavBar";
-import PropertyList from "../../../components/ProperyList/PropertyList";
+import PropertyList from "../../../components/PropertyList/PropertyList";
 
 export default function OwnerHome({token}){
     return (

@@ -7,8 +7,8 @@ import "./PropertyList.css";
 export default function LandingPage() {
   const [cards, setCards] = useState([]); // State to hold the fetched data
   const navigate = useNavigate();
-  const userId = useSelector((state) => state.id); // Replace with your Redux state slice
-  const token = useSelector((state) => state.token); // Replace with your Redux state slice
+  const userId = useSelector((state) => state.id); 
+  const token = useSelector((state) => state.token); 
 
   // Fetch estates on component mount
   useEffect(() => {
@@ -30,7 +30,8 @@ export default function LandingPage() {
         }
 
         const data = await response.json();
-        setCards(data); // Update state with fetched data
+        console.log(data);
+        setCards(data);
       } catch (error) {
         console.error("Error fetching estates:", error);
       }
@@ -94,10 +95,10 @@ export default function LandingPage() {
             sx={{ width: "60%", padding: 2 }}
           >
             <Typography variant="h5" className="card-title">
-              {card.name} {/* Replace with API field for title */}
+              {card.title}
             </Typography>
             <Typography variant="body2" className="card-description">
-              {card.description || "No description available"} {/* Replace with API field */}
+              {card.description || "No description available"} 
             </Typography>
             <div className="card-buttons">
               <Button className="card-button" onClick={handleReservation}>

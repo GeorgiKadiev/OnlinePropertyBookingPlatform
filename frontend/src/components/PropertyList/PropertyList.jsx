@@ -1,55 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Card, CardContent, Typography, Button } from "@mui/material";
+import { useSelector } from "react-redux"; // To access userId and token from Redux
 import "./PropertyList.css";
 
-const cards = [
-  {
-    title: "Card 1",
-    description: "This is the description for card 1.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    title: "Card 2",
-    description: "This is the description for card 2.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    title: "Card 3",
-    description: "This is the description for card 3.",
-    image: "https://via.placeholder.com/150",
-  },
-];
-
 export default function LandingPage() {
+  const [cards, setCards] = useState([]); // State to hold the fetched data
   const navigate = useNavigate();
+  const userId = useSelector((state) => state.id); // Replace with your Redux state slice
+  const token = useSelector((state) => state.token); // Replace with your Redux state slice
+
+  // Fetch estates on component mount
+  useEffect(() => {
+    const fetchEstates = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5076/api/estate/owner-estates/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch estates");
+        }
+
+        const data = await response.json();
+        setCards(data); // Update state with fetched data
+      } catch (error) {
+        console.error("Error fetching estates:", error);
+      }
+    };
+
+    fetchEstates();
+  }, [userId, token]); // Re-run effect if userId or token changes
 
   const handleAdd = () => {
     navigate("/create-property");
   };
 
-  const handleReservaton = () => {
-    navigate("/owner-reservations");
-  }; 
-  
+  const handleReservation = () => {
+    navigate("/reservations");
+  };
+
   const handleReviews = () => {
-    navigate("/create-property");
+    navigate("/reviews");
+  };
+
+  const handleRemove = (estateId) => {
+    // Add logic to remove an estate
+    console.log("Remove estate with ID:", estateId);
   };
 
   return (
     <Box className="cards-container">
+      {/* Button to add a new property */}
       <Card className="card">
         <CardContent className="card-content" sx={{ width: "60%", padding: 2 }}>
           <div className="card-buttons">
             <Button className="card-button" onClick={handleAdd}>
-              Add new Propery
+              Add new Property
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {cards.map((card, index) => (
-        <Card className="card" key={index}>
+      {/* Render estate cards */}
+      {cards.map((card) => (
+        <Card className="card" key={card.id}>
           {/* Image on the left */}
           <Box
             sx={{
@@ -60,8 +82,8 @@ export default function LandingPage() {
             }}
           >
             <img
-              src={card.image}
-              alt={card.title}
+              src={card.imageUrl || "https://via.placeholder.com/150"} // Use card.imageUrl if available
+              alt={card.name}
               style={{ width: "100%", height: "auto", objectFit: "cover" }}
             />
           </Box>
@@ -72,17 +94,23 @@ export default function LandingPage() {
             sx={{ width: "60%", padding: 2 }}
           >
             <Typography variant="h5" className="card-title">
-              {card.title}
+              {card.name} {/* Replace with API field for title */}
             </Typography>
             <Typography variant="body2" className="card-description">
-              {card.description}
+              {card.description || "No description available"} {/* Replace with API field */}
             </Typography>
             <div className="card-buttons">
-              <Button className="card-button" onClick={handleReservaton}>
+              <Button className="card-button" onClick={handleReservation}>
                 Reservations
               </Button>
               <Button className="card-button" onClick={handleReviews}>
                 Reviews
+              </Button>
+              <Button
+                className="card-button"
+                onClick={() => handleRemove(card.id)} // Pass estate ID to remove
+              >
+                Remove estate
               </Button>
             </div>
           </CardContent>

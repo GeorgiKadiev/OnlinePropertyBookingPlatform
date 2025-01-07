@@ -31,6 +31,9 @@ public partial class PropertyManagementContext : DbContext
     public virtual DbSet<Room> Rooms { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<EstatePhoto> EstatesPhotos { get; set; }
+    public virtual DbSet<RoomPhoto> RoomPhotos { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -156,6 +159,24 @@ public partial class PropertyManagementContext : DbContext
             entity.Property(e => e.EmailVerificationToken);
             entity.Property(e => e.Password).HasMaxLength(255);
             entity.Property(e => e.Role).HasColumnType("enum('Customer','EstateOwner','Admin')");
+        });
+        modelBuilder.Entity<RoomPhoto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.ToTable("roomphotos");
+            entity.Property(e => e.Url);
+            entity.Property(e => e.RoomId);
+
+
+        });
+        modelBuilder.Entity<EstatePhoto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.ToTable("estatephotos");
+            entity.Property(e => e.Url);
+            entity.Property(e => e.EstateId);
+
+
         });
 
         OnModelCreatingPartial(modelBuilder);

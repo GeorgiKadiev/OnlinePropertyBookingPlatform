@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlinePropertyBookingPlatform;
 
@@ -11,9 +12,11 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    partial class PropertyManagementContextModelSnapshot : ModelSnapshot
+    [Migration("20250107134847_photostodb")]
+    partial class photostodb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,16 +51,19 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("EstateOwnerId")
+                    b.Property<int?>("EstateOwnerId")
                         .HasColumnType("int");
 
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
+
+                    b.Property<string>("PhotoUrls")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<double>("PricePerNight")
                         .HasColumnType("double");
@@ -225,6 +231,10 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("PhotoUrls")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("RoomType")
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
@@ -321,8 +331,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.HasOne("OnlinePropertyBookingPlatform.Models.User", "EstateOwner")
                         .WithMany("Estates")
                         .HasForeignKey("EstateOwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("estate_ibfk_1");
 
                     b.Navigation("EstateOwner");

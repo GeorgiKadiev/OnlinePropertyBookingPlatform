@@ -13,9 +13,9 @@ public partial class Estate
 
     public double PricePerNight { get; set; }
 
-    public int? EstateOwnerId { get; set; }
+    public int EstateOwnerId { get; set; }
 
-    public string? Description { get; set; }
+    public string Description { get; set; }
 
     public virtual ICollection<Amenity> Amenities { get; set; } = new List<Amenity>();
 

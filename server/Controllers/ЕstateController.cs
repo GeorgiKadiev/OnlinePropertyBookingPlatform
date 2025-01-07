@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
+using OnlinePropertyBookingPlatform.Models.DataModels;
 using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
 using OnlinePropertyBookingPlatform.Utility;
 
@@ -222,6 +223,32 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
                     }).ToListAsync();
             return Ok(users);
+
+
+        }
+        [Authorize(Roles ="EstateOwner")]
+        [HttpPost("{id}/add-photo")]
+        public async Task<ActionResult> SetEstatePhoto(int id, [FromBody] UrlModel model)
+        {
+            if(!_context.Estates.Any(e=>e.Id == id))
+            {
+                return BadRequest("Estate not found");
+            }
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            int userid = int.Parse(userIdClaim.Value);
+            var estates = _context.Estates.Where(e => e.Id == id);
+            var estateownerid = estates.First().EstateOwnerId;
+            if (estateownerid != userid)
+                return BadRequest("You don't have access to this");
+            var Photo = new EstatePhoto
+            {
+                Url = model.Url,
+                Id = id,
+            };
+
+            _context.EstatesPhotos.Add(Photo);
+            _context.SaveChanges();
+            return Ok();
 
 
         }

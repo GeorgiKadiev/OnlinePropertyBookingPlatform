@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlinePropertyBookingPlatform.Models;
+using OnlinePropertyBookingPlatform.Models.DataModels;
 using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
 using OnlinePropertyBookingPlatform.Utility;
 using System.Security.Cryptography.X509Certificates;
@@ -157,7 +158,36 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 .ToList();
             return Ok();
         }
+        [Authorize(Roles = "EstateOwner")]
+        [HttpPost("{estateId}/{ roomId}/add-photo")]
+        public async Task<ActionResult> SetEstatePhoto(int roomId,int estateId, [FromBody] UrlModel model)
+        {
+            if (!_context.Rooms.Any(e => e.Id == roomId))
+            {
+                return BadRequest("Room not found");
+            }
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            int userid = int.Parse(userIdClaim.Value);
+            var rooms = _context.Rooms.Where(e => e.Id == roomId);
+            if(!_context.Estates.Any(e=>e.Id ==estateId))
+            {
+                return BadRequest("Estate doesn't exist");
+            }
+            var estateownerid = _context.Estates.First(e => e.Id == estateId).EstateOwnerId;
+            if (estateownerid != userid)
+                return BadRequest("You don't have access to this");
+            var Photo = new RoomPhoto
+            {
+                Url = model.Url,
+                Id = roomId,
+            };
 
+            _context.RoomPhotos.Add(Photo);
+            _context.SaveChanges();
+            return Ok();
+
+
+        }
 
 
     }

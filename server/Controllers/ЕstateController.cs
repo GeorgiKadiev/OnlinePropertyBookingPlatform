@@ -197,18 +197,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        [HttpGet("owner-estates/{id}")]
         [Authorize]
+        [HttpGet("owner-estates/{id}")]
         public async Task<ActionResult<List<EstateDto>>> GetOwnerEstates(int id)
         {
             var user = _context.Users.FirstOrDefault(u => u.Id == id);
             if (user == null)
             {
                 return BadRequest("Estate owner not found");
-            }
-            if(user.Role != "EstateOwner")
-            {
-                return BadRequest();
             }
             var users = await _context.Estates
                     .Where(e=>e.EstateOwnerId==id)

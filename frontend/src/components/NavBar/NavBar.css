@@ -3,7 +3,7 @@
 }
 
 .navbar {
-  /* background-color: #d21985; */
+  background-color: #fbc9ff;
   display: flex; /* Flexbox layout */
   justify-content: space-between;
   padding: 0 16px;

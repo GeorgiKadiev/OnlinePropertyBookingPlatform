@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 function Success() {
   return (
     <div>
-      <h1>Successful!</h1>
-      <Link to="/">Home Page</Link>
+      <h1>Successfull creating estate!</h1>
+      <Link to="/landing-page">Home Page</Link>
     </div>
   );
 }

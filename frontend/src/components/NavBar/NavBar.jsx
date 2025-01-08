@@ -62,7 +62,7 @@ export default function NavBar() {
       dispatch(clearToken()); 
       dispatch(clearRole()); 
       setState({ right: false });
-      navigate("/success");
+      navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
       alert("Error logging out. Please try again.");

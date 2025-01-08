@@ -6,6 +6,7 @@ import "./PropertyList.css";
 
 export default function LandingPage() {
   const [cards, setCards] = useState([]); // State to hold the fetched data
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
   const userId = useSelector((state) => state.id); 
   const token = useSelector((state) => state.token); 
@@ -38,7 +39,11 @@ export default function LandingPage() {
     };
 
     fetchEstates();
-  }, [userId, token]); // Re-run effect if userId or token changes
+  }, [userId, token, refreshKey]); // Re-run effect if ...
+
+  const refreshData = () => {
+    setRefreshKey((prev) => prev + 1); // Increment to trigger re-fetch
+  };
 
   const handleAdd = () => {
     navigate("/create-property");
@@ -54,6 +59,8 @@ export default function LandingPage() {
 
   const handleRemove = (estateId) => {
     // Add logic to remove an estate
+    refreshData(); // Trigger re-fetch
+
     console.log("Remove estate with ID:", estateId);
   };
 

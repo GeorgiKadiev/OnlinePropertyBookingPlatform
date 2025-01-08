@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -9,6 +10,11 @@ import NavBar from "../../../components/NavBar/NavBar";
 import "./LandingPage.css";
 
 export default function UserLanding() {
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    navigate("/results")
+  }
   return (
     <div>
     <NavBar/>
@@ -49,6 +55,7 @@ export default function UserLanding() {
             borderRadius: 1,
           }}
           aria-label="search"
+          onClick={handleSearch}
         >
           <SearchIcon />
         </IconButton>

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Card, CardContent, Typography, Button } from "@mui/material";
-import { useSelector } from "react-redux"; // To access userId and token from Redux
+import { useSelector } from "react-redux";
+import DeleteConfirmationDialog from "../DeleteConfirmationDialog/DeleteConfirmationDialog";
 import "./PropertyList.css";
 
 export default function LandingPage() {
-  const [cards, setCards] = useState([]); // State to hold the fetched data
+  const [cards, setCards] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
-  const userId = useSelector((state) => state.id); 
-  const token = useSelector((state) => state.token); 
+  const userId = useSelector((state) => state.id);
+  const token = useSelector((state) => state.token);
 
-  // Fetch estates on component mount
   useEffect(() => {
     const fetchEstates = async () => {
       try {
@@ -31,7 +31,6 @@ export default function LandingPage() {
         }
 
         const data = await response.json();
-        console.log(data);
         setCards(data);
       } catch (error) {
         console.error("Error fetching estates:", error);
@@ -39,91 +38,106 @@ export default function LandingPage() {
     };
 
     fetchEstates();
-  }, [userId, token, refreshKey]); // Re-run effect if ...
+  }, [userId, token, refreshKey]);
 
   const refreshData = () => {
-    setRefreshKey((prev) => prev + 1); // Increment to trigger re-fetch
+    setRefreshKey((prev) => prev + 1);
   };
 
-  const handleAdd = () => {
-    navigate("/create-property");
-  };
+  const handleRemove = async (estateId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/estate/${estateId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  const handleReservation = () => {
-    navigate("/reservations");
-  };
+      if (!response.ok) {
+        throw new Error(`Failed to delete estate with ID: ${estateId}`);
+      }
 
-  const handleReviews = () => {
-    navigate("/reviews");
-  };
-
-  const handleRemove = (estateId) => {
-    // Add logic to remove an estate
-    refreshData(); // Trigger re-fetch
-
-    console.log("Remove estate with ID:", estateId);
+      console.log(`Estate with ID: ${estateId} successfully deleted.`);
+      refreshData();
+    } catch (error) {
+      console.error("Error deleting estate:", error);
+    }
   };
 
   return (
     <Box className="cards-container">
-      {/* Button to add a new property */}
       <Card className="card">
         <CardContent className="card-content" sx={{ width: "60%", padding: 2 }}>
           <div className="card-buttons">
-            <Button className="card-button" onClick={handleAdd}>
+            <Button
+              className="card-button"
+              onClick={() => navigate("/create-property")}
+            >
               Add new Property
             </Button>
           </div>
         </CardContent>
       </Card>
+      {cards.length === 0 ? (
+        <Box sx={{ textAlign: "center", marginTop: 4 }}>
+          <Typography variant="h6" color="textSecondary">
+            You have no estates. Create one to get started!
+          </Typography>
+        </Box>
+      ) : (
+        cards.map((card) => (
+          <Card className="card" key={card.id}>
+            <Box
+              sx={{
+                width: "15%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <img
+                src={card.imageUrl || "https://via.placeholder.com/150"}
+                alt={card.name}
+                style={{ width: "100%", height: "auto", objectFit: "cover" }}
+              />
+            </Box>
 
-      {/* Render estate cards */}
-      {cards.map((card) => (
-        <Card className="card" key={card.id}>
-          {/* Image on the left */}
-          <Box
-            sx={{
-              width: "15%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <img
-              src={card.imageUrl || "https://via.placeholder.com/150"} // Use card.imageUrl if available
-              alt={card.name}
-              style={{ width: "100%", height: "auto", objectFit: "cover" }}
-            />
-          </Box>
-
-          {/* Content on the right */}
-          <CardContent
-            className="card-content"
-            sx={{ width: "60%", padding: 2 }}
-          >
-            <Typography variant="h5" className="card-title">
-              {card.title}
-            </Typography>
-            <Typography variant="body2" className="card-description">
-              {card.description || "No description available"} 
-            </Typography>
-            <div className="card-buttons">
-              <Button className="card-button" onClick={handleReservation}>
-                Reservations
-              </Button>
-              <Button className="card-button" onClick={handleReviews}>
-                Reviews
-              </Button>
-              <Button
-                className="card-button"
-                onClick={() => handleRemove(card.id)} // Pass estate ID to remove
-              >
-                Remove estate
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            <CardContent
+              className="card-content"
+              sx={{ width: "60%", padding: 2 }}
+            >
+              <Typography variant="h5" className="card-title">
+                {card.title}
+              </Typography>
+              <Typography variant="body2" className="card-description">
+                {card.description || "No description available"}
+              </Typography>
+              <div className="card-buttons">
+                <Button
+                  className="card-button"
+                  onClick={() => navigate("/reservations")}
+                >
+                  Reservations
+                </Button>
+                <Button
+                  className="card-button"
+                  onClick={() => navigate("/reviews")}
+                >
+                  Reviews
+                </Button>
+                <DeleteConfirmationDialog
+                  estateId={card.id}
+                  onConfirm={handleRemove} // Pass the remove handler
+                />
+              </div>
+            </CardContent>
+          </Card>
+        ))
+      )}
     </Box>
   );
 }

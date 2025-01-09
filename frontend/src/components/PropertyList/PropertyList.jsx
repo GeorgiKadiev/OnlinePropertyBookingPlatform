@@ -125,7 +125,7 @@ export default function LandingPage() {
                 </Button>
                 <Button
                   className="card-button"
-                  onClick={() => navigate("/reviews")}
+                  onClick={() => navigate(`/reviews/${card.id}`)}
                 >
                   Reviews
                 </Button>

@@ -7,20 +7,15 @@ import {
   Grid,
   Paper,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
 } from "@mui/material";
-import "./PropertyPage.css"; // Import the CSS file
+import Reviews from "../../../components/EstateReviews/EstateReviews";
+import "./PropertyPage.css";
 
 export default function PropertyPage() {
   const { id } = useParams(); // Get the property ID from URL parameter
   const [property, setProperty] = useState(null); // State to store property data
-  const [reviews, setReviews] = useState([]); // State to store reviews
   const [loading, setLoading] = useState(true); // State to handle loading state
-  const [reviewsLoading, setReviewsLoading] = useState(true); // State for review loading
   const [error, setError] = useState(null); // State to handle errors during fetching
-  const [reviewsError, setReviewsError] = useState(null); // State to handle review fetch errors
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -39,27 +34,6 @@ export default function PropertyPage() {
     };
 
     fetchProperty();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5076/api/review/estate-reviews/${id}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch reviews");
-        }
-        const data = await response.json();
-        setReviews(data);
-        setReviewsLoading(false);
-      } catch (err) {
-        setReviewsError(err.message);
-        setReviewsLoading(false);
-      }
-    };
-
-    fetchReviews();
   }, [id]);
 
   if (loading) {
@@ -125,31 +99,7 @@ export default function PropertyPage() {
       </Box>
 
       {/* Reviews Section */}
-      <Box className="reviews-section">
-        <Typography variant="h5" className="reviews-title">
-          Reviews
-        </Typography>
-        {reviewsLoading ? (
-          <CircularProgress />
-        ) : reviewsError ? (
-          <Typography color="error">Error: {reviewsError}</Typography>
-        ) : reviews.length > 0 ? (
-          <List className="reviews-list">
-            {reviews.map((review) => (
-              <ListItem key={review.id} className="review-item">
-                <ListItemText
-                  primary={`User: ${review.username}`}
-                  secondary={review.comment}
-                />
-              </ListItem>
-            ))}
-          </List>
-        ) : (
-          <Typography className="no-reviews">
-            No reviews for this property.
-          </Typography>
-        )}
-      </Box>
+      <Reviews estateId={id} />
     </Box>
   );
 }

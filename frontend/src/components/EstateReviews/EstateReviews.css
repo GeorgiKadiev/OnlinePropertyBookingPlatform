@@ -1,0 +1,30 @@
+.reviews-container {
+    margin-top: 32px;
+  }
+  
+  .reviews-title {
+    margin-bottom: 16px;
+  }
+  
+  .reviews-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .review-item {
+    margin-bottom: 8px;
+  }
+  
+  .no-reviews {
+    color: #888;
+    font-style: italic;
+  }
+  
+  .reviews-loading,
+  .reviews-error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 16px;
+  }
+  

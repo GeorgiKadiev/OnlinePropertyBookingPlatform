@@ -13,6 +13,7 @@ import PropertyPage from "./app/UserPages/PropertyPage/PropertyPage";
 import CreateProperyPage from "./app/OwnerPages/CreatePropertyPage/CreateProperyPage";
 import ReseravtionsPage from "./app/OwnerPages/ReservationsPage/ReservationsPage";
 import ForgotPassForm from "./components/ForgotPassForm/ForgotPassForm";
+import ReviewsPage from "./app/OwnerPages/ReviewsPage/ReviewsPage";
 
 const theme = createTheme({
   typography: {
@@ -68,6 +69,7 @@ function App() {
           <Route path="/create-property" element={<CreateProperyPage />} />
           <Route path="/reservations" element={<ReseravtionsPage />} />
           <Route path="/forgot-password" element={<ForgotPassForm />} />
+          <Route path="/reviews/:id" element={<ReviewsPage />} />
         </Routes>
       </div>
     </ThemeProvider>

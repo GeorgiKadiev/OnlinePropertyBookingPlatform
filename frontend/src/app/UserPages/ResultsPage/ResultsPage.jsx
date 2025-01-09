@@ -24,6 +24,7 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true); // State for loading state
 
   const handleMoreInfo = (id) => {
+    console.log(id);
     navigate(`/property/${id}`);
   };
 
@@ -31,7 +32,7 @@ export default function ResultsPage() {
     const fetchEstates = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5076/api/estate/get-all-estates`,
+          `http://localhost:5076/api/estate/get-all-estates`, //usually admin only but for testing 
           {
             method: "GET",
             headers: {
@@ -128,7 +129,7 @@ export default function ResultsPage() {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={handleMoreInfo}
+                    onClick={() => handleMoreInfo(property.id)}
                   >
                     More Info
                   </Button>

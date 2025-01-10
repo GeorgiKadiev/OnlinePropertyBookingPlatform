@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Card, CardContent, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Menu,
+  MenuItem,
+} from "@mui/material";
 import { useSelector } from "react-redux";
 import DeleteConfirmationDialog from "../DeleteConfirmationDialog/DeleteConfirmationDialog";
 import "./PropertyList.css";
 
 export default function LandingPage() {
   const [cards, setCards] = useState([]);
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
   const userId = useSelector((state) => state.id);
   const token = useSelector((state) => state.token);
+  const open = Boolean(anchorEl);
 
   useEffect(() => {
     const fetchEstates = async () => {
@@ -44,6 +54,18 @@ export default function LandingPage() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleAddRoom = () => {
+    setAnchorEl(null);
+  };
+  const handleAddPhotos = () => {
+    setAnchorEl(null);
+  };
   const handleRemove = async (estateId) => {
     try {
       const response = await fetch(
@@ -117,6 +139,27 @@ export default function LandingPage() {
                 {card.description || "No description available"}
               </Typography>
               <div className="card-buttons">
+                <Button
+                  className="card-button"
+                  aria-controls={open ? "basic-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? "true" : undefined}
+                  onClick={handleClick}
+                >
+                  Edit
+                </Button>
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  MenuListProps={{
+                    "aria-labelledby": "basic-button",
+                  }}
+                >
+                  <MenuItem onClick={handleAddRoom}>Add room</MenuItem>
+                  <MenuItem onClick={handleAddPhotos}>Add photos</MenuItem>
+                </Menu>
                 <Button
                   className="card-button"
                   onClick={() => navigate("/reservations")}

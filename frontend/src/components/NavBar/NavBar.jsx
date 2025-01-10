@@ -21,7 +21,6 @@ export default function NavBar() {
   const rgbColor = "rgb(88, 19, 93)";
   const token = useSelector((state) => state.token);
   const userRole = useSelector((state) => state.role);
-  console.log(userRole);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [state, setState] = useState({

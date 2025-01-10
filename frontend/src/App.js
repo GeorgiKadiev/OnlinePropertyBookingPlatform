@@ -14,6 +14,7 @@ import CreateProperyPage from "./app/OwnerPages/CreatePropertyPage/CreatePropery
 import ReseravtionsPage from "./app/OwnerPages/ReservationsPage/ReservationsPage";
 import ForgotPassForm from "./components/ForgotPassForm/ForgotPassForm";
 import ReviewsPage from "./app/OwnerPages/ReviewsPage/ReviewsPage";
+import SuccessPassword from "./components/Success/SuccessPassword";
 
 const theme = createTheme({
   typography: {
@@ -65,6 +66,7 @@ function App() {
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/successregister" element={<SuccessRegister />} />
           <Route path="/success" element={<Success />} />
+          <Route path="/successpassword" element={<SuccessPassword />} />
           <Route path="/property/:id" element={<PropertyPage />} />
           <Route path="/create-property" element={<CreateProperyPage />} />
           <Route path="/reservations" element={<ReseravtionsPage />} />

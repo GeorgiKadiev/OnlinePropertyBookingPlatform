@@ -34,6 +34,9 @@ public partial class PropertyManagementContext : DbContext
 
     public virtual DbSet<Property> Properties { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -53,6 +56,24 @@ public partial class PropertyManagementContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("amenities_ibfk_1");
         });
+
+            modelBuilder.Entity<Notification>(entity =>
+{
+    entity.HasKey(e => e.Id); 
+
+    entity.ToTable("notification"); 
+
+    entity.Property(e => e.Title).HasMaxLength(255);
+    entity.Property(e => e.Message).HasColumnType("text"); 
+    entity.Property(e => e.Timestamp).HasColumnType("datetime"); 
+
+    entity.HasOne(d => d.User) 
+        .WithMany(p => p.Notifications) 
+        .HasForeignKey(d => d.UserId) 
+        .OnDelete(DeleteBehavior.Cascade) 
+        .HasConstraintName("notification_ibfk_1");
+});
+
 
         modelBuilder.Entity<Estate>(entity =>
         {

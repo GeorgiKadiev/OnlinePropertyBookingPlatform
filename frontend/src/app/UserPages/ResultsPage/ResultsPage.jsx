@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -14,44 +15,54 @@ import FiltersSideBar from "../../../components/FiltersSideBar/FiltersSideBar";
 import NavBar from "../../../components/NavBar/NavBar";
 import "./ResultsPage.css";
 
-const propertyData = [
-  {
-    id: 1,
-    title: "Cozy Apartment in City Center",
-    price: "$120/night",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 2,
-    title: "Luxury Villa with Sea View",
-    price: "$350/night",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 3,
-    title: "Modern Studio near Park",
-    price: "$90/night",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 4,
-    title: "Modern Studio near Park",
-    price: "$90/night",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 5,
-    title: "Modern Studio near Park",
-    price: "$90/night",
-    image: "https://via.placeholder.com/150",
-  },
-];
-
 export default function ResultsPage() {
   const navigate = useNavigate();
+  const token = useSelector((state) => state.token); // Get token from Redux
+  const userId = useSelector((state) => state.id); // Get token from Redux
+
+  const [propertyData, setPropertyData] = useState([]); // State for holding fetched data
+  const [loading, setLoading] = useState(true); // State for loading state
+
   const handleMoreInfo = (id) => {
+    console.log(id);
     navigate(`/property/${id}`);
   };
+
+  useEffect(() => {
+    const fetchEstates = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5076/api/estate/get-all-estates`, //usually admin only but for testing 
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch estates");
+        }
+
+        const data = await response.json();
+        console.log(data);
+        setPropertyData(data); // Store fetched data in state
+        setLoading(false); // Set loading to false once data is fetched
+      } catch (error) {
+        console.error("Error fetching estates:", error);
+        setLoading(false); // Set loading to false if there's an error
+      }
+    };
+
+    fetchEstates();
+  }, [userId, token]);
+
+  if (loading) {
+    return <div>Loading...</div>; // Show loading text until data is fetched
+  }
+
   return (
     <div>
       <NavBar />
@@ -98,7 +109,7 @@ export default function ResultsPage() {
                   {/* Property Image */}
                   <img
                     src={property.image}
-                    alt={property.title}
+                    // alt={property.title}
                     style={{
                       width: "150px",
                       height: "100px",
@@ -109,15 +120,16 @@ export default function ResultsPage() {
                   {/* Property Details */}
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="h6">{property.title}</Typography>
+                    <Typography variant="h10">{property.description}</Typography>
                     <Typography variant="body1" color="text.secondary">
-                      {property.price}
+                      {property.pricePerNight}
                     </Typography>
                   </Box>
                   {/* More Info Button */}
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={handleMoreInfo}
+                    onClick={() => handleMoreInfo(property.id)}
                   >
                     More Info
                   </Button>

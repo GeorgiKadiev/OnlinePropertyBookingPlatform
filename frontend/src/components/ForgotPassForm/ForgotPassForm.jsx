@@ -67,7 +67,7 @@ export default function ForgotPassForm() {
       }
 
       setError("");
-      navigate("/successregister"); //to add new success page for reset password
+      navigate("/successpassword"); 
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
         console.log("Reset password successful", data);

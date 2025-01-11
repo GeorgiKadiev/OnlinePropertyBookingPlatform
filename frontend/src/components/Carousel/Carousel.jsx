@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Carousel } from "react-responsive-carousel";
 import { Paper, Typography, Box, Button, IconButton } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -7,10 +8,12 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 const accountData = [
   {
+    id: 1,
     amount: 5000,
     accountNum: "6769649ILG",
   },
   {
+    id: 2,
     amount: 0,
     accountNum: "832873287h",
   },
@@ -23,6 +26,12 @@ const numAccounts = accountData.length;
 const showMultipleAccounts = numAccounts >= 3; // Display 3 slides only if there are 3 or more items ??NOT WORKING
 
 function CarouselProperties() {
+  const navigate = useNavigate();
+
+  const handleInfo = (id) => {
+    navigate(`/property/${id}`);
+  };
+
   const [showMultipleAccounts, setShowMultipleAccounts] = useState(true);
 
   useEffect(() => {
@@ -106,7 +115,11 @@ function CarouselProperties() {
                   <strong>Price per night:</strong> {account.accountNum}
                 </Typography>
                 <Box mt={2}>
-                  <Button variant="contained" color="primary" sx={{ mr: 1 }}>
+                  <Button
+                    variant="contained"
+                    sx={{ mr: 1 }}
+                    onClick={() => handleInfo(account.id)}
+                  >
                     More info
                   </Button>
                 </Box>

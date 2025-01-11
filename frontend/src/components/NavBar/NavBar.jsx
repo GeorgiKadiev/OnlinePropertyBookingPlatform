@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Home } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { clearToken } from '../../utils/tokenSlice';
+import { clearToken } from "../../utils/tokenSlice";
 import {
   Box,
   IconButton,
@@ -18,15 +18,14 @@ import "./NavBar.css";
 import { clearRole } from "../../utils/roleSlice";
 
 export default function NavBar() {
+  const rgbColor = "rgb(88, 19, 93)";
   const token = useSelector((state) => state.token);
-  const userRole = useSelector((state) => state.role); 
-  console.log(userRole);
+  const userRole = useSelector((state) => state.role);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [state, setState] = useState({
     right: false,
   });
-
 
   const menuItems = [
     { text: "View Reservations", showFor: "Customer" },
@@ -59,10 +58,10 @@ export default function NavBar() {
       }
 
       console.log("Logged out successfully");
-      dispatch(clearToken()); 
-      dispatch(clearRole()); 
+      dispatch(clearToken());
+      dispatch(clearRole());
       setState({ right: false });
-      navigate("/success");
+      navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
       alert("Error logging out. Please try again.");
@@ -88,7 +87,7 @@ export default function NavBar() {
   };
 
   const handleHome = () => {
-    navigate("/landing-page")
+    navigate("/landing-page");
   };
 
   const list = () => (
@@ -97,26 +96,29 @@ export default function NavBar() {
       onClick={toggleDrawer("right", false)}
       onKeyDown={toggleDrawer("right", false)}
     >
-       <List>
-      {menuItems
-        .filter(
-          (item) =>
-            item.showFor === "All" || item.showFor === userRole // Filter based on user type
-        )
-        .map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton onClick={() => handleMenuClick(item.text)}>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-    </List>
+      <List>
+        {menuItems
+          .filter(
+            (item) => item.showFor === "All" || item.showFor === userRole // Filter based on user type
+          )
+          .map((item) => (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton onClick={() => handleMenuClick(item.text)}>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+      </List>
     </Box>
   );
 
   return (
     <Box className="navbar">
-      <Button startIcon={<Home />} onClick={handleHome}>
+      <Button
+        startIcon={<Home sx={{ color: rgbColor }} />}
+        sx={{ color: rgbColor }}
+        onClick={handleHome}
+      >
         Home
       </Button>
       <div>

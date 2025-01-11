@@ -18,32 +18,68 @@ import "./ResultsPage.css";
 export default function ResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const token = useSelector((state) => state.token); // Get token from Redux
-  const userId = useSelector((state) => state.id); // Get token from Redux
   const [filters, setFilters] = useState({});
+  const [locationEstate, setLocationEstate] = useState("");
+  const [propertyData, setPropertyData] = useState([]);
+  const [error, setError] = useState(null);
 
-  const [propertyData, setPropertyData] = useState([]); // State for holding fetched data
-  const [loading, setLoading] = useState(true); // State for loading state
-
+  // Navigate to property details page
   const handleMoreInfo = (id) => {
-    console.log(id);
     navigate(`/property/${id}`);
   };
 
+  // Handle Search
+  const handleSearch = async (e) => {
+    e.preventDefault();
+
+    if (locationEstate.trim()) {
+      const searchFilters = { location: locationEstate };
+
+      try {
+        const response = await fetch(
+          "http://localhost:5076/api/estate/filter",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(searchFilters),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch estates");
+        }
+
+        const data = await response.json();
+        setPropertyData(data);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        setPropertyData([]);
+      }
+    } else {
+      // alert("Please enter a location to search.");
+    }
+  };
+
   useEffect(() => {
-    // Extract query params from URL
     const queryParams = new URLSearchParams(location.search);
 
-    const filters = {
-      location: queryParams.get("location"),
-      minPrice: parseFloat(queryParams.get("startDate")) || null,
-      maxPrice: parseFloat(queryParams.get("endDate")) || null,
-      numberOfPersons: parseInt(queryParams.get("numberOfPeople")) || null,
+    const initialFilters = {
+      location: queryParams.get("location") || "",
+      minPrice: queryParams.get("startDate")
+        ? parseFloat(queryParams.get("startDate"))
+        : null,
+      maxPrice: queryParams.get("endDate")
+        ? parseFloat(queryParams.get("endDate"))
+        : null,
+      numberOfPersons: queryParams.get("numberOfPeople")
+        ? parseInt(queryParams.get("numberOfPeople"))
+        : null,
     };
 
-    setFilters(filters);
-    console.log(filters);
+    setFilters(initialFilters);
 
     const fetchEstates = async () => {
       try {
@@ -54,7 +90,7 @@ export default function ResultsPage() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(filters),
+            body: JSON.stringify(initialFilters),
           }
         );
 
@@ -63,20 +99,19 @@ export default function ResultsPage() {
         }
 
         const data = await response.json();
-        console.log(data);
-        setPropertyData(data); // Store fetched data in state
-        setLoading(false); // Set loading to false once data is fetched
-      } catch (error) {
-        console.error("Error fetching estates:", error);
-        setLoading(false); // Set loading to false if there's an error
+        setPropertyData(data);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        setPropertyData([]);
       }
     };
 
     fetchEstates();
-  }, [userId, token]);
+  }, [location.search]);
 
-  if (loading) {
-    return <div>Loading...</div>; // Show loading text until data is fetched
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
   return (
@@ -89,10 +124,10 @@ export default function ResultsPage() {
         {/* Main Results Section */}
         <div className="main-info">
           <Box className="results">
-            {/* Search Bar */}
             <Box
               component="form"
               className="search-bar"
+              onSubmit={handleSearch}
               sx={{
                 p: "2px 4px",
                 display: "flex",
@@ -103,56 +138,61 @@ export default function ResultsPage() {
                 sx={{ ml: 1, flex: 1 }}
                 placeholder="Search for location"
                 inputProps={{ "aria-label": "search for location" }}
+                value={locationEstate}
+                onChange={(e) => setLocationEstate(e.target.value)}
               />
-              <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
+              <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
                 <SearchIcon />
               </IconButton>
             </Box>
 
             {/* Property List */}
             <Stack className="properties-list" spacing={2}>
-              {propertyData.map((property) => (
-                <Paper
-                  key={property.id}
-                  className="property-item"
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                    padding: 2,
-                  }}
-                >
-                  {/* Property Image */}
-                  <img
-                    src={property.image}
-                    // alt={property.title}
-                    style={{
-                      width: "150px",
-                      height: "100px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
+              {propertyData.length > 0 ? (
+                propertyData.map((property) => (
+                  <Paper
+                    key={property.id}
+                    className="property-item"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      padding: 2,
                     }}
-                  />
-                  {/* Property Details */}
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6">{property.title}</Typography>
-                    <Typography variant="h10">
-                      {property.description}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      {property.pricePerNight}
-                    </Typography>
-                  </Box>
-                  {/* More Info Button */}
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleMoreInfo(property.id)}
                   >
-                    More Info
-                  </Button>
-                </Paper>
-              ))}
+                    <img
+                      src={property.image}
+                      alt={property.title}
+                      style={{
+                        width: "150px",
+                        height: "100px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h6">{property.title}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {property.description}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        ${property.pricePerNight} per night
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleMoreInfo(property.id)}
+                    >
+                      More Info
+                    </Button>
+                  </Paper>
+                ))
+              ) : (
+                <Typography>
+                  No properties found for the given filters.
+                </Typography>
+              )}
             </Stack>
           </Box>
         </div>

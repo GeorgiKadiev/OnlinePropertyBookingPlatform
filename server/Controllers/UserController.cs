@@ -396,8 +396,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok("Password reset link sent to your email. " + resetToken);
         }
 
+        [HttpGet("reset-password/{token}")]
+        public IActionResult ResetPasswordGET(string token)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
+            if (user == null)
+            {
+                return BadRequest("Invalid token");
+            }
+            return Ok();
+
+        }
         [HttpPost("reset-password/{token}")]
-        public IActionResult ResetPassword(string token,PasswordModel model)
+        public IActionResult ResetPasswordPOST(string token, PasswordModel model)
         {
             var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
             if (user == null)
@@ -407,15 +418,16 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             if (model.newPassword1 != model.newPassword2)
                 return BadRequest("Passwords don't match");
-            
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(model.newPassword1);
             user.ResetPasswordToken = null;
             _context.Update(user);
             _context.SaveChanges();
 
-            return Ok("Password reset successfully."+ token);
+            return Ok("Password reset successfully." + token);
 
         }
+
 
         [HttpGet("get-all-users")]
         [Authorize(Roles = "Admin")]

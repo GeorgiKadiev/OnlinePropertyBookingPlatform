@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import {
   Box,
   Typography,
+  Rating,
   CircularProgress,
   List,
   ListItem,
@@ -62,18 +63,23 @@ export default function Reviews() {
       {reviews.length > 0 ? (
         <List className="reviews-list">
           {reviews.map((review) => (
-            <ListItem key={review.id} className="review-item">
-              <ListItemText
-                primary={`User: ${review.username}`}
-                secondary={review.comment}
-              />
-            </ListItem>
+            <Box className="review-item-container" key={review.id}>
+              <ListItem className="review-item">
+                <ListItemText secondary={review.comment} />
+              </ListItem>
+              <Box sx={{ "& > legend": { mt: 2 } }} className="review-rating">
+                <Typography component="legend">Rating</Typography>
+                <Rating name="read-only" value={review.rating} readOnly />
+              </Box>
+            </Box>
           ))}
         </List>
       ) : (
-        <Typography className="no-reviews">
-          No reviews available for this property.
-        </Typography>
+        <Box className="no-reviews-container">
+          <Typography variant="h6" className="no-reviews-message">
+            No reviews available for this property.
+          </Typography>
+        </Box>
       )}
     </Box>
   );

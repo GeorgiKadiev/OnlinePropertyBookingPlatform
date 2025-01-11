@@ -32,11 +32,76 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Property<string>("AmenityName")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.HasKey("EstateId", "AmenityName")
                         .HasName("PRIMARY")
                         .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
                     b.ToTable("amenities", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            EstateId = 1,
+                            AmenityName = "Air Conditioning",
+                            Id = 1
+                        },
+                        new
+                        {
+                            EstateId = 1,
+                            AmenityName = "Wi-Fi",
+                            Id = 2
+                        },
+                        new
+                        {
+                            EstateId = 2,
+                            AmenityName = "Parking",
+                            Id = 3
+                        },
+                        new
+                        {
+                            EstateId = 3,
+                            AmenityName = "Swimming Pool",
+                            Id = 4
+                        },
+                        new
+                        {
+                            EstateId = 4,
+                            AmenityName = "Eco-Friendly",
+                            Id = 5
+                        },
+                        new
+                        {
+                            EstateId = 5,
+                            AmenityName = "DigitalNomad-Friendly",
+                            Id = 6
+                        },
+                        new
+                        {
+                            EstateId = 6,
+                            AmenityName = "Hair Dryer",
+                            Id = 7
+                        },
+                        new
+                        {
+                            EstateId = 7,
+                            AmenityName = "Fridge",
+                            Id = 8
+                        },
+                        new
+                        {
+                            EstateId = 8,
+                            AmenityName = "Smoker-Friendly",
+                            Id = 9
+                        },
+                        new
+                        {
+                            EstateId = 9,
+                            AmenityName = "Fitness Centre",
+                            Id = 10
+                        });
                 });
 
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.Estate", b =>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Card,
@@ -14,13 +14,29 @@ import DeleteConfirmationDialog from "../DeleteConfirmationDialog/DeleteConfirma
 import "./PropertyList.css";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const location = useLocation(); // Access location to get state
+
   const [cards, setCards] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  const navigate = useNavigate();
+  const [menuState, setMenuState] = useState({});
+  const [successMessage, setSuccessMessage] = useState(null);
+
   const userId = useSelector((state) => state.id);
   const token = useSelector((state) => state.token);
   const open = Boolean(anchorEl);
+
+  // Set success message if available in location state
+  useEffect(() => {
+    if (location.state && location.state.successMessage) {
+      setSuccessMessage(location.state.successMessage);
+
+      // Clear the success message after 5 seconds
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const fetchEstates = async () => {
@@ -54,11 +70,12 @@ export default function LandingPage() {
     setRefreshKey((prev) => prev + 1);
   };
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (event, cardId) => {
+    setMenuState({ [cardId]: event.currentTarget });
   };
-  const handleClose = () => {
-    setAnchorEl(null);
+
+  const handleClose = (cardId) => {
+    setMenuState((prevState) => ({ ...prevState, [cardId]: null }));
   };
   const handleAddRoom = (estateId) => {
     setAnchorEl(null);
@@ -94,6 +111,13 @@ export default function LandingPage() {
 
   return (
     <Box className="cards-container">
+      {successMessage && (
+        <Box sx={{ textAlign: "center", marginBottom: 2 }}>
+          <Typography variant="h6" color="success.main">
+            {successMessage}
+          </Typography>
+        </Box>
+      )}
       <Card className="card">
         <CardContent className="card-content" sx={{ width: "60%", padding: 2 }}>
           <div className="card-buttons">
@@ -142,21 +166,21 @@ export default function LandingPage() {
               </Typography>
               <div className="card-buttons">
                 <Button
-                  className="card-button"
-                  aria-controls={open ? "basic-menu" : undefined}
+                  id={`menu-button-${card.id}`}
+                  aria-controls={`menu-${card.id}`}
                   aria-haspopup="true"
-                  aria-expanded={open ? "true" : undefined}
-                  onClick={handleClick}
+                  aria-expanded={Boolean(menuState[card.id])}
+                  onClick={(event) => handleClick(event, card.id)}
                 >
                   Edit
                 </Button>
                 <Menu
-                  id="basic-menu"
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleClose}
+                  id={`menu-${card.id}`}
+                  anchorEl={menuState[card.id] || null}
+                  open={Boolean(menuState[card.id])}
+                  onClose={() => handleClose(card.id)}
                   MenuListProps={{
-                    "aria-labelledby": "basic-button",
+                    "aria-labelledby": `menu-button-${card.id}`,
                   }}
                 >
                   <MenuItem onClick={() => handleAddRoom(card.id)}>

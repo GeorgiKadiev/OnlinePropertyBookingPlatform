@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   TextField,
@@ -14,7 +15,7 @@ import NavBar from "../NavBar/NavBar";
 export default function AddRoomForm() {
   const { id } = useParams();
   const token = useSelector((state) => state.token);
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     Name: "",
     Description: "",
@@ -23,7 +24,6 @@ export default function AddRoomForm() {
   });
   const [message, setMessage] = useState(""); // For success messages
   const [error, setError] = useState(null); // For error messages
-  const [loading, setLoading] = useState(false); // Loading state
 
   // Handle input change
   const handleChange = (event) => {
@@ -43,7 +43,6 @@ export default function AddRoomForm() {
     event.preventDefault();
     setMessage("");
     setError(null);
-    setLoading(true);
 
     const payload = {
       Name: formData.Name,
@@ -66,17 +65,15 @@ export default function AddRoomForm() {
         throw new Error("Failed to add room. Please try again.");
       }
 
-      setMessage("Room added successfully!");
       setFormData({
         Name: "",
         Description: "",
         BedCount: 0,
         MaxGuests: 0,
       });
+      navigate("/landing-page", { state: { successMessage: "Room added successfully!" } });
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -131,13 +128,8 @@ export default function AddRoomForm() {
             variant="contained"
             color="primary"
             className="submit-button"
-            disabled={loading}
           >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Add Room"
-            )}
+            Add Room
           </Button>
           {message && (
             <Typography className="success-message">{message}</Typography>

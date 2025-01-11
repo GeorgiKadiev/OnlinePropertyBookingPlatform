@@ -42,7 +42,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         }
         [Authorize(Roles = "EstateOwner")]
-        [HttpPost("edit")]
+        [HttpPut("edit")]
         public IActionResult Edit([FromBody] Room room)
         {
 
@@ -159,8 +159,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
         }
         [Authorize(Roles = "EstateOwner")]
-        [HttpPost("{estateId}/{ roomId}/add-photo")]
-        public async Task<ActionResult> SetEstatePhoto(int roomId,int estateId, [FromBody] UrlModel model)
+        [HttpPost("{ roomId}/add-photo")]
+        public async Task<ActionResult> SetEstatePhoto(int roomId, [FromBody] UrlModel model)
         {
             if (!_context.Rooms.Any(e => e.Id == roomId))
             {
@@ -168,14 +168,15 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
             int userid = int.Parse(userIdClaim.Value);
-            var rooms = _context.Rooms.Where(e => e.Id == roomId);
-            if(!_context.Estates.Any(e=>e.Id ==estateId))
+            var room = _context.Rooms.FirstOrDefault(e => e.Id == roomId);
+            var estate = _context.Estates.FirstOrDefault(e => e.Id == room.EstateId);
+            if(estate == null)
             {
-                return BadRequest("Estate doesn't exist");
+                return BadRequest("Estate of room not found");
             }
-            var estateownerid = _context.Estates.First(e => e.Id == estateId).EstateOwnerId;
+            var estateownerid = estate.EstateOwnerId;
             if (estateownerid != userid)
-                return BadRequest("You don't have access to this");
+                return BadRequest("You don't have access to this, you must be the owner of the estate to be able to add photos");
             var Photo = new RoomPhoto
             {
                 Url = model.Url,

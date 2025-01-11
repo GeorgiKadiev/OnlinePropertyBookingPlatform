@@ -96,7 +96,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             await _emailSender.SendEmailAsync(user.Email, "Confirm your email", "hello");
             return Ok();
         }
-        [HttpPost("edit")]
+        [HttpPut("edit")]
         public IActionResult Edit([FromBody] User user)
         {
             // Санитизираме входните данни
@@ -390,16 +390,25 @@ namespace OnlinePropertyBookingPlatform.Controllers
             user.ResetPasswordToken = resetToken;
             _context.Update(user);
             _context.SaveChanges();
-
-            // Send email
-            var resetLink = $"https://yourapp.com/reset-password/{resetToken}";
+            var resetLink = $"http://localhost:5076/api/user/reset-password/{resetToken}";
             await _emailSender.SendEmailAsync(user.Email, "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
 
             return Ok("Password reset link sent to your email. " + resetToken);
         }
 
+        [HttpGet("reset-password/{token}")]
+        public IActionResult ResetPasswordGET(string token)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
+            if (user == null)
+            {
+                return BadRequest("Invalid token");
+            }
+            return Ok();
+
+        }
         [HttpPost("reset-password/{token}")]
-        public IActionResult ResetPassword(string token,PasswordModel model)
+        public IActionResult ResetPasswordPOST(string token, PasswordModel model)
         {
             var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == token);
             if (user == null)
@@ -409,15 +418,16 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             if (model.newPassword1 != model.newPassword2)
                 return BadRequest("Passwords don't match");
-            
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(model.newPassword1);
             user.ResetPasswordToken = null;
             _context.Update(user);
             _context.SaveChanges();
 
-            return Ok("Password reset successfully."+ token);
+            return Ok("Password reset successfully." + token);
 
         }
+
 
         [HttpGet("get-all-users")]
         [Authorize(Roles = "Admin")]

@@ -56,7 +56,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
 
         [Authorize(Roles = "Customer")]
-        [HttpPost("edit")]
+        [HttpPut("edit")]
         public IActionResult Edit([FromBody] Review review)
         {
             var reviewToEdit = _context.Reviews.FirstOrDefault(r => r.Id == review.Id);

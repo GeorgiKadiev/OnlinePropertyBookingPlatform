@@ -15,6 +15,7 @@ import ReseravtionsPage from "./app/OwnerPages/ReservationsPage/ReservationsPage
 import ForgotPassForm from "./components/ForgotPassForm/ForgotPassForm";
 import ReviewsPage from "./app/OwnerPages/ReviewsPage/ReviewsPage";
 import SuccessPassword from "./components/Success/SuccessPassword";
+import AddRoomForm from "./components/AddRoomForm/AddRoomForm";
 
 const theme = createTheme({
   typography: {
@@ -72,6 +73,7 @@ function App() {
           <Route path="/reservations" element={<ReseravtionsPage />} />
           <Route path="/forgot-password" element={<ForgotPassForm />} />
           <Route path="/reviews/:id" element={<ReviewsPage />} />
+          <Route path="/add-room/:id" element={<AddRoomForm />} />
         </Routes>
       </div>
     </ThemeProvider>

@@ -60,10 +60,12 @@ export default function LandingPage() {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleAddRoom = () => {
+  const handleAddRoom = (estateId) => {
     setAnchorEl(null);
+    console.log("estateid  " + estateId);
+    navigate(`/add-room/${estateId}`);
   };
-  const handleAddPhotos = () => {
+  const handleAddPhotos = (estateId) => {
     setAnchorEl(null);
   };
   const handleRemove = async (estateId) => {
@@ -157,8 +159,12 @@ export default function LandingPage() {
                     "aria-labelledby": "basic-button",
                   }}
                 >
-                  <MenuItem onClick={handleAddRoom}>Add room</MenuItem>
-                  <MenuItem onClick={handleAddPhotos}>Add photos</MenuItem>
+                  <MenuItem onClick={() => handleAddRoom(card.id)}>
+                    Add room
+                  </MenuItem>
+                  <MenuItem onClick={() => handleAddPhotos(card.id)}>
+                    Add photos
+                  </MenuItem>
                 </Menu>
                 <Button
                   className="card-button"
@@ -174,7 +180,7 @@ export default function LandingPage() {
                 </Button>
                 <DeleteConfirmationDialog
                   estateId={card.id}
-                  onConfirm={handleRemove} // Pass the remove handler
+                  onConfirm={handleRemove}
                 />
               </div>
             </CardContent>

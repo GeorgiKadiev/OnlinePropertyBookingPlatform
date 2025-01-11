@@ -1,10 +1,10 @@
 import NavBar from "../../../components/NavBar/NavBar";
 import EstateReviews from "../../../components/EstateReviews/EstateReviews";
 
-export default function ReviewsPage({token}){
+export default function ReviewsPage(){
     return (
         <div>
-          <NavBar token={token}/>
+          <NavBar/>
           <EstateReviews />
         </div>
       );

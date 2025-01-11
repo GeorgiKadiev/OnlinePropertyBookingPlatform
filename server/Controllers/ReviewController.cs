@@ -77,7 +77,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             // Санитизация на входните данни
             reviewToEdit.Comment = _sanitizer.Sanitize(review.Comment);
             reviewToEdit.Rating = review.Rating;
-
             _context.Update(reviewToEdit);
             _context.SaveChanges();
 

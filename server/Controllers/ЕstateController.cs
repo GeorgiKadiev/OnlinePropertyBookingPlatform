@@ -48,7 +48,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
         }
         [Authorize(Roles = "EstateOwner")]
-        [HttpPost("edit")]
+        [HttpPut("edit")]
         public IActionResult Edit([FromBody] Estate estate)
         {
             if (!ModelState.IsValid)

@@ -96,7 +96,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             await _emailSender.SendEmailAsync(user.Email, "Confirm your email", "hello");
             return Ok();
         }
-        [HttpPost("edit")]
+        [HttpPut("edit")]
         public IActionResult Edit([FromBody] User user)
         {
             // Санитизираме входните данни
@@ -390,9 +390,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             user.ResetPasswordToken = resetToken;
             _context.Update(user);
             _context.SaveChanges();
-
-            // Send email
-            var resetLink = $"https://yourapp.com/reset-password/{resetToken}";
+            var resetLink = $"http://localhost:5076/api/user/reset-password/{resetToken}";
             await _emailSender.SendEmailAsync(user.Email, "Reset Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
 
             return Ok("Password reset link sent to your email. " + resetToken);

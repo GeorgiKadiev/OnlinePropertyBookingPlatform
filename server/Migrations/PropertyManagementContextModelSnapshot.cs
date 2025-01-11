@@ -32,11 +32,76 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Property<string>("AmenityName")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.HasKey("EstateId", "AmenityName")
                         .HasName("PRIMARY")
                         .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
                     b.ToTable("amenities", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            EstateId = 1,
+                            AmenityName = "Air Conditioning",
+                            Id = 1
+                        },
+                        new
+                        {
+                            EstateId = 1,
+                            AmenityName = "Wi-Fi",
+                            Id = 2
+                        },
+                        new
+                        {
+                            EstateId = 2,
+                            AmenityName = "Parking",
+                            Id = 3
+                        },
+                        new
+                        {
+                            EstateId = 3,
+                            AmenityName = "Swimming Pool",
+                            Id = 4
+                        },
+                        new
+                        {
+                            EstateId = 4,
+                            AmenityName = "Eco-Friendly",
+                            Id = 5
+                        },
+                        new
+                        {
+                            EstateId = 5,
+                            AmenityName = "DigitalNomad-Friendly",
+                            Id = 6
+                        },
+                        new
+                        {
+                            EstateId = 6,
+                            AmenityName = "Hair Dryer",
+                            Id = 7
+                        },
+                        new
+                        {
+                            EstateId = 7,
+                            AmenityName = "Fridge",
+                            Id = 8
+                        },
+                        new
+                        {
+                            EstateId = 8,
+                            AmenityName = "Smoker-Friendly",
+                            Id = 9
+                        },
+                        new
+                        {
+                            EstateId = 9,
+                            AmenityName = "Fitness Centre",
+                            Id = 10
+                        });
                 });
 
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.Estate", b =>
@@ -48,9 +113,10 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("EstateOwnerId")
+                    b.Property<int>("EstateOwnerId")
                         .HasColumnType("int");
 
                     b.Property<string>("Location")
@@ -71,6 +137,27 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.HasIndex(new[] { "EstateOwnerId" }, "EstateOwnerId");
 
                     b.ToTable("estate", (string)null);
+                });
+
+            modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.EstatePhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EstateId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("estatephotos", (string)null);
                 });
 
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.Payment", b =>
@@ -216,6 +303,27 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.ToTable("room", (string)null);
                 });
 
+            modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.RoomPhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("roomphotos", (string)null);
+                });
+
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -278,6 +386,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.HasOne("OnlinePropertyBookingPlatform.Models.User", "EstateOwner")
                         .WithMany("Estates")
                         .HasForeignKey("EstateOwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("estate_ibfk_1");
 
                     b.Navigation("EstateOwner");

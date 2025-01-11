@@ -14,5 +14,6 @@
 
         public string? Description { get; set; }
         public string EstateOwnerName { get; set; }
+        public List<string> Photos { get; set; }
     }
 }

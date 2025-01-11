@@ -18,5 +18,6 @@
 
         public string EstateName { get; set; }
         public List<DateOnly> DatesWhenOccupied { get; set; }
+        public List<string> Photos { get; set; }
     }
 }

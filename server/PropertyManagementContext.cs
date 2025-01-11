@@ -31,6 +31,9 @@ public partial class PropertyManagementContext : DbContext
     public virtual DbSet<Room> Rooms { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<EstatePhoto> EstatesPhotos { get; set; }
+    public virtual DbSet<RoomPhoto> RoomPhotos { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -63,7 +66,7 @@ public partial class PropertyManagementContext : DbContext
             entity.Property(e => e.Location).HasMaxLength(255);
             entity.Property(e => e.Title).HasMaxLength(255);
             entity.Property(e => e.Description);
-            
+
             entity.HasOne(d => d.EstateOwner).WithMany(p => p.Estates)
                 .HasForeignKey(d => d.EstateOwnerId)
                 .HasConstraintName("estate_ibfk_1");
@@ -102,7 +105,7 @@ public partial class PropertyManagementContext : DbContext
                 .HasForeignKey(d => d.EstateId)
                 .HasConstraintName("reservation_ibfk_2").OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(e => e.RoomId);
-           
+
         });
 
         modelBuilder.Entity<Review>(entity =>
@@ -141,7 +144,7 @@ public partial class PropertyManagementContext : DbContext
                 .HasConstraintName("room_ibfk_1").OnDelete(DeleteBehavior.Cascade);
             entity.Property(e => e.Description);
             entity.Property(e => e.Name);
-            
+
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -156,6 +159,36 @@ public partial class PropertyManagementContext : DbContext
             entity.Property(e => e.EmailVerificationToken);
             entity.Property(e => e.Password).HasMaxLength(255);
             entity.Property(e => e.Role).HasColumnType("enum('Customer','EstateOwner','Admin')");
+        });
+        modelBuilder.Entity<RoomPhoto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.ToTable("roomphotos");
+            entity.Property(e => e.Url);
+            entity.Property(e => e.RoomId);
+
+
+        });
+        modelBuilder.Entity<EstatePhoto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.ToTable("estatephotos");
+            entity.Property(e => e.Url);
+            entity.Property(e => e.EstateId);
+
+            modelBuilder.Entity<Amenity>().HasData(
+            new Amenity { Id = 1, AmenityName = "Air Conditioning", EstateId = 1 },
+            new Amenity { Id = 2, AmenityName = "Wi-Fi", EstateId = 1 },
+            new Amenity { Id = 3, AmenityName = "Parking", EstateId = 2 },
+            new Amenity { Id = 4, AmenityName = "Swimming Pool", EstateId = 3 },
+            new Amenity { Id = 5, AmenityName = "Eco-Friendly", EstateId = 4 },
+            new Amenity { Id = 6, AmenityName = "DigitalNomad-Friendly", EstateId = 5 },
+            new Amenity { Id = 7, AmenityName = "Hair Dryer", EstateId = 6 },
+            new Amenity { Id = 8, AmenityName = "Fridge", EstateId = 7 },
+            new Amenity { Id = 9, AmenityName = "Smoker-Friendly", EstateId = 8 },
+            new Amenity { Id = 10, AmenityName = "Fitness Centre", EstateId = 9 }
+        );
+
         });
 
         OnModelCreatingPartial(modelBuilder);

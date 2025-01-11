@@ -56,7 +56,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
 
         [Authorize(Roles = "Customer")]
-        [HttpPost("edit")]
+        [HttpPut("edit")]
         public IActionResult Edit([FromBody] Review review)
         {
             var reviewToEdit = _context.Reviews.FirstOrDefault(r => r.Id == review.Id);
@@ -77,7 +77,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             // Санитизация на входните данни
             reviewToEdit.Comment = _sanitizer.Sanitize(review.Comment);
             reviewToEdit.Rating = review.Rating;
-
             _context.Update(reviewToEdit);
             _context.SaveChanges();
 

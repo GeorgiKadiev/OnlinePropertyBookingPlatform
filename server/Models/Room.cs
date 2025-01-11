@@ -20,5 +20,5 @@ public partial class Room
     public int? MaxGuests { get; set; }
 
     public virtual Estate? Estate { get; set; }
-    
+
 }

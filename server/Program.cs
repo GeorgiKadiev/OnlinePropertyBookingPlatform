@@ -192,6 +192,8 @@ public class Program
         pattern: "{controller=Home}/{action=Index}/{id?}")
         .RequireRateLimiting("slidingPolicy");
 
+
+
         // Стартиране на приложението
         app.Run();
     }

@@ -67,9 +67,14 @@ export default function Reviews() {
               <ListItem className="review-item">
                 <ListItemText secondary={review.comment} />
               </ListItem>
+              <Box sx={{display: "flex", flexDirection: "column"}}>
               <Box sx={{ "& > legend": { mt: 2 } }} className="review-rating">
                 <Typography component="legend">Rating</Typography>
                 <Rating name="read-only" value={review.rating} readOnly />
+              </Box>
+              <ListItem>
+                <ListItemText secondary={review.date} />
+              </ListItem>
               </Box>
             </Box>
           ))}

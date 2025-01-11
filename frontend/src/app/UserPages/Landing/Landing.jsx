@@ -12,15 +12,33 @@ import "./LandingPage.css";
 
 export default function UserLanding() {
   const navigate = useNavigate();
-  const [numberOfPersons, setNumberOfPeople] = useState("");
+  const [location, setLocation] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  // const [isEcoFriendly, setIsEcoFriendly] = useState(false);
+  const [numberOfPeople, setNumberOfPeople] = useState("");
 
-  const handleSearch = () => {
-    navigate("/results");
+  const handleSearch = (e) => {
+    e.preventDefault();
+    console.log(numberOfPeople);
+
+    // Construct the filters object
+    const filters = {
+      location,
+      startDate: startDate ? parseFloat(startDate) : null,
+      endDate: endDate ? parseFloat(endDate) : null,
+      numberOfPeople: numberOfPeople ? numberOfPeople: null,
+    };
+    console.log(filters);
+
+    // Convert the filters into query parameters
+    const queryParams = new URLSearchParams(filters).toString();
+    navigate(`/results?${queryParams}`);
   };
   return (
     <div>
       <NavBar />
-      <FilterResults />
+      {/* <FilterResults /> */}
       <div className="title-search">
         <h1>Book your stay now</h1>
         <Box className="search-bar" component="form">
@@ -29,17 +47,28 @@ export default function UserLanding() {
             sx={{ flex: 1 }}
             placeholder="Search for location"
             inputProps={{ "aria-label": "search for location" }}
+            onChange={(e) => setLocation(e.target.value)}
           />
 
           {/* Date Pickers */}
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker label="Start date" sx={{ width: 180 }} />
-            <DatePicker label="End date" sx={{ width: 180 }} />
+            <DatePicker
+              label="Start date"
+              sx={{ width: 180 }}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <DatePicker
+              label="End date"
+              sx={{ width: 180 }}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
           </LocalizationProvider>
+
+          {/* Num People */}
           <TextField
             label="Number of People"
             type="number"
-            value={numberOfPersons}
+            value={numberOfPeople}
             onChange={(e) => setNumberOfPeople(e.target.value)}
           />
 

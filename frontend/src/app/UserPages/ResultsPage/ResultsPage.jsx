@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   InputBase,
@@ -17,8 +17,11 @@ import "./ResultsPage.css";
 
 export default function ResultsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const token = useSelector((state) => state.token); // Get token from Redux
   const userId = useSelector((state) => state.id); // Get token from Redux
+  const [filters, setFilters] = useState({});
 
   const [propertyData, setPropertyData] = useState([]); // State for holding fetched data
   const [loading, setLoading] = useState(true); // State for loading state
@@ -29,16 +32,29 @@ export default function ResultsPage() {
   };
 
   useEffect(() => {
+    // Extract query params from URL
+    const queryParams = new URLSearchParams(location.search);
+
+    const filters = {
+      location: queryParams.get("location"),
+      minPrice: parseFloat(queryParams.get("startDate")) || null,
+      maxPrice: parseFloat(queryParams.get("endDate")) || null,
+      numberOfPersons: parseInt(queryParams.get("numberOfPeople")) || null,
+    };
+
+    setFilters(filters);
+    console.log(filters);
+
     const fetchEstates = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5076/api/estate/get-all-estates`, //usually admin only but for testing 
+          "http://localhost:5076/api/estate/filter",
           {
-            method: "GET",
+            method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify(filters),
           }
         );
 
@@ -120,7 +136,9 @@ export default function ResultsPage() {
                   {/* Property Details */}
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="h6">{property.title}</Typography>
-                    <Typography variant="h10">{property.description}</Typography>
+                    <Typography variant="h10">
+                      {property.description}
+                    </Typography>
                     <Typography variant="body1" color="text.secondary">
                       {property.pricePerNight}
                     </Typography>

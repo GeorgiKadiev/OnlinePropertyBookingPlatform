@@ -20,12 +20,7 @@ function CarouselProperties() {
       setErrorMessage(""); // Reset error message
 
       const filters = {
-        Location: null, // Optional: Use `null` to ignore location filter
-        MinPrice: null,
-        MaxPrice: null,
-        IsEcoFriendly: true, // Only fetch eco-friendly properties
-        Amenities: [],
-        NumberOfPersons: null,
+        IsEcoFriendly: true, 
       };
 
       try {

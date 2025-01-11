@@ -31,7 +31,7 @@ const theme = createTheme({
       main: "rgb(251, 200, 255)", // Primary button background color
     },
     secondary: {
-      main: "rgb(24, 145, 255)", // Secondary button background color (optional)
+      main: "rgb(251, 148, 213)", // Secondary button background color (optional)
     },
   },
   components: {

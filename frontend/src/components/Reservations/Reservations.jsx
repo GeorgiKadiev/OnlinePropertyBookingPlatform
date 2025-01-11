@@ -1,5 +1,5 @@
-import React from "react";
-import { MenuItem, MenuList, Divider, Box } from "@mui/material";
+import React, { useState } from "react";
+import { MenuItem, MenuList, Divider, Box, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 
 const fetchReservations = async (url, token) => {
@@ -28,24 +28,37 @@ export default function MenuListComposition() {
   const userId = useSelector((state) => state.id);
   const token = useSelector((state) => state.token);
 
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const handleGetReservations = async () => {
+    setLoading(true);
+    setErrorMessage(""); // Reset the error message
     let url;
 
     if (role === "Customer") {
       url = `http://localhost:5076/api/reservation/user-reservations/${userId}`;
     } else if (role === "EstateOwner") {
-      const estateId = ""; // Replace with actual estateId logic
+      const estateId = 15; // Replace with actual estateId logic
       url = `http://localhost:5076/api/estate/${estateId}/reservations`;
     } else {
-      console.log("Invalid role");
+      setLoading(false);
+      setErrorMessage("Invalid role");
       return;
     }
 
-    const reservations = await fetchReservations(url, token);
+    const reservationsData = await fetchReservations(url, token);
 
-    if (reservations) {
-      console.log(`Reservations for ${role}:`, reservations);
+    if (reservationsData) {
+      setReservations(reservationsData);
+      console.log(reservationsData);
+      reservationsData.map((reservation, index) => console.log(reservation.id));
+    } else {
+      setErrorMessage("No reservations found.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -65,6 +78,37 @@ export default function MenuListComposition() {
         <MenuItem>Future reservations</MenuItem>
       </MenuList>
       <Divider orientation="vertical" flexItem />
+
+      {/* Display Reservations */}
+      {loading && <Typography variant="h6">Loading reservations...</Typography>}
+
+      {errorMessage && (
+        <Typography variant="h6" color="error">
+          {errorMessage}
+        </Typography>
+      )}
+
+      {!loading && !errorMessage && reservations.length === 0 && (
+        <Typography variant="h6" color="textSecondary">
+          No reservations available.
+        </Typography>
+      )}
+
+      {!loading && !errorMessage && reservations.length > 0 && (
+        <Box>
+          {reservations.map((reservation, index) => (
+            <Box key={index}>
+              <Typography variant="body1">
+                {reservation.customerName}
+              </Typography>
+              <Typography variant="body1">{reservation.checkInDate}</Typography>
+              <Typography variant="body1">
+                {reservation.checkOutDate}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }

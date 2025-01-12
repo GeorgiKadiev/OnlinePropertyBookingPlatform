@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Mono.TextTemplating;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
 using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
@@ -110,12 +111,13 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("get-all-estates")]
-        public async Task<ActionResult<IEnumerable<Estate>>> GetAllEstates()
+        public async Task<ActionResult<IEnumerable<EstateDto>>> GetAllEstates()
         {
             try
             {
                 var users = await _context.Estates
-                    .Include(e => e.EstateOwner)
+                    .Include(e => e.EstateOwner) // Include EstateOwner
+                    .Include(e => e.Amenities) // Include Amenities
                     .Select(e => new EstateDto
                     {
                         Id = e.Id,
@@ -124,14 +126,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
                         PricePerNight = e.PricePerNight,
                         EstateOwnerId = e.EstateOwnerId,
                         Description = e.Description,
-                        EstateOwnerName = e.EstateOwner.Username
-
+                        EstateOwnerName = e.EstateOwner.Username,
+                        Amenities = e.Amenities.Select(a => a.AmenityName).ToList() // Map Amenities
                     }).ToListAsync();
-                return Ok(users);
+
+                return Ok(users); // Return the list of DTOs
             }
             catch (Exception ex)
             {
-
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -191,16 +193,20 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok(rooms);
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<Estate>> GetEstateDetails(int id)
+        public async Task<ActionResult<EstateDto>> GetEstateDetails(int id)
         {
             try
             {
-                var e = await _context.Estates.FindAsync(id);
+                var e = await _context.Estates
+                    .Include(e => e.Amenities) // Include Amenities
+                    .FirstOrDefaultAsync(e => e.Id == id); // Corrected query to fetch related data
+
                 if (e == null)
                 {
                     return NotFound($"Estate with ID {id} not found.");
                 }
-                var dto = new EstateDto()
+
+                var dto = new EstateDto
                 {
                     Id = e.Id,
                     Location = e.Location,
@@ -208,19 +214,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     PricePerNight = e.PricePerNight,
                     EstateOwnerId = e.EstateOwnerId,
                     Description = e.Description,
-
+                    EstateOwnerName = _context.Users
+                        .FirstOrDefault(u => u.Id == e.EstateOwnerId)?.Username, // Ensure EstateOwnerName is set
+                    Amenities = e.Amenities.Select(a => a.AmenityName).ToList() // Map Amenities
                 };
-                dto.EstateOwnerName = _context.Users
-                    .FirstOrDefault(e => e.Id == dto.EstateOwnerId).Username;
 
-
-                return Ok(dto);
+                return Ok(dto); // Return the DTO
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [Authorize]
         [HttpGet("owner-estates/{id}")]

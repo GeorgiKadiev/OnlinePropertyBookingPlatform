@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
   Box,
@@ -13,20 +14,41 @@ import NavBar from "../../../components/NavBar/NavBar";
 import "./PropertyPage.css";
 
 export default function PropertyPage() {
-  const { id } = useParams(); // Get the property ID from URL parameter
-  const [property, setProperty] = useState(null); // State to store property data
-  const [loading, setLoading] = useState(true); // State to handle loading state
-  const [error, setError] = useState(null); // State to handle errors during fetching
+  const { id: estateId } = useParams();
+  const token = useSelector((state) => state.token);
+  const [property, setProperty] = useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch estate details and rooms
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await fetch(`http://localhost:5076/api/estate/${id}`);
-        if (!response.ok) {
+        const propertyResponse = await fetch(
+          `http://localhost:5076/api/estate/${estateId}`
+        );
+        if (!propertyResponse.ok) {
           throw new Error("Property not found");
         }
-        const data = await response.json();
-        setProperty(data);
+        const propertyData = await propertyResponse.json();
+        setProperty(propertyData);
+
+        const roomsResponse = await fetch(
+          `http://localhost:5076/api/estate/${estateId}/rooms`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!roomsResponse.ok) {
+          throw new Error("Rooms not found");
+        }
+        const roomsData = await roomsResponse.json();
+        setRooms(roomsData);
+
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -35,7 +57,31 @@ export default function PropertyPage() {
     };
 
     fetchProperty();
-  }, [id]);
+  }, [estateId]);
+
+  const handleBooking = async (roomId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/reservation/create/${estateId}/${roomId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to book the room");
+      }
+
+      alert("Room booked successfully!");
+    } catch (err) {
+      console.error("Error booking room:", err);
+      alert("Failed to book the room. Please try again.");
+    }
+  };
 
   if (loading) {
     return (
@@ -57,7 +103,7 @@ export default function PropertyPage() {
 
   return (
     <div>
-      <NavBar/>
+      <NavBar />
       <Box className="property-page">
         {/* Title */}
         <Typography variant="h4" className="property-title">
@@ -80,29 +126,47 @@ export default function PropertyPage() {
             ))}
         </Grid>
 
-        {/* Description and Booking */}
+        {/* Description */}
         <Box className="property-details">
-          <Box className="property-info">
-            <Typography variant="body1" className="property-description">
-              {property.description}
-            </Typography>
-            <Typography variant="h6" className="property-price">
-              {property.price}
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={() => alert(`Booking Property ${id}`)}
-            className="booking-button"
-          >
-            Book
-          </Button>
+          <Typography variant="body1" className="property-description">
+            {property.description}
+          </Typography>
+          <Typography variant="h6" className="property-price">
+            Price per night: ${property.price}
+          </Typography>
+        </Box>
+
+        {/* Rooms Section */}
+        <Box className="rooms-section">
+          <Typography variant="h5" className="rooms-title">
+            Available Rooms
+          </Typography>
+          <Grid container spacing={2}>
+            {rooms.map((room) => (
+              <Grid item xs={12} sm={6} md={4} key={room.id}>
+                <Paper elevation={3} className="room-card">
+                  <Box className="room-info">
+                    <Typography variant="h6">Room {room.name}</Typography>
+                    <Typography>Max Guests: {room.maxGuests}</Typography>
+                    <Typography>
+                      Price: ${room.pricePerNight} per night
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleBooking(room.id)} // Pass roomId to booking handler
+                  >
+                    Book
+                  </Button>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
 
         {/* Reviews Section */}
-        <Reviews estateId={id} />
+        <Reviews estateId={estateId} />
       </Box>
     </div>
   );

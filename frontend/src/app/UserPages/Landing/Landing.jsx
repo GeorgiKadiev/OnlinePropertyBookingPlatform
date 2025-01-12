@@ -4,6 +4,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs"; // Import dayjs for formatting
 import { OutlinedInput, IconButton, Box, TextField } from "@mui/material";
 import CarouselProperties from "../../../components/Carousel/Carousel";
 import FilterResults from "../../../components/FilterResults/FilterResults";
@@ -25,9 +26,9 @@ export default function UserLanding() {
     // Construct the filters object
     const filters = {
       location,
-      startDate: startDate ? parseFloat(startDate) : null,
-      endDate: endDate ? parseFloat(endDate) : null,
-      numberOfPeople: numberOfPeople ? numberOfPeople: null,
+      startDate: startDate || null,
+      endDate: endDate || null,
+      numberOfPeople: numberOfPeople ? numberOfPeople : null,
     };
     console.log(filters);
 
@@ -55,12 +56,16 @@ export default function UserLanding() {
             <DatePicker
               label="Start date"
               sx={{ width: 180 }}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(date) =>
+                setStartDate(date ? dayjs(date).format("YYYY-MM-DD") : "")
+              }
             />
             <DatePicker
               label="End date"
               sx={{ width: 180 }}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(date) =>
+                setEndDate(date ? dayjs(date).format("YYYY-MM-DD") : "")
+              }
             />
           </LocalizationProvider>
 

@@ -68,18 +68,17 @@ export default function ResultsPage() {
 
     const initialFilters = {
       location: queryParams.get("location") || "",
-      minPrice: queryParams.get("startDate")
-        ? parseFloat(queryParams.get("startDate"))
+      startDate: queryParams.get("startDate")
+        ? queryParams.get("startDate")
         : null,
-      maxPrice: queryParams.get("endDate")
-        ? parseFloat(queryParams.get("endDate"))
-        : null,
+      endDate: queryParams.get("endDate") ? queryParams.get("endDate") : null,
       numberOfPersons: queryParams.get("numberOfPeople")
         ? parseInt(queryParams.get("numberOfPeople"))
         : null,
     };
 
     setFilters(initialFilters);
+    console.log(initialFilters);
 
     const fetchEstates = async () => {
       try {

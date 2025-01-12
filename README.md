@@ -1,5 +1,6 @@
 🌍 Online Property Booking Platform
-Welcome to the Online Property Booking Platform! This project is designed to help users find and book properties effortlessly while providing a seamless experience for property owners to manage their listings. 🏡✨
+Welcome to the Online Property Booking Platform!
+This project helps users find and book properties effortlessly while offering property owners tools to manage their listings. 🏡✨
 
 🚀 Features
 🏘️ Property Filtering: Search properties by location, price, amenities, and availability dates.

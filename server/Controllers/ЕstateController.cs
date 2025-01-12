@@ -280,6 +280,17 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     estates = estates.Where(e => (decimal)e.PricePerNight <= filter.MaxPrice.Value);
                 }
 
+                if (filter.StartDate.HasValue && filter.EndDate.HasValue)
+                {
+                    var startDate = DateOnly.FromDateTime(filter.StartDate.Value);
+                    var endDate = DateOnly.FromDateTime(filter.EndDate.Value);
+
+                    estates = estates.Where(e => !e.Reservations.Any(r =>
+                        (r.CheckInDate <= endDate && r.CheckOutDate >= startDate)));
+                }
+
+
+
                 if (filter.IsEcoFriendly.HasValue && filter.IsEcoFriendly.Value)
                 {
                     estates = estates.Where(e => e.Amenities.Any(a => a.AmenityName == "Eco-Friendly"));

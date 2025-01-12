@@ -170,7 +170,28 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok(reservations);
 
         }
+        [Authorize]
+        [HttpGet("{estateId}/rooms")]
+        public async Task<ActionResult<List<RoomDto>>> GetRooms(int estateId)
+        {
+            if (!_context.Estates.Any(e => e.Id == estateId))
+            {
+                return BadRequest("Estate not found.");
+            }
 
+            var rooms = _context.Rooms.Where(r => r.EstateId == estateId).Include(r => r.Estate).Select(room => new RoomDto
+            {
+                Id = room.Id,
+                Name = room.Name,
+                Description = room.Description,
+                MaxGuests = room.MaxGuests,
+                BedCount = room.BedCount,
+                RoomType = room.RoomType,
+                EstateId = room.EstateId,
+                EstateName = room.Estate.Title,
+            });
+            return Ok(rooms);
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<EstateDto>> GetEstateDetails(int id)
         {

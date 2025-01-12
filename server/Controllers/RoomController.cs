@@ -109,7 +109,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
         }
         [HttpGet("details/{roomId}")]
-        public async Task<ActionResult<Room>> GetRoomDetails(int roomId)
+        public async Task<ActionResult<RoomDto>> GetRoomDetails(int roomId)
         {
             try
             {
@@ -135,12 +135,13 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     return NotFound("The room doesn't match a proper estate");
                 }
                 List<DateOnly> occupied = _context.Reservations
+                    .AsEnumerable()
                 .Where(r => r.RoomId == roomId)
                 .SelectMany(r => Enumerable.Range(0, (r.CheckOutDate.ToDateTime(TimeOnly.MinValue) - r.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
                 .Select(offset => r.CheckInDate.AddDays(offset)))
                 .ToList();
 
-
+                dto.DatesWhenOccupied = occupied;
                 return Ok(dto);
             }
             catch (Exception ex)
@@ -151,16 +152,19 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpGet("details/{roomId}/dates")]
         public async Task<ActionResult<List<DateOnly>>> GetEmptyDates(int roomId)
         {
+            if (!_context.Rooms.Any(r => r.Id == roomId))
+                return BadRequest("room not found");
             List<DateOnly> occupied = _context.Reservations
+                .AsEnumerable()
                 .Where(r => r.RoomId == roomId)
                 .SelectMany(r => Enumerable.Range(0, (r.CheckOutDate.ToDateTime(TimeOnly.MinValue) - r.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
                 .Select(offset => r.CheckInDate.AddDays(offset)))
                 .ToList();
-            return Ok();
+            return Ok(occupied);
         }
         [Authorize(Roles = "EstateOwner")]
         [HttpPost("{ roomId}/add-photo")]
-        public async Task<ActionResult> SetEstatePhoto(int roomId, [FromBody] UrlModel model)
+        public async Task<ActionResult> SetRoomPhoto(int roomId, [FromBody] UrlModel model)
         {
             if (!_context.Rooms.Any(e => e.Id == roomId))
             {

@@ -40,6 +40,8 @@ export default function PropertyForm() {
       setError("All fields are required");
       return;
     }
+    console.log(payload);
+    console.log(token)
 
     try {
       const response = await fetch("http://localhost:5076/api/estate/create", {

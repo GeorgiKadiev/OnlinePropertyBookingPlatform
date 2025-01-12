@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FiltersSideBar from "../../../components/FiltersSideBar/FiltersSideBar";
+import FilterResults from "../../../components/FilterResults/FilterResults";
+
 import NavBar from "../../../components/NavBar/NavBar";
 import "./ResultsPage.css";
 
@@ -121,6 +123,7 @@ export default function ResultsPage() {
       <NavBar />
       <Box className="sidebar-results">
         {/* Sidebar Section */}
+        <FilterResults/>
         <FiltersSideBar
           filters={filters}
           setFilters={(newFilters) => {

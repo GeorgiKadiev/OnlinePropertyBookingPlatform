@@ -17,6 +17,7 @@ import "./EstateReviews.css";
 export default function Reviews() {
   const { id } = useParams(); // Get the property ID from URL parameter
   const role = useSelector((state) => state.role); // Get the user's role
+  const token = useSelector((state) => state.token);
 
   const [reviews, setReviews] = useState([]); // State to store reviews
   const [loading, setLoading] = useState(true); // State to handle loading state
@@ -43,9 +44,28 @@ export default function Reviews() {
     fetchReviews();
   }, [id]);
 
-  const handleFlagClick = (reviewId) => {
-    // Implement flag logic here
-    alert(`Flagged review ID: ${reviewId}`);
+  const handleFlagClick = async (reviewId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/review/flag/${reviewId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Include the token for authentication
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to flag the review");
+      }
+
+      console.log(`Successfully flagged review ID: ${reviewId}`);
+    } catch (error) {
+      console.error("Error flagging review:", error);
+      alert("Failed to flag the review. Please try again.");
+    }
   };
 
   if (loading) {

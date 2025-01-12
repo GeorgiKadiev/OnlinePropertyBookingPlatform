@@ -140,13 +140,32 @@ public partial class PropertyManagementContext : DbContext
 
             entity.Property(e => e.RoomType).HasMaxLength(50);
 
-            entity.HasOne(d => d.Estate).WithMany(p => p.Rooms)
+            entity.HasOne(d => d.Estate)
+                .WithMany(p => p.Rooms)
                 .HasForeignKey(d => d.EstateId)
-                .HasConstraintName("room_ibfk_1").OnDelete(DeleteBehavior.Cascade);
+                .HasConstraintName("room_ibfk_1")
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.Property(e => e.Description);
             entity.Property(e => e.Name);
-
         });
+
+        // Configure many-to-many relationship between Room and Amenity
+        modelBuilder.Entity<Room>()
+            .HasMany(r => r.Amenities)
+            .WithMany(a => a.Rooms)
+            .UsingEntity<Dictionary<string, object>>(
+                "RoomAmenity", // Junction table name
+                j => j.HasOne<Amenity>()
+                      .WithMany()
+                      .HasForeignKey(new[] { "EstateId", "AmenityName" }) // Composite foreign key
+                      .HasPrincipalKey(a => new { a.EstateId, a.AmenityName }), // Match composite primary key in Amenity
+                j => j.HasOne<Room>()
+                      .WithMany()
+                      .HasForeignKey("RoomId")
+                      .HasPrincipalKey(r => r.Id)
+            );
+
 
         modelBuilder.Entity<User>(entity =>
         {
@@ -180,6 +199,28 @@ public partial class PropertyManagementContext : DbContext
             
 
         });
+
+        modelBuilder.Entity<Amenity>().HasData(
+    
+    new Amenity { EstateId = 1, AmenityName = "Wi-Fi" },
+    new Amenity { EstateId = 1, AmenityName = "Parking" },
+    new Amenity { EstateId = 1, AmenityName = "Swimming Pool" },
+    new Amenity { EstateId = 1, AmenityName = "Air Conditioning" },
+    new Amenity { EstateId = 1, AmenityName = "Fitness Centre" },
+    new Amenity { EstateId = 2, AmenityName = "Eco-Friendly" },
+    new Amenity { EstateId = 2, AmenityName = "DigitalNomad-Friendly" },
+    new Amenity { EstateId = 2, AmenityName = "Hair Dryer" },
+    new Amenity { EstateId = 2, AmenityName = "Fridge" },
+    new Amenity { EstateId = 2, AmenityName = "Balcony" },
+    new Amenity { EstateId = 3, AmenityName = "Garden Access" },
+    new Amenity { EstateId = 3, AmenityName = "Pet-Friendly" },
+    new Amenity { EstateId = 3, AmenityName = "Hot Tub" },
+    new Amenity { EstateId = 3, AmenityName = "Sauna" },
+    new Amenity { EstateId = 4, AmenityName = "Fireplace" },
+    new Amenity { EstateId = 4, AmenityName = "BBQ Grill" },
+    new Amenity { EstateId = 4, AmenityName = "Kitchenette" },
+    new Amenity { EstateId = 4, AmenityName = "Coffee Maker" }
+);
 
 
         OnModelCreatingPartial(modelBuilder);

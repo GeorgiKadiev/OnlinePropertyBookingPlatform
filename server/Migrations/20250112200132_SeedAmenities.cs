@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateRelationships : Migration
+    public partial class SeedAmenities : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -226,6 +228,34 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
 
             migrationBuilder.CreateTable(
+                name: "RoomAmenity",
+                columns: table => new
+                {
+                    RoomId = table.Column<int>(type: "int", nullable: false),
+                    EstateId = table.Column<int>(type: "int", nullable: false),
+                    AmenityName = table.Column<string>(type: "varchar(255)", nullable: false, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoomAmenity", x => new { x.RoomId, x.EstateId, x.AmenityName });
+                    table.ForeignKey(
+                        name: "FK_RoomAmenity_amenities_EstateId_AmenityName",
+                        columns: x => new { x.EstateId, x.AmenityName },
+                        principalTable: "amenities",
+                        principalColumns: new[] { "EstateId", "AmenityName" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RoomAmenity_room_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "room",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+
+            migrationBuilder.CreateTable(
                 name: "payment",
                 columns: table => new
                 {
@@ -249,6 +279,31 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+
+            migrationBuilder.InsertData(
+                table: "amenities",
+                columns: new[] { "AmenityName", "EstateId", "Id" },
+                values: new object[,]
+                {
+                    { "Air Conditioning", 1, 0 },
+                    { "Fitness Centre", 1, 0 },
+                    { "Parking", 1, 0 },
+                    { "Swimming Pool", 1, 0 },
+                    { "Wi-Fi", 1, 0 },
+                    { "Balcony", 2, 0 },
+                    { "DigitalNomad-Friendly", 2, 0 },
+                    { "Eco-Friendly", 2, 0 },
+                    { "Fridge", 2, 0 },
+                    { "Hair Dryer", 2, 0 },
+                    { "Garden Access", 3, 0 },
+                    { "Hot Tub", 3, 0 },
+                    { "Pet-Friendly", 3, 0 },
+                    { "Sauna", 3, 0 },
+                    { "BBQ Grill", 4, 0 },
+                    { "Coffee Maker", 4, 0 },
+                    { "Fireplace", 4, 0 },
+                    { "Kitchenette", 4, 0 }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "EstateOwnerId",
@@ -296,6 +351,11 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 column: "EstateId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RoomAmenity_EstateId_AmenityName",
+                table: "RoomAmenity",
+                columns: new[] { "EstateId", "AmenityName" });
+
+            migrationBuilder.CreateIndex(
                 name: "Email",
                 table: "user",
                 column: "Email",
@@ -306,9 +366,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "amenities");
-
-            migrationBuilder.DropTable(
                 name: "estatephotos");
 
             migrationBuilder.DropTable(
@@ -318,10 +375,16 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 name: "review");
 
             migrationBuilder.DropTable(
+                name: "RoomAmenity");
+
+            migrationBuilder.DropTable(
                 name: "roomphotos");
 
             migrationBuilder.DropTable(
                 name: "reservation");
+
+            migrationBuilder.DropTable(
+                name: "amenities");
 
             migrationBuilder.DropTable(
                 name: "room");

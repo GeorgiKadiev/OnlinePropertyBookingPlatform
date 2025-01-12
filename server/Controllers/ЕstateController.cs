@@ -261,8 +261,60 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
 
         }
-
         // New Code Starts Here
+        [Authorize(Roles = "EstateOwner")]
+        [HttpPost("rooms/create")]
+        public async Task<IActionResult> CreateRoom([FromBody] RoomCreateDto roomDto)
+        {
+            // Validate the request
+            if (string.IsNullOrEmpty(roomDto.Name) || roomDto.MaxGuests <= 0)
+            {
+                return BadRequest("Invalid room details.");
+            }
+
+            // Create a new room
+            var newRoom = new Room
+            {
+                Name = roomDto.Name,
+                Description = roomDto.Description,
+                MaxGuests = roomDto.MaxGuests,
+                BedCount = roomDto.BedCount,
+                RoomType = roomDto.RoomType,
+                EstateId = roomDto.EstateId, // Link the room to an estate
+                Amenities = new List<Amenity>()
+            };
+
+            // Add selected amenities to the room
+            foreach (var amenityName in roomDto.Amenities)
+            {
+                var amenity = await _context.Amenities.FirstOrDefaultAsync(a => a.AmenityName == amenityName);
+
+                if (amenity != null)
+                {
+                    newRoom.Amenities.Add(amenity); // Associate the amenity with the room
+                }
+            }
+
+            _context.Rooms.Add(newRoom);
+            await _context.SaveChangesAsync();
+
+            return Ok("Room created successfully.");
+        }
+
+
+        [Authorize]
+        [HttpGet("get-amenities")]
+        public async Task<ActionResult<List<string>>> GetAllAmenities()
+        {
+            var amenities = await _context.Amenities
+                .Select(a => a.AmenityName)
+                .ToListAsync();
+
+            return Ok(amenities); // this will return a list of amenities
+        }
+
+
+        
 
         [HttpPost("filter")]
         public async Task<ActionResult<List<EstateDto>>> GetFilteredEstates([FromBody] EstateFilterDto filter)

@@ -13,4 +13,7 @@ public partial class Amenity
     public string AmenityName { get; set; } = null!;
 
     public virtual Estate Estate { get; set; } = null!;
+
+    // new relationship for rooms
+    public virtual ICollection<Room> Rooms { get; set; } = new List<Room>();
 }

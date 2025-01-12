@@ -21,4 +21,6 @@ public partial class Room
 
     public virtual Estate? Estate { get; set; }
 
+    // new relationship for amenities
+    public virtual ICollection<Amenity> Amenities { get; set; } = new List<Amenity>();
 }

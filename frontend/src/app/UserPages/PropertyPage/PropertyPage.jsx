@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 import {
   Box,
   Typography,
   Button,
-  Grid,
+  Grid2,
   Paper,
   CircularProgress,
 } from "@mui/material";
@@ -18,6 +22,9 @@ export default function PropertyPage() {
   const token = useSelector((state) => state.token);
   const [property, setProperty] = useState(null);
   const [rooms, setRooms] = useState([]);
+  const [bookedDates, setBookedDates] = useState({}); // Track booked dates
+  const [selectedDates, setSelectedDates] = useState({});
+  const [activeRoom, setActiveRoom] = useState(null); // Room for which date pickers are shown
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -57,9 +64,40 @@ export default function PropertyPage() {
     };
 
     fetchProperty();
-  }, [estateId]);
+  }, [estateId, token]);
 
-  const handleBooking = async (roomId) => {
+  // Fetch booked dates for a room
+  const fetchBookedDates = async (roomId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/room/details/${roomId}/dates`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch booked dates");
+      }
+      const data = await response.json();
+
+      setBookedDates((prev) => ({ ...prev, [roomId]: data }));
+    } catch (err) {
+      console.error("Error fetching booked dates:", err);
+    }
+  };
+
+  const handleBooking = (roomId) => {
+    setActiveRoom(roomId); // Show date pickers for this room
+    if (!bookedDates[roomId]) {
+      fetchBookedDates(roomId); // Fetch booked dates if not already fetched
+    }
+  };
+
+  const confirmBooking = async (roomId) => {
+    const { startDate, endDate } = selectedDates[roomId] || {};
+
+    if (!startDate || !endDate) {
+      alert("Please select start and end dates for booking.");
+      return;
+    }
+
     try {
       const response = await fetch(
         `http://localhost:5076/api/reservation/create/${estateId}/${roomId}`,
@@ -69,6 +107,10 @@ export default function PropertyPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify({
+            startDate: dayjs(startDate).format("YYYY-MM-DD"),
+            endDate: dayjs(endDate).format("YYYY-MM-DD"),
+          }),
         }
       );
 
@@ -77,6 +119,7 @@ export default function PropertyPage() {
       }
 
       alert("Room booked successfully!");
+      setActiveRoom(null); // Hide date pickers
     } catch (err) {
       console.error("Error booking room:", err);
       alert("Failed to book the room. Please try again.");
@@ -111,10 +154,10 @@ export default function PropertyPage() {
         </Typography>
 
         {/* Image Section */}
-        <Grid container spacing={2} className="property-images">
+        <Grid2 container spacing={2} className="property-images">
           {property.images &&
             property.images.map((image, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+              <Grid2 item xs={12} sm={6} md={4} key={index}>
                 <Paper elevation={3} className="image-paper">
                   <img
                     src={image}
@@ -122,9 +165,9 @@ export default function PropertyPage() {
                     className="property-image"
                   />
                 </Paper>
-              </Grid>
+              </Grid2>
             ))}
-        </Grid>
+        </Grid2>
 
         {/* Description */}
         <Box className="property-details">
@@ -141,9 +184,9 @@ export default function PropertyPage() {
           <Typography variant="h5" className="rooms-title">
             Available Rooms
           </Typography>
-          <Grid container spacing={2}>
+          <Grid2 container spacing={2}>
             {rooms.map((room) => (
-              <Grid item xs={12} sm={6} md={4} key={room.id}>
+              <Grid2 item xs={12} sm={6} md={4} key={room.id}>
                 <Paper elevation={3} className="room-card">
                   <Box className="room-info">
                     <Typography variant="h6">Room {room.name}</Typography>
@@ -152,17 +195,62 @@ export default function PropertyPage() {
                       Price: ${room.pricePerNight} per night
                     </Typography>
                   </Box>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleBooking(room.id)} // Pass roomId to booking handler
-                  >
-                    Book
-                  </Button>
+
+                  {activeRoom === room.id ? (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <Box className="date-pickers">
+                        <DatePicker
+                          label="Start Date"
+                          value={selectedDates[room.id]?.startDate || null}
+                          onChange={(date) =>
+                            setSelectedDates((prev) => ({
+                              ...prev,
+                              [room.id]: { ...prev[room.id], startDate: date },
+                            }))
+                          }
+                          shouldDisableDate={(date) =>
+                            bookedDates[room.id]?.includes(
+                              date.format("YYYY-MM-DD")
+                            )
+                          }
+                        />
+                        <DatePicker
+                          label="End Date"
+                          value={selectedDates[room.id]?.endDate || null}
+                          onChange={(date) =>
+                            setSelectedDates((prev) => ({
+                              ...prev,
+                              [room.id]: { ...prev[room.id], endDate: date },
+                            }))
+                          }
+                          shouldDisableDate={(date) =>
+                            bookedDates[room.id]?.includes(
+                              date.format("YYYY-MM-DD")
+                            )
+                          }
+                        />
+                      </Box>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => confirmBooking(room.id)}
+                      >
+                        Confirm
+                      </Button>
+                    </LocalizationProvider>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleBooking(room.id)}
+                    >
+                      Book
+                    </Button>
+                  )}
                 </Paper>
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
+          </Grid2>
         </Box>
 
         {/* Reviews Section */}

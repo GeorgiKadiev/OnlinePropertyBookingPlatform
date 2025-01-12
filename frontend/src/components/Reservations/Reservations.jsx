@@ -69,12 +69,12 @@ export default function MenuListComposition() {
       );
 
       // Check for response status and handle empty responses
-      if (!response.ok) {
-        throw new Error("Failed to post review");
-      }
+      // if (!response.ok) {
+      //   throw new Error("Failed to post review");
+      // }
     } catch (error) {
       console.error("Error posting review:", error);
-      return null;
+      return false;
     }
   };
 
@@ -194,11 +194,9 @@ export default function MenuListComposition() {
       token
     );
 
-    if (response) {
+    if (!response) {
       alert("Review posted successfully!");
       setReview({ rating: 0, comment: "" }); // Reset review form
-    } else {
-      alert("Failed to post review. Please try again.");
     }
     setLoadingReview(false);
   };

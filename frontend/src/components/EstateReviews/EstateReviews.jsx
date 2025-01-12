@@ -9,6 +9,8 @@ import {
   ListItem,
   ListItemText,
   IconButton,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag"; // Import FlagIcon
 import { useSelector } from "react-redux"; // To get the role from Redux store
@@ -22,6 +24,11 @@ export default function Reviews() {
   const [reviews, setReviews] = useState([]); // State to store reviews
   const [loading, setLoading] = useState(true); // State to handle loading state
   const [error, setError] = useState(null); // State to handle errors during fetching
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -61,11 +68,26 @@ export default function Reviews() {
         throw new Error("Failed to flag the review");
       }
 
-      console.log(`Successfully flagged review ID: ${reviewId}`);
+      // Show success message
+      setSnackbar({
+        open: true,
+        message:
+          "The review has been flagged successfully and will be reviewed by the admin.",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Error flagging review:", error);
-      alert("Failed to flag the review. Please try again.");
+      // Show error message
+      setSnackbar({
+        open: true,
+        message: "Failed to flag the review. Please try again.",
+        severity: "error",
+      });
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   if (loading) {
@@ -124,6 +146,22 @@ export default function Reviews() {
           </Typography>
         </Box>
       )}
+
+      {/* Snackbar for feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

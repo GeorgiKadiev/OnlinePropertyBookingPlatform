@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
@@ -18,9 +17,13 @@ import "./ResultsPage.css";
 export default function ResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // State for filters and properties
   const [filters, setFilters] = useState({});
   const [locationEstate, setLocationEstate] = useState("");
   const [propertyData, setPropertyData] = useState([]);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [error, setError] = useState(null);
 
   // Navigate to property details page
@@ -32,66 +35,66 @@ export default function ResultsPage() {
   const handleSearch = async (e) => {
     e.preventDefault();
 
-    if (locationEstate.trim()) {
-      const searchFilters = { location: locationEstate };
+    const searchFilters = {
+      location: locationEstate.trim(),
+      startDate,
+      endDate,
+    };
 
-      try {
-        const response = await fetch(
-          "http://localhost:5076/api/estate/filter",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(searchFilters),
-          }
-        );
+    try {
+      const response = await fetch("http://localhost:5076/api/estate/filter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(searchFilters),
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch estates");
-        }
-
-        const data = await response.json();
-        setPropertyData(data);
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-        setPropertyData([]);
+      if (!response.ok) {
+        throw new Error("Failed to fetch estates");
       }
-    } else {
-      // alert("Please enter a location to search.");
+
+      const data = await response.json();
+      setPropertyData(data);
+      setError(null);
+
+      // Update URL with new filters
+      const queryParams = new URLSearchParams({
+        location: searchFilters.location,
+        startDate: searchFilters.startDate,
+        endDate: searchFilters.endDate,
+      }).toString();
+      navigate(`?${queryParams}`);
+    } catch (err) {
+      setError(err.message);
+      setPropertyData([]);
     }
   };
 
+  // Load initial filters from URL query parameters
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
 
     const initialFilters = {
       location: queryParams.get("location") || "",
-      startDate: queryParams.get("startDate")
-        ? queryParams.get("startDate")
-        : null,
-      endDate: queryParams.get("endDate") ? queryParams.get("endDate") : null,
-      numberOfPersons: queryParams.get("numberOfPeople")
-        ? parseInt(queryParams.get("numberOfPeople"))
-        : null,
+      startDate: queryParams.get("startDate"),
+      endDate: queryParams.get("endDate"),
     };
 
     setFilters(initialFilters);
-    console.log(initialFilters);
+    setLocationEstate(initialFilters.location || "");
+    setStartDate(initialFilters.startDate || null);
+    setEndDate(initialFilters.endDate || null);
 
     const fetchEstates = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5076/api/estate/filter",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(initialFilters),
-          }
-        );
+        const response = await fetch("http://localhost:5076/api/estate/filter", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(initialFilters),
+        });
 
         if (!response.ok) {
           throw new Error("Failed to fetch estates");
@@ -118,7 +121,22 @@ export default function ResultsPage() {
       <NavBar />
       <Box className="sidebar-results">
         {/* Sidebar Section */}
-        <FiltersSideBar />
+        <FiltersSideBar
+          filters={filters}
+          setFilters={(newFilters) => {
+            // Update filters and dates when applying new filters
+            setFilters((prev) => ({ ...prev, ...newFilters }));
+            setStartDate(newFilters.startDate || startDate);
+            setEndDate(newFilters.endDate || endDate);
+
+            // Update URL
+            const queryParams = new URLSearchParams({
+              ...filters,
+              ...newFilters,
+            }).toString();
+            navigate(`?${queryParams}`);
+          }}
+        />
 
         {/* Main Results Section */}
         <div className="main-info">

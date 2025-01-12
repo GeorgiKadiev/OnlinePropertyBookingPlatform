@@ -97,6 +97,11 @@ export default function PropertyPage() {
       alert("Please select start and end dates for booking.");
       return;
     }
+    const payload =  JSON.stringify({
+      CheckInDate: dayjs(startDate).format("YYYY-MM-DD"),
+      CheckOutDate: dayjs(endDate).format("YYYY-MM-DD"),
+    });
+    console.log(payload);
 
     try {
       const response = await fetch(
@@ -107,11 +112,8 @@ export default function PropertyPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            startDate: dayjs(startDate).format("YYYY-MM-DD"),
-            endDate: dayjs(endDate).format("YYYY-MM-DD"),
-          }),
-        }
+          body: payload,
+          }
       );
 
       if (!response.ok) {

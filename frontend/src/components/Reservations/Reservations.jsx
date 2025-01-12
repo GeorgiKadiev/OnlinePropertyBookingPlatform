@@ -106,6 +106,41 @@ export default function MenuListComposition() {
     setLoading(false);
   };
 
+  const handleCancelReservation = async (reservationId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/reservation/delete/${reservationId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to cancel the reservation");
+      }
+
+      alert("Reservation canceled successfully!");
+
+      // Update the reservations state by removing the canceled reservation
+      setReservations((prevReservations) =>
+        prevReservations.filter(
+          (reservation) => reservation.id !== reservationId
+        )
+      );
+      filterReservations(
+        reservations.filter((reservation) => reservation.id !== reservationId),
+        filterType
+      );
+    } catch (error) {
+      console.error("Error canceling reservation:", error);
+      alert("Failed to cancel reservation. Please try again.");
+    }
+  };
+
   const filterReservations = (reservationsData, filterType) => {
     const currentDate = dayjs(); // Get current date using dayjs
     let filtered = [];
@@ -219,74 +254,92 @@ export default function MenuListComposition() {
       {/* Display actual reservations */}
       {!loading && !errorMessage && filteredReservations.length > 0 && (
         <Box sx={{ padding: 2 }}>
-          {filteredReservations.map((reservation) => (
-            <Box
-              key={reservation.id}
-              sx={{
-                border: "1px solid #ddd", // Light border around each reservation
-                borderRadius: "8px", // Rounded corners
-                padding: "16px",
-                marginBottom: "16px", // Space between reservations
-                boxShadow: 1, // Slight shadow for a card-like feel
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                {reservation.estateName}
-              </Typography>
-              <Divider sx={{ margin: "8px 0" }} />
-              <Typography variant="body1">
-                <strong>Customer:</strong> {reservation.customerName}
-              </Typography>
-              <Typography variant="body1">
-                <strong>Check-in Date:</strong> {reservation.checkInDate}
-              </Typography>
-              <Typography variant="body1">
-                <strong>Check-out Date:</strong> {reservation.checkOutDate}
-              </Typography>
-              <Typography variant="body1">
-                <strong>Total Price:</strong>{" "}
-                {reservation.totalPrice || "Not available"}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                <strong>Status:</strong> {reservation.status || "Pending"}
-              </Typography>
+          {filteredReservations.map((reservation) => {
+            const isCancelable =
+              dayjs(reservation.checkInDate).isAfter(dayjs()) &&
+              dayjs(reservation.checkInDate).diff(dayjs(), "day") >= 2;
 
-              {/* Review section (only for past reservations) */}
-              {dayjs(reservation.checkOutDate).isBefore(dayjs()) &&
-                role === "Customer" && (
-                  <Box sx={{ marginTop: 2 }}>
-                    <Typography variant="h6">Post a Review</Typography>
-                    <Box sx={{ display: "flex", flexDirection: "column" }}>
-                      <Rating
-                        name="rating"
-                        value={review.rating}
-                        onChange={(e, newValue) =>
-                          setReview({ ...review, rating: newValue })
-                        }
-                      />
-                      <TextField
-                        label="Comment"
-                        name="comment"
-                        multiline
-                        rows={4}
-                        value={review.comment}
-                        onChange={handleReviewChange}
-                        sx={{ marginTop: 2 }}
-                      />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{ marginTop: 2 }}
-                        onClick={() => handlePostReview(reservation.estateId)}
-                        disabled={loadingReview}
-                      >
-                        {loadingReview ? "Posting..." : "Submit Review"}
-                      </Button>
-                    </Box>
-                  </Box>
+            return (
+              <Box
+                key={reservation.id}
+                sx={{
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  marginBottom: "16px",
+                  boxShadow: 1,
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  {reservation.estateName}
+                </Typography>
+                <Divider sx={{ margin: "8px 0" }} />
+                <Typography variant="body1">
+                  <strong>Customer:</strong> {reservation.customerName}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Check-in Date:</strong> {reservation.checkInDate}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Check-out Date:</strong> {reservation.checkOutDate}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Total Price:</strong>{" "}
+                  {reservation.totalPrice || "Not available"}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  <strong>Status:</strong> {reservation.status || "Pending"}
+                </Typography>
+
+                {/* Cancel Reservation Button */}
+                {isCancelable && (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    sx={{ marginTop: 2 }}
+                    onClick={() => handleCancelReservation(reservation.id)}
+                  >
+                    Cancel Reservation
+                  </Button>
                 )}
-            </Box>
-          ))}
+
+                {/* Review section (only for past reservations) */}
+                {dayjs(reservation.checkOutDate).isBefore(dayjs()) &&
+                  role === "Customer" && (
+                    <Box sx={{ marginTop: 2 }}>
+                      <Typography variant="h6">Post a Review</Typography>
+                      <Box sx={{ display: "flex", flexDirection: "column" }}>
+                        <Rating
+                          name="rating"
+                          value={review.rating}
+                          onChange={(e, newValue) =>
+                            setReview({ ...review, rating: newValue })
+                          }
+                        />
+                        <TextField
+                          label="Comment"
+                          name="comment"
+                          multiline
+                          rows={4}
+                          value={review.comment}
+                          onChange={handleReviewChange}
+                          sx={{ marginTop: 2 }}
+                        />
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{ marginTop: 2 }}
+                          onClick={() => handlePostReview(reservation.estateId)}
+                          disabled={loadingReview}
+                        >
+                          {loadingReview ? "Posting..." : "Submit Review"}
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+              </Box>
+            );
+          })}
         </Box>
       )}
     </Box>

@@ -135,6 +135,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     return NotFound("The room doesn't match a proper estate");
                 }
                 List<DateOnly> occupied = _context.Reservations
+                    .AsEnumerable()
                 .Where(r => r.RoomId == roomId)
                 .SelectMany(r => Enumerable.Range(0, (r.CheckOutDate.ToDateTime(TimeOnly.MinValue) - r.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
                 .Select(offset => r.CheckInDate.AddDays(offset)))
@@ -151,12 +152,15 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpGet("details/{roomId}/dates")]
         public async Task<ActionResult<List<DateOnly>>> GetEmptyDates(int roomId)
         {
+            if (!_context.Rooms.Any(r => r.Id == roomId))
+                return BadRequest("room not found");
             List<DateOnly> occupied = _context.Reservations
+                .AsEnumerable()
                 .Where(r => r.RoomId == roomId)
                 .SelectMany(r => Enumerable.Range(0, (r.CheckOutDate.ToDateTime(TimeOnly.MinValue) - r.CheckInDate.ToDateTime(TimeOnly.MinValue)).Days)
                 .Select(offset => r.CheckInDate.AddDays(offset)))
                 .ToList();
-            return Ok();
+            return Ok(occupied);
         }
         [Authorize(Roles = "EstateOwner")]
         [HttpPost("{ roomId}/add-photo")]

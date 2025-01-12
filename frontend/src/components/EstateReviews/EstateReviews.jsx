@@ -8,11 +8,15 @@ import {
   List,
   ListItem,
   ListItemText,
+  IconButton,
 } from "@mui/material";
+import FlagIcon from "@mui/icons-material/Flag"; // Import FlagIcon
+import { useSelector } from "react-redux"; // To get the role from Redux store
 import "./EstateReviews.css";
 
 export default function Reviews() {
   const { id } = useParams(); // Get the property ID from URL parameter
+  const role = useSelector((state) => state.role); // Get the user's role
 
   const [reviews, setReviews] = useState([]); // State to store reviews
   const [loading, setLoading] = useState(true); // State to handle loading state
@@ -38,6 +42,11 @@ export default function Reviews() {
 
     fetchReviews();
   }, [id]);
+
+  const handleFlagClick = (reviewId) => {
+    // Implement flag logic here
+    alert(`Flagged review ID: ${reviewId}`);
+  };
 
   if (loading) {
     return (
@@ -66,15 +75,24 @@ export default function Reviews() {
             <Box className="review-item-container" key={review.id}>
               <ListItem className="review-item">
                 <ListItemText secondary={review.comment} />
+                {/* Conditionally render the flag button */}
+                {role === "EstateOwner" && (
+                  <IconButton
+                    color="error"
+                    onClick={() => handleFlagClick(review.id)}
+                  >
+                    <FlagIcon />
+                  </IconButton>
+                )}
               </ListItem>
-              <Box sx={{display: "flex", flexDirection: "column"}}>
-              <Box sx={{ "& > legend": { mt: 2 } }} className="review-rating">
-                <Typography component="legend">Rating</Typography>
-                <Rating name="read-only" value={review.rating} readOnly />
-              </Box>
-              <ListItem>
-                <ListItemText secondary={review.date} />
-              </ListItem>
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <Box sx={{ "& > legend": { mt: 2 } }} className="review-rating">
+                  <Typography component="legend">Rating</Typography>
+                  <Rating name="read-only" value={review.rating} readOnly />
+                </Box>
+                <ListItem>
+                  <ListItemText secondary={review.date} />
+                </ListItem>
               </Box>
             </Box>
           ))}

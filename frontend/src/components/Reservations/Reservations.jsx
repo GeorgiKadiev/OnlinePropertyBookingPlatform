@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   MenuItem,
   MenuList,
@@ -7,63 +8,9 @@ import {
   Typography,
   Button,
   TextField,
+  Rating,
 } from "@mui/material";
-import { useSelector } from "react-redux";
-import dayjs from "dayjs"; // Import dayjs for date comparison
-import Rating from "@mui/material/Rating";
-
-const fetchReservations = async (url, token) => {
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch reservations");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching reservations:", error);
-    return null;
-  }
-};
-
-const postReview = async (estateId, rating, comment, token) => {
-  try {
-    const payload = JSON.stringify({
-      Rating: rating,
-      Comment: comment,
-    });
-
-    console.log("Payload being sent:", payload);
-    console.log("Estate ID:", estateId);
-
-    const response = await fetch(
-      `http://localhost:5076/api/review/create/${estateId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: payload,
-      }
-    );
-
-    // Check for response status and handle empty responses
-    if (!response.ok) {
-      throw new Error("Failed to post review");
-    }
-  } catch (error) {
-    console.error("Error posting review:", error);
-    return null;
-  }
-};
+import dayjs from "dayjs";
 
 export default function MenuListComposition() {
   const role = useSelector((state) => state.role);
@@ -77,6 +24,59 @@ export default function MenuListComposition() {
   const [filterType, setFilterType] = useState("All");
   const [review, setReview] = useState({ rating: 0, comment: "" });
   const [loadingReview, setLoadingReview] = useState(false);
+
+  const fetchReservations = async (url, token) => {
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch reservations");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching reservations:", error);
+      return null;
+    }
+  };
+
+  const postReview = async (estateId, rating, comment, token) => {
+    try {
+      const payload = JSON.stringify({
+        Rating: rating,
+        Comment: comment,
+      });
+
+      console.log("Payload being sent:", payload);
+      console.log("Estate ID:", estateId);
+
+      const response = await fetch(
+        `http://localhost:5076/api/review/create/${estateId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: payload,
+        }
+      );
+
+      // Check for response status and handle empty responses
+      if (!response.ok) {
+        throw new Error("Failed to post review");
+      }
+    } catch (error) {
+      console.error("Error posting review:", error);
+      return null;
+    }
+  };
 
   const handleGetReservations = async () => {
     setLoading(true);
@@ -252,38 +252,39 @@ export default function MenuListComposition() {
               </Typography>
 
               {/* Review section (only for past reservations) */}
-              {dayjs(reservation.checkOutDate).isBefore(dayjs()) && (
-                <Box sx={{ marginTop: 2 }}>
-                  <Typography variant="h6">Post a Review</Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <Rating
-                      name="rating"
-                      value={review.rating}
-                      onChange={(e, newValue) =>
-                        setReview({ ...review, rating: newValue })
-                      }
-                    />
-                    <TextField
-                      label="Comment"
-                      name="comment"
-                      multiline
-                      rows={4}
-                      value={review.comment}
-                      onChange={handleReviewChange}
-                      sx={{ marginTop: 2 }}
-                    />
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{ marginTop: 2 }}
-                      onClick={() => handlePostReview(reservation.estateId)}
-                      disabled={loadingReview}
-                    >
-                      {loadingReview ? "Posting..." : "Submit Review"}
-                    </Button>
+              {dayjs(reservation.checkOutDate).isBefore(dayjs()) &&
+                role === "Customer" && (
+                  <Box sx={{ marginTop: 2 }}>
+                    <Typography variant="h6">Post a Review</Typography>
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                      <Rating
+                        name="rating"
+                        value={review.rating}
+                        onChange={(e, newValue) =>
+                          setReview({ ...review, rating: newValue })
+                        }
+                      />
+                      <TextField
+                        label="Comment"
+                        name="comment"
+                        multiline
+                        rows={4}
+                        value={review.comment}
+                        onChange={handleReviewChange}
+                        sx={{ marginTop: 2 }}
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ marginTop: 2 }}
+                        onClick={() => handlePostReview(reservation.estateId)}
+                        disabled={loadingReview}
+                      >
+                        {loadingReview ? "Posting..." : "Submit Review"}
+                      </Button>
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                )}
             </Box>
           ))}
         </Box>

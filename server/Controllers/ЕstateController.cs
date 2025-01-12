@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Mono.TextTemplating;
 using OnlinePropertyBookingPlatform.Models;
 using OnlinePropertyBookingPlatform.Models.DataModels;
 using OnlinePropertyBookingPlatform.Models.DataTransferObjects;
@@ -125,8 +126,9 @@ namespace OnlinePropertyBookingPlatform.Controllers
                         EstateOwnerId = e.EstateOwnerId,
                         Description = e.Description,
                         EstateOwnerName = e.EstateOwner.Username
-
+                        Amenities = e.Amenities.Select(a => a.AmenityName).ToList() //added amenities here
                     }).ToListAsync();
+                
                 return Ok(users);
             }
             catch (Exception ex)
@@ -191,6 +193,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 };
                 dto.EstateOwnerName = _context.Users
                     .FirstOrDefault(e => e.Id == dto.EstateOwnerId).Username;
+
+                Amenities = estate.Amenities.Select(a => a.AmenityName).ToList() // added amenities here
 
 
                 return Ok(dto);

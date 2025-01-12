@@ -12,8 +12,8 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    [Migration("20250112144102_migr")]
-    partial class migr
+    [Migration("20250112152454_UpdateRelationships")]
+    partial class UpdateRelationships
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

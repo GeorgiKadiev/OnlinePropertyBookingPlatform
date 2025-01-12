@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     /// <inheritdoc />
-    public partial class migr : Migration
+    public partial class UpdateRelationships : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

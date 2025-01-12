@@ -82,24 +82,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             return Ok();
 
-  /*
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-
-            if (!_context.Reviews.Any(r => r.Id == review.Id))
-            {
-                return BadRequest("review doesn't exist");
-            }
-
-            Review review1 = _context.Reviews.Where(r => r.Id == review.Id).First();
-            _context.Update(review1);
-            _context.SaveChanges();
-
-            return Ok();
-            */
         }
         [Authorize(Roles = "Customer,Admin")]
         [HttpDelete("{id}")]
@@ -247,6 +229,54 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+        [HttpPut("flag/{reviewId}")]
+        [Authorize(Roles ="EstateOwner")]
+        public async Task<ActionResult> FlagReview(int reviewId)
+        {
+            var review = _context.Reviews.FirstOrDefault(r => r.Id == reviewId);
+            if (review == null)
+                return BadRequest("Review not found");
+
+            var estateOfReviewId = review.EstateId;
+            var estateOfReview = _context.Estates.FirstOrDefault(e=>e.Id == estateOfReviewId);
+            if (estateOfReview == null)
+                return BadRequest("Review information doesn't match estate data");
+
+            var estateOwnerId = estateOfReview.EstateOwnerId;
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            var userId = int.Parse(userIdClaim.Value);
+            if (userId != estateOwnerId)
+                return BadRequest("Only the owner of the estate can flag a review");
+
+            review.flagged = true;
+            _context.Reviews.Update(review);
+            _context.SaveChanges();
+            return Ok();
+
+
+        }
+        [HttpGet("flagged")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> GetAllFlaggedReviews()
+        {
+            var flaggedReviews = _context.Reviews.Where(r => r.flagged)
+                .Include(r => r.Author)
+                    .Include(r => r.Estate)
+                    .Select(r => new ReviewDto
+                    {
+                        Id = r.Id,
+                        AuthorId = r.AuthorId,
+                        EstateId = r.EstateId,
+                        EstateName = r.Estate.Title,
+                        AuthorEmail = r.Author.Email,
+                        AuthorName = r.Author.Username,
+                        Rating = r.Rating,
+                        Date = r.Date,
+                        Comment = r.Comment
+                    });
+            return Ok(flaggedReviews);
+
         }
     }
 }

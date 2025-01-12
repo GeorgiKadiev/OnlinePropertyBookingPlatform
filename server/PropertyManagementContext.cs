@@ -127,6 +127,7 @@ public partial class PropertyManagementContext : DbContext
             entity.HasOne(d => d.Estate).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.EstateId)
                 .HasConstraintName("review_ibfk_1");
+            entity.HasIndex(e => e.flagged, "flagged");
         });
 
         modelBuilder.Entity<Room>(entity =>
@@ -176,20 +177,10 @@ public partial class PropertyManagementContext : DbContext
             entity.Property(e => e.Url);
             entity.Property(e => e.EstateId);
 
-            modelBuilder.Entity<Amenity>().HasData(
-            new Amenity { Id = 1, AmenityName = "Air Conditioning", EstateId = 1 },
-            new Amenity { Id = 2, AmenityName = "Wi-Fi", EstateId = 1 },
-            new Amenity { Id = 3, AmenityName = "Parking", EstateId = 2 },
-            new Amenity { Id = 4, AmenityName = "Swimming Pool", EstateId = 3 },
-            new Amenity { Id = 5, AmenityName = "Eco-Friendly", EstateId = 4 },
-            new Amenity { Id = 6, AmenityName = "DigitalNomad-Friendly", EstateId = 5 },
-            new Amenity { Id = 7, AmenityName = "Hair Dryer", EstateId = 6 },
-            new Amenity { Id = 8, AmenityName = "Fridge", EstateId = 7 },
-            new Amenity { Id = 9, AmenityName = "Smoker-Friendly", EstateId = 8 },
-            new Amenity { Id = 10, AmenityName = "Fitness Centre", EstateId = 9 }
-        );
+            
 
         });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

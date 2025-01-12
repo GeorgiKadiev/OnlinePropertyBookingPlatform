@@ -73,7 +73,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
 
         // Изтриване на резервация 
-        [Authorize(Roles = "Admin,Customer")]
+        [Authorize]
         [HttpDelete("delete/{id}")]
         public IActionResult Delete(int id)
         {
@@ -83,7 +83,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("Reservation doesn't exist.");
             }
-
             _context.Reservations.Remove(reservation);
             _context.SaveChanges();
             return Ok(); 

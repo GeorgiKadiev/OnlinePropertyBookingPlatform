@@ -12,6 +12,7 @@ public partial class Review
     public int Rating { get; set; }
 
     public string? Comment { get; set; }
+    public bool flagged { get; set; } = false;
 
     public DateOnly? Date { get; set; }
 
@@ -20,4 +21,5 @@ public partial class Review
     public virtual User? Author { get; set; }
 
     public virtual Estate? Estate { get; set; }
+
 }

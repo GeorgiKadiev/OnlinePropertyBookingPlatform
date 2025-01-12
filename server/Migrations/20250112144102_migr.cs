@@ -7,13 +7,47 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     /// <inheritdoc />
-    public partial class @new : Migration
+    public partial class migr : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "estatephotos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Url = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EstateId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+
+            migrationBuilder.CreateTable(
+                name: "roomphotos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Url = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RoomId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
 
             migrationBuilder.CreateTable(
                 name: "user",
@@ -54,8 +88,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     Title = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PricePerNight = table.Column<double>(type: "double", nullable: false),
-                    EstateOwnerId = table.Column<int>(type: "int", nullable: true),
-                    Description = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
+                    EstateOwnerId = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -65,7 +99,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         name: "estate_ibfk_1",
                         column: x => x.EstateOwnerId,
                         principalTable: "user",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
@@ -76,7 +111,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 {
                     EstateId = table.Column<int>(type: "int", nullable: false),
                     AmenityName = table.Column<string>(type: "varchar(255)", nullable: false, collation: "utf8mb4_0900_ai_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -101,6 +137,7 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     Rating = table.Column<int>(type: "int", nullable: false),
                     Comment = table.Column<string>(type: "text", nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    flagged = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Date = table.Column<DateOnly>(type: "date", nullable: true),
                     AuthorId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -249,6 +286,11 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 column: "EstateId");
 
             migrationBuilder.CreateIndex(
+                name: "flagged",
+                table: "review",
+                column: "flagged");
+
+            migrationBuilder.CreateIndex(
                 name: "EstateId2",
                 table: "room",
                 column: "EstateId");
@@ -267,10 +309,16 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 name: "amenities");
 
             migrationBuilder.DropTable(
+                name: "estatephotos");
+
+            migrationBuilder.DropTable(
                 name: "payment");
 
             migrationBuilder.DropTable(
                 name: "review");
+
+            migrationBuilder.DropTable(
+                name: "roomphotos");
 
             migrationBuilder.DropTable(
                 name: "reservation");

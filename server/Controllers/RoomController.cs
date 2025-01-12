@@ -109,7 +109,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             }
         }
         [HttpGet("details/{roomId}")]
-        public async Task<ActionResult<Room>> GetRoomDetails(int roomId)
+        public async Task<ActionResult<RoomDto>> GetRoomDetails(int roomId)
         {
             try
             {
@@ -141,7 +141,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 .Select(offset => r.CheckInDate.AddDays(offset)))
                 .ToList();
 
-
+                dto.DatesWhenOccupied = occupied;
                 return Ok(dto);
             }
             catch (Exception ex)
@@ -164,7 +164,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
         [Authorize(Roles = "EstateOwner")]
         [HttpPost("{ roomId}/add-photo")]
-        public async Task<ActionResult> SetEstatePhoto(int roomId, [FromBody] UrlModel model)
+        public async Task<ActionResult> SetRoomPhoto(int roomId, [FromBody] UrlModel model)
         {
             if (!_context.Rooms.Any(e => e.Id == roomId))
             {

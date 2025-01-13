@@ -259,7 +259,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                         PricePerNight = e.PricePerNight,
                         EstateOwnerId = e.EstateOwnerId,
                         Description = e.Description,
-                        EstateOwnerName = e.EstateOwner.Username
+                        EstateOwnerName = e.EstateOwner.Username,
                         Photos = e.Photos.Select(p => p.Url).ToList()   
 
                     }).ToListAsync();

@@ -50,6 +50,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             reservation.CustomerId = int.Parse(_sanitizer.Sanitize(userIdClaim.Value));
             // reservation.CustomerId = int.Parse(userId);
+            if (!_context.Rooms.Any(r => r.Id == roomId))
+                return BadRequest("Room doesn't exist");
+            if(!_context.Estates.Any(r => r.Id == estateId))
+                return BadRequest("Estate doesn't exist");
             reservation.EstateId = estateId;
             reservation.RoomId = roomId;
 
@@ -64,6 +68,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("room is not avaivable for one of the given days");
             }
+            //TimeSpan difference = reservation.CheckInDate.ToDateTime(TimeOnly.MinValue)
+            //    - reservation.CheckOutDate.ToDateTime(TimeOnly.MinValue);
+            //int days = difference.Days;
+            //reservation.TotalPrice = days * _context.Rooms.First(r=>r.Id == roomId).
 
 
             _context.Reservations.Add(reservation);

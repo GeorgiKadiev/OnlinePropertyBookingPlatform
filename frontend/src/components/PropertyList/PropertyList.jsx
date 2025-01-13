@@ -107,6 +107,8 @@ export default function LandingPage() {
       return;
     }
 
+    const payload = JSON.stringify({ url: photoLink });
+    console.log(payload);
     try {
       const response = await fetch(
         `http://localhost:5076/api/estate/${estateId}/add-photo`,
@@ -116,7 +118,7 @@ export default function LandingPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ Url: photoLink }), // Send the photo link in the request body
+          body: payload, // Send the photo link in the request body
         }
       );
 
@@ -170,7 +172,7 @@ export default function LandingPage() {
         <CardContent className="card-content" sx={{ width: "60%", padding: 2 }}>
           <div className="card-buttons">
             <Button
-              className="card-button"
+              // className="card-button"
               onClick={() => navigate("/create-property")}
             >
               Add new Property
@@ -232,8 +234,8 @@ export default function LandingPage() {
                   }}
                 >
                   <MenuItem
-                    onClick={handleOpenDialog}
-                    // onClick={() => handleAddRoom(card.id)}
+                    // onClick={handleOpenDialog}
+                    onClick={() => handleAddRoom(card.id)}
                   >
                     Add room
                   </MenuItem>
@@ -260,21 +262,21 @@ export default function LandingPage() {
                     <Button onClick={handleCloseDialog} color="secondary">
                       Cancel
                     </Button>
-                    <Button onClick={handleAddPhotos} color="primary">
+                    <Button
+                      onClick={() => handleAddPhotos(card.id)}
+                      color="primary"
+                    >
                       Add Photo
                     </Button>
                   </DialogActions>
                 </Dialog>
-                <Button
-                  className="card-button"
-                  onClick={() => navigate("/reservations")}
-                >
+                <Button onClick={() => navigate(`/owner-rooms/${card.id}`)}>
+                  view rooms
+                </Button>
+                <Button onClick={() => navigate("/reservations")}>
                   Reservations
                 </Button>
-                <Button
-                  className="card-button"
-                  onClick={() => navigate(`/reviews/${card.id}`)}
-                >
+                <Button onClick={() => navigate(`/reviews/${card.id}`)}>
                   Reviews
                 </Button>
                 <DeleteConfirmationDialog

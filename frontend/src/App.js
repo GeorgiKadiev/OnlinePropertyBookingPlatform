@@ -16,16 +16,17 @@ import ForgotPassForm from "./components/ForgotPassForm/ForgotPassForm";
 import ReviewsPage from "./app/OwnerPages/ReviewsPage/ReviewsPage";
 import SuccessPassword from "./components/Success/SuccessPassword";
 import AddRoomForm from "./components/AddRoomForm/AddRoomForm";
+import Rooms from "./app/OwnerPages/Rooms/Rooms";
 
 const theme = createTheme({
   typography: {
     allVariants: {
-      color: "rgb(60, 12, 63)",  // Apply the color globally to all typography elements
+      color: "rgb(60, 12, 63)", // Apply the color globally to all typography elements
     },
   },
   palette: {
     text: {
-      primary: "rgb(60, 12, 63)",  // Apply to primary text color
+      primary: "rgb(60, 12, 63)", // Apply to primary text color
     },
     primary: {
       main: "rgb(251, 200, 255)", // Primary button background color
@@ -39,15 +40,15 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          color: 'white', // Text color for the button
-          backgroundColor: 'rgb(251, 200, 255)', // Button background color
-          '&:hover': {
-            backgroundColor: 'rgb(255, 225, 255)', // Hover background color
-            boxShadow: '0 4px 6px rgba(82, 13, 82, 0.1)', // Optional hover shadow
+          color: "white", // Text color for the button
+          backgroundColor: "rgb(251, 200, 255)", // Button background color
+          "&:hover": {
+            backgroundColor: "rgb(255, 225, 255)", // Hover background color
+            boxShadow: "0 4px 6px rgba(82, 13, 82, 0.1)", // Optional hover shadow
           },
         },
         text: {
-          color: 'rgb(60, 12, 63)', // Text color for text buttons
+          color: "rgb(60, 12, 63)", // Text color for text buttons
         },
       },
     },
@@ -74,6 +75,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassForm />} />
           <Route path="/reviews/:id" element={<ReviewsPage />} />
           <Route path="/add-room/:id" element={<AddRoomForm />} />
+          <Route path="/owner-rooms/:id" element={<Rooms />} />
+          {/* /owner-rooms */}
         </Routes>
       </div>
     </ThemeProvider>

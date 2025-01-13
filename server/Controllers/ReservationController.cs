@@ -79,7 +79,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.SaveChanges();
 
 
-            // Email notification
+            /* Email notification
             var user = _context.Users.FirstOrDefault(u => u.Id == userId); // Retrieve user details
             if (user != null)
             {
@@ -88,7 +88,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     subject: "Reservation Confirmation",
                     message: $"Dear {user.Username}, Your reservation has been confirmed. Thank you for booking with us!"
                 );
-            }
+            }*/
 
 
             return Ok();
@@ -115,7 +115,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.Reservations.Remove(reservation);
             _context.SaveChanges();
 
-            // Send email notification if the user exists
+            /* Send email notification if the user exists
             if (user != null)
             {
                 _emailSender.SendEmailAsync(
@@ -123,7 +123,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     subject: "Reservation Canceled",
                     message: $"Dear {user.Username}, Your reservation has been canceled. If you have any questions, please contact support."
                 );
-            }
+            }*/
 
 
 

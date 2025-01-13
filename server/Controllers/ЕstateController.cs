@@ -22,7 +22,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context = context;
             _sanitizer = sanitizer;
         }
-
+        
         private static readonly List<string> AvailableAmenities = new List<string>
     {
         "Wi-Fi",
@@ -40,7 +40,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         "Kitchen",
         "Fitness Centre"
     };
-
+        [Authorize]
         [HttpGet("available-amenities")]
         public IActionResult GetAvailableAmenities()
         {

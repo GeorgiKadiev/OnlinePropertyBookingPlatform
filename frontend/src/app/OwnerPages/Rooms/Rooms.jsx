@@ -158,7 +158,7 @@ export default function Rooms() {
                 }}
               >
                 <img
-                  src={room.imageUrl || "https://via.placeholder.com/150"}
+                  src={room.photos || "https://via.placeholder.com/150"}
                   alt={room.name}
                   style={{ width: "100%", height: "auto", objectFit: "cover" }}
                 />

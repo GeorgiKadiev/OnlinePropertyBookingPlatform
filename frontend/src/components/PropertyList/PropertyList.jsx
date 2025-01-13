@@ -21,17 +21,15 @@ import "./PropertyList.css";
 export default function LandingPage() {
   const navigate = useNavigate();
   const location = useLocation(); // Access location to get state
-
+  const userId = useSelector((state) => state.id);
+  const token = useSelector((state) => state.token);
   const [cards, setCards] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
   const [refreshKey, setRefreshKey] = useState(0);
   const [menuState, setMenuState] = useState({});
   const [successMessage, setSuccessMessage] = useState(null);
   const [selectedEstateId, setSelectedEstateId] = useState(null);
-
-  const userId = useSelector((state) => state.id);
-  const token = useSelector((state) => state.token);
-  const open = Boolean(anchorEl);
   const [photoLink, setPhotoLink] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -189,6 +187,7 @@ export default function LandingPage() {
       ) : (
         cards.map((card) => (
           <Card className="card" key={card.id}>
+            {console.log(card.photos)}
             <Box
               sx={{
                 width: "15%",
@@ -198,8 +197,7 @@ export default function LandingPage() {
               }}
             >
               <img
-                src={card.imageUrl || "https://via.placeholder.com/150"}
-                alt={card.name}
+                src={card.photos || "https://via.placeholder.com/150"}
                 style={{ width: "100%", height: "auto", objectFit: "cover" }}
               />
             </Box>

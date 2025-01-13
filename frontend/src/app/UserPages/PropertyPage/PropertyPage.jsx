@@ -97,7 +97,7 @@ export default function PropertyPage() {
       alert("Please select start and end dates for booking.");
       return;
     }
-    const payload =  JSON.stringify({
+    const payload = JSON.stringify({
       CheckInDate: dayjs(startDate).format("YYYY-MM-DD"),
       CheckOutDate: dayjs(endDate).format("YYYY-MM-DD"),
     });
@@ -113,7 +113,7 @@ export default function PropertyPage() {
             Authorization: `Bearer ${token}`,
           },
           body: payload,
-          }
+        }
       );
 
       if (!response.ok) {
@@ -157,8 +157,8 @@ export default function PropertyPage() {
 
         {/* Image Section */}
         <Grid2 container spacing={2} className="property-images">
-          {property.images &&
-            property.images.map((image, index) => (
+          {property.photos &&
+            property.photos.map((image, index) => (
               <Grid2 item xs={12} sm={6} md={4} key={index}>
                 <Paper elevation={3} className="image-paper">
                   <img
@@ -196,6 +196,21 @@ export default function PropertyPage() {
                     <Typography>
                       Price: ${room.pricePerNight} per night
                     </Typography>
+                    {/* Image Section */}
+                    <Grid2 container spacing={2} className="property-images">
+                      {room.photos &&
+                        room.photos.map((image, index) => (
+                          <Grid2 item xs={12} sm={6} md={4} key={index}>
+                            <Paper elevation={3} className="image-paper">
+                              <img
+                                src={image}
+                                alt={`Property image ${index + 1}`}
+                                className="property-image"
+                              />
+                            </Paper>
+                          </Grid2>
+                        ))}
+                    </Grid2>
                   </Box>
 
                   {activeRoom === room.id ? (

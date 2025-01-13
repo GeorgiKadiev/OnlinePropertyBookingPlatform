@@ -38,27 +38,6 @@ export default function ResultsPage() {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  // const handelMap = () => {
-  //   return (
-  //     <APIProvider
-  //       apiKey={"Your API key here"}
-  //       onLoad={() => console.log("Maps API has loaded.")}
-  //     >
-  //       <Map
-  //         defaultZoom={13}
-  //         defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
-  //         onCameraChanged={(ev) =>
-  //           console.log(
-  //             "camera changed:",
-  //             ev.detail.center,
-  //             "zoom:",
-  //             ev.detail.zoom
-  //           )
-  //         }
-  //       ></Map>
-  //     </APIProvider>
-  //   );
-  // };
 
   // Navigate to property details page
   const handleMoreInfo = (id) => {

@@ -235,6 +235,9 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
                     b.Property<string>("RoomType")
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");

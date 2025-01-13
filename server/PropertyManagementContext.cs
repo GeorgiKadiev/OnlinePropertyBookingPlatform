@@ -148,6 +148,7 @@ public partial class PropertyManagementContext : DbContext
 
             entity.Property(e => e.Description);
             entity.Property(e => e.Name);
+            entity.Property(e => e.Price);
         });
 
         // Configure many-to-many relationship between Room and Amenity

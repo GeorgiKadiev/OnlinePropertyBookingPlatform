@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     /// <inheritdoc />
-    public partial class SeedEstatesData : Migration
+    public partial class @new : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -71,18 +71,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
 
-            // Insert seed data for estates
-            migrationBuilder.InsertData(
-                table: "estate",
-                columns: new[] { "Id", "Location", "Title", "PricePerNight", "EstateOwnerId", "Description" },
-                values: new object[,]
-                {
-                    { 1, "City Center", "Luxury Apartment", 150.0, 1, "A luxurious apartment in the city center." },
-                    { 2, "Suburbs", "Eco Lodge", 100.0, 2, "An eco-friendly lodge surrounded by nature." },
-                    { 3, "Countryside", "Country House", 200.0, 3, "A spacious house in the countryside." },
-                    { 4, "Beachside", "Beach Villa", 300.0, 4, "A beautiful villa by the beach." }
-                });
-
             migrationBuilder.CreateTable(
                 name: "amenities",
                 columns: table => new
@@ -104,6 +92,7 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+
             migrationBuilder.CreateTable(
                 name: "estatephotos",
                 columns: table => new
@@ -172,7 +161,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     RoomType = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     BedCount = table.Column<int>(type: "int", nullable: true),
-                    MaxGuests = table.Column<int>(type: "int", nullable: true)
+                    MaxGuests = table.Column<int>(type: "int", nullable: true),
+                    Price = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -68,10 +68,11 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("room is not avaivable for one of the given days");
             }
-            //TimeSpan difference = reservation.CheckInDate.ToDateTime(TimeOnly.MinValue)
-            //    - reservation.CheckOutDate.ToDateTime(TimeOnly.MinValue);
-            //int days = difference.Days;
-            //reservation.TotalPrice = days * _context.Rooms.First(r=>r.Id == roomId).
+            TimeSpan difference = reservation.CheckInDate.ToDateTime(TimeOnly.MinValue)
+                - reservation.CheckOutDate.ToDateTime(TimeOnly.MinValue);
+            int days = difference.Days;
+            reservation.TotalPrice = days * _context.Rooms.First(r => r.Id == roomId).Price;
+
 
 
             _context.Reservations.Add(reservation);

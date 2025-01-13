@@ -12,8 +12,8 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    [Migration("20250113154431_SeedEstatesData")]
-    partial class SeedEstatesData
+    [Migration("20250113174150_new")]
+    partial class @new
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -237,6 +237,9 @@ namespace OnlinePropertyBookingPlatform.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
 
                     b.Property<string>("RoomType")
                         .HasMaxLength(50)

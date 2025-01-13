@@ -133,7 +133,7 @@ function CarouselProperties() {
                 p={2}
                 sx={{
                   minWidth: "250px",
-                  maxWidth: "300px",
+                  maxWidth: "400px",
                   margin: "0 auto",
                   "@media (max-width: 600px)": {
                     minWidth: "100%",

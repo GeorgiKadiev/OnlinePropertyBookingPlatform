@@ -189,7 +189,7 @@ export default function LandingPage() {
       ) : (
         cards.map((card) => (
           <Card className="card" key={card.id}>
-            {console.log(card.photos)}
+            {console.log("photos ", card.photos)}
             <Box
               sx={{
                 width: "15%",

@@ -177,7 +177,7 @@ export default function PropertyPage() {
             {property.description}
           </Typography>
           <Typography variant="h6" className="property-price">
-            Price per night: ${property.price}
+            Price per night: ${property.pricePerNight}
           </Typography>
         </Box>
 
@@ -186,6 +186,7 @@ export default function PropertyPage() {
           <Typography variant="h5" className="rooms-title">
             Available Rooms
           </Typography>
+         {rooms.length === 0 && <Typography variant="h6">No rooms aveable</Typography>}
           <Grid2 container spacing={2}>
             {rooms.map((room) => (
               <Grid2 item xs={12} sm={6} md={4} key={room.id}>

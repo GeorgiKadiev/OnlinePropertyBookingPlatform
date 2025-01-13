@@ -26,4 +26,5 @@ public partial class Estate
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual ICollection<Room> Rooms { get; set; } = new List<Room>();
+    public virtual ICollection<EstatePhoto> Photos { get; set; } = new List<EstatePhoto>();
 }

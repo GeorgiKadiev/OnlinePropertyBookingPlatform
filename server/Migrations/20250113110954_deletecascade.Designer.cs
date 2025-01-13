@@ -12,8 +12,8 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    [Migration("20250112200132_SeedAmenities")]
-    partial class SeedAmenities
+    [Migration("20250113110954_deletecascade")]
+    partial class deletecascade
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,116 +43,6 @@ namespace OnlinePropertyBookingPlatform.Migrations
                         .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
                     b.ToTable("amenities", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            EstateId = 1,
-                            AmenityName = "Wi-Fi",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 1,
-                            AmenityName = "Parking",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 1,
-                            AmenityName = "Swimming Pool",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 1,
-                            AmenityName = "Air Conditioning",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 1,
-                            AmenityName = "Fitness Centre",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 2,
-                            AmenityName = "Eco-Friendly",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 2,
-                            AmenityName = "DigitalNomad-Friendly",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 2,
-                            AmenityName = "Hair Dryer",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 2,
-                            AmenityName = "Fridge",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 2,
-                            AmenityName = "Balcony",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 3,
-                            AmenityName = "Garden Access",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 3,
-                            AmenityName = "Pet-Friendly",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 3,
-                            AmenityName = "Hot Tub",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 3,
-                            AmenityName = "Sauna",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 4,
-                            AmenityName = "Fireplace",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 4,
-                            AmenityName = "BBQ Grill",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 4,
-                            AmenityName = "Kitchenette",
-                            Id = 0
-                        },
-                        new
-                        {
-                            EstateId = 4,
-                            AmenityName = "Coffee Maker",
-                            Id = 0
-                        });
                 });
 
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.Estate", b =>
@@ -207,6 +97,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("EstateId");
 
                     b.ToTable("estatephotos", (string)null);
                 });
@@ -377,6 +269,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
+                    b.HasIndex("RoomId");
+
                     b.ToTable("roomphotos", (string)null);
                 });
 
@@ -467,6 +361,18 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Navigation("EstateOwner");
                 });
 
+            modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.EstatePhoto", b =>
+                {
+                    b.HasOne("OnlinePropertyBookingPlatform.Models.Estate", "estate")
+                        .WithMany("Photos")
+                        .HasForeignKey("EstateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("estatephoto_ibfk_1");
+
+                    b.Navigation("estate");
+                });
+
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.Payment", b =>
                 {
                     b.HasOne("OnlinePropertyBookingPlatform.Models.Reservation", "Reservation")
@@ -532,6 +438,18 @@ namespace OnlinePropertyBookingPlatform.Migrations
                     b.Navigation("Estate");
                 });
 
+            modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.RoomPhoto", b =>
+                {
+                    b.HasOne("OnlinePropertyBookingPlatform.Models.Room", "room")
+                        .WithMany("Photos")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("roomphoto_ibfk_1");
+
+                    b.Navigation("room");
+                });
+
             modelBuilder.Entity("RoomAmenity", b =>
                 {
                     b.HasOne("OnlinePropertyBookingPlatform.Models.Room", null)
@@ -551,6 +469,8 @@ namespace OnlinePropertyBookingPlatform.Migrations
                 {
                     b.Navigation("Amenities");
 
+                    b.Navigation("Photos");
+
                     b.Navigation("Reservations");
 
                     b.Navigation("Reviews");
@@ -561,6 +481,11 @@ namespace OnlinePropertyBookingPlatform.Migrations
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.Reservation", b =>
                 {
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.Room", b =>
+                {
+                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("OnlinePropertyBookingPlatform.Models.User", b =>

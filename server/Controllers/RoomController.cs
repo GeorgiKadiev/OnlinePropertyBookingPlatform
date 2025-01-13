@@ -118,7 +118,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 {
                     return NotFound($"room with ID {roomId} not found.");
                 }
-
+                var photos = _context.RoomPhotos.Where(r=>r.RoomId ==roomId).Select(r=>r.Url).ToList();
                 RoomDto dto = new RoomDto()
                 {
                     Id = room.Id,
@@ -127,7 +127,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     MaxGuests = room.MaxGuests,
                     BedCount = room.BedCount,
                     RoomType = room.RoomType,
-                    EstateId = room.EstateId
+                    EstateId = room.EstateId,
+                    Photos = photos
                 };
                 string EstateName = _context.Estates.FirstOrDefault(e => e.Id == dto.EstateId).Title;
                 if(EstateName ==null)
@@ -184,7 +185,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             var Photo = new RoomPhoto
             {
                 Url = model.Url,
-                Id = roomId,
+                RoomId = roomId,
             };
 
             _context.RoomPhotos.Add(Photo);

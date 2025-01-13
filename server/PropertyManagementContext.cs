@@ -186,7 +186,10 @@ public partial class PropertyManagementContext : DbContext
             entity.ToTable("roomphotos");
             entity.Property(e => e.Url);
             entity.Property(e => e.RoomId);
-
+            entity.HasOne(e => e.room).WithMany(p => p.Photos)
+                  .HasForeignKey(d => d.RoomId)
+                  .HasConstraintName("roomphoto_ibfk_1")
+            .OnDelete(DeleteBehavior.Cascade);
 
         });
         modelBuilder.Entity<EstatePhoto>(entity =>
@@ -195,32 +198,36 @@ public partial class PropertyManagementContext : DbContext
             entity.ToTable("estatephotos");
             entity.Property(e => e.Url);
             entity.Property(e => e.EstateId);
+            entity.HasOne(e => e.estate).WithMany(p => p.Photos)
+                  .HasForeignKey(d => d.EstateId)
+                  .HasConstraintName("estatephoto_ibfk_1")
+            .OnDelete(DeleteBehavior.Cascade);
 
-            
+
 
         });
 
-        modelBuilder.Entity<Amenity>().HasData(
+//        modelBuilder.Entity<Amenity>().HasData(
     
-    new Amenity { EstateId = 1, AmenityName = "Wi-Fi" },
-    new Amenity { EstateId = 1, AmenityName = "Parking" },
-    new Amenity { EstateId = 1, AmenityName = "Swimming Pool" },
-    new Amenity { EstateId = 1, AmenityName = "Air Conditioning" },
-    new Amenity { EstateId = 1, AmenityName = "Fitness Centre" },
-    new Amenity { EstateId = 2, AmenityName = "Eco-Friendly" },
-    new Amenity { EstateId = 2, AmenityName = "DigitalNomad-Friendly" },
-    new Amenity { EstateId = 2, AmenityName = "Hair Dryer" },
-    new Amenity { EstateId = 2, AmenityName = "Fridge" },
-    new Amenity { EstateId = 2, AmenityName = "Balcony" },
-    new Amenity { EstateId = 3, AmenityName = "Garden Access" },
-    new Amenity { EstateId = 3, AmenityName = "Pet-Friendly" },
-    new Amenity { EstateId = 3, AmenityName = "Hot Tub" },
-    new Amenity { EstateId = 3, AmenityName = "Sauna" },
-    new Amenity { EstateId = 4, AmenityName = "Fireplace" },
-    new Amenity { EstateId = 4, AmenityName = "BBQ Grill" },
-    new Amenity { EstateId = 4, AmenityName = "Kitchenette" },
-    new Amenity { EstateId = 4, AmenityName = "Coffee Maker" }
-);
+//    //new Amenity { EstateId = 1, AmenityName = "Wi-Fi" },
+//    //new Amenity { EstateId = 1, AmenityName = "Parking" },
+//    //new Amenity { EstateId = 1, AmenityName = "Swimming Pool" },
+//    //new Amenity { EstateId = 1, AmenityName = "Air Conditioning" },
+//    //new Amenity { EstateId = 1, AmenityName = "Fitness Centre" },
+//    //new Amenity { EstateId = 2, AmenityName = "Eco-Friendly" },
+//    //new Amenity { EstateId = 2, AmenityName = "DigitalNomad-Friendly" },
+//    //new Amenity { EstateId = 2, AmenityName = "Hair Dryer" },
+//    //new Amenity { EstateId = 2, AmenityName = "Fridge" },
+//    //new Amenity { EstateId = 2, AmenityName = "Balcony" },
+//    //new Amenity { EstateId = 3, AmenityName = "Garden Access" },
+//    //new Amenity { EstateId = 3, AmenityName = "Pet-Friendly" },
+//    //new Amenity { EstateId = 3, AmenityName = "Hot Tub" },
+//    //new Amenity { EstateId = 3, AmenityName = "Sauna" },
+//    //new Amenity { EstateId = 4, AmenityName = "Fireplace" },
+//    //new Amenity { EstateId = 4, AmenityName = "BBQ Grill" },
+//    //new Amenity { EstateId = 4, AmenityName = "Kitchenette" },
+//    //new Amenity { EstateId = 4, AmenityName = "Coffee Maker" }
+//);
 
 
         OnModelCreatingPartial(modelBuilder);

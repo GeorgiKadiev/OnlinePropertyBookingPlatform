@@ -23,4 +23,5 @@ public partial class Room
 
     // new relationship for amenities
     public virtual ICollection<Amenity> Amenities { get; set; } = new List<Amenity>();
+    public virtual ICollection<RoomPhoto> Photos { get; set; } = new List<RoomPhoto>();
 }

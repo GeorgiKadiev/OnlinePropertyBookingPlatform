@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import {
   MenuItem,
   MenuList,
@@ -11,11 +12,16 @@ import {
   Rating,
 } from "@mui/material";
 import dayjs from "dayjs";
+import "./Reservations.css"; // Import CSS file
 
-export default function MenuListComposition() {
+export default function Reservations() {
   const role = useSelector((state) => state.role);
   const userId = useSelector((state) => state.id);
   const token = useSelector((state) => state.token);
+
+  // if (role === "EstateOwner") 
+    const { id } = useParams();
+  console.log(id)
 
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -53,9 +59,6 @@ export default function MenuListComposition() {
         Comment: comment,
       });
 
-      console.log("Payload being sent:", payload);
-      console.log("Estate ID:", estateId);
-
       const response = await fetch(
         `http://localhost:5076/api/review/create/${estateId}`,
         {
@@ -67,11 +70,6 @@ export default function MenuListComposition() {
           body: payload,
         }
       );
-
-      // Check for response status and handle empty responses
-      // if (!response.ok) {
-      //   throw new Error("Failed to post review");
-      // }
     } catch (error) {
       console.error("Error posting review:", error);
       return false;
@@ -86,8 +84,9 @@ export default function MenuListComposition() {
     if (role === "Customer") {
       url = `http://localhost:5076/api/reservation/user-reservations/${userId}`;
     } else if (role === "EstateOwner") {
-      const estateId = 15; // Replace with actual estateId logic
-      url = `http://localhost:5076/api/estate/${estateId}/reservations`;
+      console.log(id);
+      url = `http://localhost:5076/api/estate/${id}/reservations`;
+      console.log(url);
     } else {
       setLoading(false);
       setErrorMessage("Invalid role");
@@ -125,7 +124,6 @@ export default function MenuListComposition() {
 
       alert("Reservation canceled successfully!");
 
-      // Update the reservations state by removing the canceled reservation
       setReservations((prevReservations) =>
         prevReservations.filter(
           (reservation) => reservation.id !== reservationId
@@ -184,7 +182,7 @@ export default function MenuListComposition() {
   };
 
   const handlePostReview = async (estateId) => {
-    if (loadingReview) return; // Prevent multiple submissions
+    if (loadingReview) return;
 
     setLoadingReview(true);
     const response = await postReview(
@@ -196,28 +194,18 @@ export default function MenuListComposition() {
 
     if (!response) {
       alert("Review posted successfully!");
-      setReview({ rating: 0, comment: "" }); // Reset review form
+      setReview({ rating: 0, comment: "" });
     }
     setLoadingReview(false);
   };
 
-  // Load reservations automatically when the component is mounted
   useEffect(() => {
-    handleGetReservations(); // Automatically fetch reservations on mount
+    handleGetReservations();
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "flex-start",
-        [`& .MuiDivider-root`]: {
-          mx: 0.5,
-        },
-      }}
-    >
-      <MenuList>
-        {/* "All reservations" button */}
+    <Box className="main-container">
+      <MenuList className="menu-list">
         <MenuItem onClick={() => handleFilterChange("All")}>
           All reservations
         </MenuItem>
@@ -233,80 +221,63 @@ export default function MenuListComposition() {
       </MenuList>
       <Divider orientation="vertical" flexItem />
 
-      {/* Display Reservations or Loading/Error Message */}
-      {loading && <Typography variant="h6">Loading reservations...</Typography>}
+      {loading && <Typography className="loading-text">Loading...</Typography>}
 
       {errorMessage && (
-        <Typography variant="h6" color="error">
-          {errorMessage}
-        </Typography>
+        <Typography className="error-text">{errorMessage}</Typography>
       )}
 
-      {/* No reservations found message */}
       {!loading && !errorMessage && filteredReservations.length === 0 && (
-        <Typography variant="h6" color="textSecondary">
+        <Typography className="no-reservations">
           No reservations available.
         </Typography>
       )}
 
-      {/* Display actual reservations */}
       {!loading && !errorMessage && filteredReservations.length > 0 && (
-        <Box sx={{ padding: 2 }}>
+        <Box sx={{ padding: 2, width: "-webkit-fill-available" }}>
           {filteredReservations.map((reservation) => {
             const isCancelable =
               dayjs(reservation.checkInDate).isAfter(dayjs()) &&
               dayjs(reservation.checkInDate).diff(dayjs(), "day") >= 2;
 
             return (
-              <Box
-                key={reservation.id}
-                sx={{
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  padding: "16px",
-                  marginBottom: "16px",
-                  boxShadow: 1,
-                }}
-              >
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              <Box key={reservation.id} className="reservation-card">
+                <Typography className="reservation-title">
                   {reservation.estateName}
                 </Typography>
-                <Divider sx={{ margin: "8px 0" }} />
-                <Typography variant="body1">
+                <Divider className="reservation-divider" />
+                <Typography className="reservation-info">
                   <strong>Customer:</strong> {reservation.customerName}
                 </Typography>
-                <Typography variant="body1">
+                <Typography className="reservation-info">
                   <strong>Check-in Date:</strong> {reservation.checkInDate}
                 </Typography>
-                <Typography variant="body1">
+                <Typography className="reservation-info">
                   <strong>Check-out Date:</strong> {reservation.checkOutDate}
                 </Typography>
-                <Typography variant="body1">
+                <Typography className="reservation-info">
                   <strong>Total Price:</strong>{" "}
                   {reservation.totalPrice || "Not available"}
                 </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  <strong>Status:</strong> {reservation.status || "Pending"}
-                </Typography>
 
-                {/* Cancel Reservation Button */}
                 {isCancelable && (
                   <Button
                     variant="contained"
                     color="error"
-                    sx={{ marginTop: 2 }}
+                    className="cancel-button"
                     onClick={() => handleCancelReservation(reservation.id)}
                   >
                     Cancel Reservation
                   </Button>
                 )}
 
-                {/* Review section (only for past reservations) */}
                 {dayjs(reservation.checkOutDate).isBefore(dayjs()) &&
                   role === "Customer" && (
-                    <Box sx={{ marginTop: 2 }}>
-                      <Typography variant="h6">Post a Review</Typography>
-                      <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <Box className="review-section">
+                      <Typography className="review-section-title">
+                        Post a Review
+                      </Typography>
+                      <Box className="review-inputs">
                         <Rating
                           name="rating"
                           value={review.rating}
@@ -321,12 +292,11 @@ export default function MenuListComposition() {
                           rows={4}
                           value={review.comment}
                           onChange={handleReviewChange}
-                          sx={{ marginTop: 2 }}
                         />
                         <Button
                           variant="contained"
                           color="primary"
-                          sx={{ marginTop: 2 }}
+                          className="submit-review-button"
                           onClick={() => handlePostReview(reservation.estateId)}
                           disabled={loadingReview}
                         >

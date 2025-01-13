@@ -95,6 +95,7 @@ export default function LogInForm() {
 
   return (
     <Box className="form-login" component="form" onSubmit={handleSubmit}>
+      <h1>Log in</h1>
       <FormControl sx={formControlStyles} variant="outlined">
         <InputLabel htmlFor="email">email</InputLabel>
         <OutlinedInput

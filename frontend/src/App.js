@@ -72,6 +72,7 @@ function App() {
           <Route path="/property/:id" element={<PropertyPage />} />
           <Route path="/create-property" element={<CreateProperyPage />} />
           <Route path="/reservations" element={<ReseravtionsPage />} />
+          <Route path="/reservations/:id" element={<ReseravtionsPage />} />
           <Route path="/forgot-password" element={<ForgotPassForm />} />
           <Route path="/reviews/:id" element={<ReviewsPage />} />
           <Route path="/add-room/:id" element={<AddRoomForm />} />

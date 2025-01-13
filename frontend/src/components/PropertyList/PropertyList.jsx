@@ -22,7 +22,9 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const location = useLocation(); // Access location to get state
   const userId = useSelector((state) => state.id);
+  const role = useSelector((state) => state.role);
   const token = useSelector((state) => state.token);
+  const [userRole, setRole] = useState(role);
   const [cards, setCards] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -271,7 +273,13 @@ export default function LandingPage() {
                 <Button onClick={() => navigate(`/owner-rooms/${card.id}`)}>
                   view rooms
                 </Button>
-                <Button onClick={() => navigate("/reservations")}>
+                <Button
+                  onClick={() => {
+                    if (userRole == "EstateOwner") {
+                      navigate(`/reservations/${card.id}`);
+                    } else navigate(`/reservationv`);
+                  }}
+                >
                   Reservations
                 </Button>
                 <Button onClick={() => navigate(`/reviews/${card.id}`)}>

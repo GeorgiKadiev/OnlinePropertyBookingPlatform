@@ -24,7 +24,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
 
         [Authorize(Roles = "EstateOwner")]
-        [HttpPut("create")]
+        [HttpPost("create")]
         public IActionResult Create([FromBody] Estate estate)
         {
             if (_context.Estates.Any(u => u.Title == estate.Title))
@@ -117,7 +117,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 var users = await _context.Estates
                     .Include(e => e.EstateOwner) // Include EstateOwner
-                    .Include(e => e.Amenities) // Include Amenities
+                    .Include(e => e.Amenities)
+                    .Include(e=>e.Photos)// Include Amenities
                     .Select(e => new EstateDto
                     {
                         Id = e.Id,
@@ -127,8 +128,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
                         EstateOwnerId = e.EstateOwnerId,
                         Description = e.Description,
                         EstateOwnerName = e.EstateOwner.Username,
-                        Amenities = e.Amenities.Select(a => a.AmenityName).ToList() // Map Amenities
+                        Amenities = e.Amenities.Select(a => a.AmenityName).ToList(),
+                        Photos = e.Photos.Select(p => p.Url).ToList()
                     }).ToListAsync();
+               
 
                 return Ok(users); // Return the list of DTOs
             }
@@ -179,17 +182,22 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return BadRequest("Estate not found.");
             }
 
-            var rooms = _context.Rooms.Where(r => r.EstateId == estateId).Include(r => r.Estate).Select(room => new RoomDto
-            {
-                Id = room.Id,
-                Name = room.Name,
-                Description = room.Description,
-                MaxGuests = room.MaxGuests,
-                BedCount = room.BedCount,
-                RoomType = room.RoomType,
-                EstateId = room.EstateId,
-                EstateName = room.Estate.Title,
-            });
+            var rooms = _context.Rooms
+                .Where(r => r.EstateId == estateId)
+                .Include(r => r.Estate)
+                .Include(r => r.Photos)
+                .Select(room => new RoomDto
+                {
+                    Id = room.Id,
+                    Name = room.Name,
+                    Description = room.Description,
+                    MaxGuests = room.MaxGuests,
+                    BedCount = room.BedCount,
+                    RoomType = room.RoomType,
+                    EstateId = room.EstateId,
+                    EstateName = room.Estate.Title,
+                    Photos = room.Photos.Select(p => p.Url).ToList()
+                }) ;
             return Ok(rooms);
         }
         [HttpGet("{id}")]
@@ -198,7 +206,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
             try
             {
                 var e = await _context.Estates
-                    .Include(e => e.Amenities) // Include Amenities
+                    .Include(e => e.Amenities)
+                    .Include(e=>e.Photos)// Include Amenities
                     .FirstOrDefaultAsync(e => e.Id == id); // Corrected query to fetch related data
 
                 if (e == null)
@@ -216,7 +225,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     Description = e.Description,
                     EstateOwnerName = _context.Users
                         .FirstOrDefault(u => u.Id == e.EstateOwnerId)?.Username, // Ensure EstateOwnerName is set
-                    Amenities = e.Amenities.Select(a => a.AmenityName).ToList() // Map Amenities
+                    Amenities = e.Amenities.Select(a => a.AmenityName).ToList(),
+                    Photos = e.Photos.Select(e=>e.Url).ToList()// Map Amenities
                 };
 
                 return Ok(dto); // Return the DTO
@@ -273,7 +283,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
             var Photo = new EstatePhoto
             {
                 Url = model.Url,
-                Id = id,
+                EstateId = id,
+                
             };
 
             _context.EstatesPhotos.Add(Photo);
@@ -282,8 +293,60 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
 
         }
-
         // New Code Starts Here
+        [Authorize(Roles = "EstateOwner")]
+        [HttpPost("rooms/create")]
+        public async Task<IActionResult> CreateRoom([FromBody] RoomCreateDto roomDto)
+        {
+            // Validate the request
+            if (string.IsNullOrEmpty(roomDto.Name) || roomDto.MaxGuests <= 0)
+            {
+                return BadRequest("Invalid room details.");
+            }
+
+            // Create a new room
+            var newRoom = new Room
+            {
+                Name = roomDto.Name,
+                Description = roomDto.Description,
+                MaxGuests = roomDto.MaxGuests,
+                BedCount = roomDto.BedCount,
+                RoomType = roomDto.RoomType,
+                EstateId = roomDto.EstateId, // Link the room to an estate
+                Amenities = new List<Amenity>()
+            };
+
+            // Add selected amenities to the room
+            foreach (var amenityName in roomDto.Amenities)
+            {
+                var amenity = await _context.Amenities.FirstOrDefaultAsync(a => a.AmenityName == amenityName);
+
+                if (amenity != null)
+                {
+                    newRoom.Amenities.Add(amenity); // Associate the amenity with the room
+                }
+            }
+
+            _context.Rooms.Add(newRoom);
+            await _context.SaveChangesAsync();
+
+            return Ok("Room created successfully.");
+        }
+
+
+        [Authorize]
+        [HttpGet("get-amenities")]
+        public async Task<ActionResult<List<string>>> GetAllAmenities()
+        {
+            var amenities = await _context.Amenities
+                .Select(a => a.AmenityName)
+                .ToListAsync();
+
+            return Ok(amenities); // this will return a list of amenities
+        }
+
+
+        
 
         [HttpPost("filter")]
         public async Task<ActionResult<List<EstateDto>>> GetFilteredEstates([FromBody] EstateFilterDto filter)
@@ -328,13 +391,16 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 }
 
                 var result = await estates
+                    .Include(e=>e.Amenities)
+                    .Include(e=>e.Photos)
                     .Select(e => new EstateDto
                     {
                         Id = e.Id,
                         Title = e.Title,
                         Location = e.Location,
                         PricePerNight = e.PricePerNight,
-                        Amenities = e.Amenities.Select(a => a.AmenityName).ToList()
+                        Amenities = e.Amenities.Select(a => a.AmenityName).ToList(),
+                        Photos = e.Photos.Select(p=>p.Url).ToList()
                     }).ToListAsync();
 
                 return Ok(result);

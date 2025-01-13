@@ -85,12 +85,12 @@ export default function UserLanding() {
             <DatePicker
               label="Start date"
               minDate={dayjs()}
-              sx={{ width: 180 }}
+              sx={{ width: 150 }}
               onChange={(date) => handleStartDateChange(date)}
             />
             <DatePicker
               label="End date"
-              sx={{ width: 180 }}
+              sx={{ width: 150 }}
               onChange={(date) => handleEndDateChange(date)}
             />
           </LocalizationProvider>

@@ -86,7 +86,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 _emailSender.SendEmailAsync(
                     email: user.Email,
                     subject: "Reservation Confirmation",
-                    message: $"Dear {user.Username},<br><br>Your reservation for Estate ID {estateId} has been confirmed.<br>Check-in: {reservation.CheckInDate}<br>Check-out: {reservation.CheckOutDate}.<br><br>Thank you for booking with us!"
+                    message: $"Dear {user.Username}, Your reservation has been confirmed. Thank you for booking with us!"
                 );
             }
 
@@ -121,7 +121,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 _emailSender.SendEmailAsync(
                     email: user.Email,
                     subject: "Reservation Canceled",
-                    message: $"Dear {user.Username},<br><br>Your reservation for Estate ID {reservation.EstateId} has been canceled.<br><br>If you have any questions, please contact support."
+                    message: $"Dear {user.Username}, Your reservation has been canceled. If you have any questions, please contact support."
                 );
             }
 

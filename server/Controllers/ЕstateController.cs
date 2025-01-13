@@ -250,6 +250,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             var users = await _context.Estates
                     .Where(e => e.EstateOwnerId == id)
                     .Include(e => e.EstateOwner)
+                    .Include(e=>e.Photos)
                     .Select(e => new EstateDto
                     {
                         Id = e.Id,
@@ -258,7 +259,8 @@ namespace OnlinePropertyBookingPlatform.Controllers
                         PricePerNight = e.PricePerNight,
                         EstateOwnerId = e.EstateOwnerId,
                         Description = e.Description,
-                        EstateOwnerName = e.EstateOwner.Username
+                        EstateOwnerName = e.EstateOwner.Username,
+                        Photos = e.Photos.Select(p => p.Url).ToList()   
 
                     }).ToListAsync();
             return Ok(users);

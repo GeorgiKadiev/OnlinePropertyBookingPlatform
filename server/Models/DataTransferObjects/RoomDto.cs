@@ -15,6 +15,7 @@
         public int? BedCount { get; set; }
 
         public int? MaxGuests { get; set; }
+        public int Price { get; set; }
 
         public string EstateName { get; set; }
         public List<DateOnly> DatesWhenOccupied { get; set; }

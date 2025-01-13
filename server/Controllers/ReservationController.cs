@@ -18,6 +18,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         private readonly PropertyManagementContext _context;
         private readonly CrudRepository<Reservation> _reservationRepository;
         private readonly InputSanitizer _sanitizer;
+        private readonly IEmailSender _emailSender;
 
 
 
@@ -49,6 +50,10 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             reservation.CustomerId = int.Parse(_sanitizer.Sanitize(userIdClaim.Value));
             // reservation.CustomerId = int.Parse(userId);
+            if (!_context.Rooms.Any(r => r.Id == roomId))
+                return BadRequest("Room doesn't exist");
+            if(!_context.Estates.Any(r => r.Id == estateId))
+                return BadRequest("Estate doesn't exist");
             reservation.EstateId = estateId;
             reservation.RoomId = roomId;
 
@@ -63,10 +68,29 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 return BadRequest("room is not avaivable for one of the given days");
             }
+            TimeSpan difference = reservation.CheckInDate.ToDateTime(TimeOnly.MinValue)
+                - reservation.CheckOutDate.ToDateTime(TimeOnly.MinValue);
+            int days = difference.Days;
+            reservation.TotalPrice = days * _context.Rooms.First(r => r.Id == roomId).Price;
+
 
 
             _context.Reservations.Add(reservation);
             _context.SaveChanges();
+
+
+            // Email notification
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId); // Retrieve user details
+            if (user != null)
+            {
+                _emailSender.SendEmailAsync(
+                    email: user.Email,
+                    subject: "Reservation Confirmation",
+                    message: $"Dear {user.Username},<br><br>Your reservation for Estate ID {estateId} has been confirmed.<br>Check-in: {reservation.CheckInDate}<br>Check-out: {reservation.CheckOutDate}.<br><br>Thank you for booking with us!"
+                );
+            }
+
+
             return Ok();
             
 
@@ -78,13 +102,32 @@ namespace OnlinePropertyBookingPlatform.Controllers
         public IActionResult Delete(int id)
         {
             //добавено Панчо
-            var reservation = _context.Reservations.FirstOrDefault(r => r.Id == id);
+            var reservation = _context.Reservations
+        .Include(r => r.Customer) 
+        .FirstOrDefault(r => r.Id == id);
             if (reservation == null)
             {
                 return BadRequest("Reservation doesn't exist.");
             }
+
+            var user = reservation.Customer;
+
             _context.Reservations.Remove(reservation);
             _context.SaveChanges();
+
+            // Send email notification if the user exists
+            if (user != null)
+            {
+                _emailSender.SendEmailAsync(
+                    email: user.Email,
+                    subject: "Reservation Canceled",
+                    message: $"Dear {user.Username},<br><br>Your reservation for Estate ID {reservation.EstateId} has been canceled.<br><br>If you have any questions, please contact support."
+                );
+            }
+
+
+
+
             return Ok(); 
         }
 

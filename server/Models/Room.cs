@@ -18,7 +18,7 @@ public partial class Room
     public int? BedCount { get; set; }
 
     public int? MaxGuests { get; set; }
-
+     public int Price { get; set; }
     public virtual Estate? Estate { get; set; }
 
     // new relationship for amenities

@@ -164,7 +164,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok(occupied);
         }
         [Authorize(Roles = "EstateOwner")]
-        [HttpPost("{ roomId}/add-photo")]
+        [HttpPost("{roomId}/add-photo")]
         public async Task<ActionResult> SetRoomPhoto(int roomId, [FromBody] UrlModel model)
         {
             if (!_context.Rooms.Any(e => e.Id == roomId))

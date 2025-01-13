@@ -5,9 +5,14 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs"; // Import dayjs for formatting
-import { OutlinedInput, IconButton, Box, TextField } from "@mui/material";
+import {
+  OutlinedInput,
+  IconButton,
+  Box,
+  TextField,
+  Typography,
+} from "@mui/material";
 import CarouselProperties from "../../../components/Carousel/Carousel";
-import FilterResults from "../../../components/FilterResults/FilterResults";
 import NavBar from "../../../components/NavBar/NavBar";
 import "./LandingPage.css";
 
@@ -16,8 +21,32 @@ export default function UserLanding() {
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  // const [isEcoFriendly, setIsEcoFriendly] = useState(false);
+  const [error, setError] = useState("");
   const [numberOfPeople, setNumberOfPeople] = useState("");
+
+  const handleStartDateChange = (date) => {
+    const formattedDate = date ? dayjs(date).format("YYYY-MM-DD") : "";
+    setStartDate(formattedDate);
+
+    // Validation: Check if the start date is after the end date
+    if (endDate && formattedDate > endDate) {
+      setError("Start date must be before the end date.");
+    } else {
+      setError(""); // Clear the error if validation passes
+    }
+  };
+
+  const handleEndDateChange = (date) => {
+    const formattedDate = date ? dayjs(date).format("YYYY-MM-DD") : "";
+    setEndDate(formattedDate);
+
+    // Validation: Check if the end date is before the start date
+    if (startDate && formattedDate < startDate) {
+      setError("End date must be after the start date.");
+    } else {
+      setError(""); // Clear the error if validation passes
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -55,17 +84,14 @@ export default function UserLanding() {
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="Start date"
+              minDate={dayjs()}
               sx={{ width: 180 }}
-              onChange={(date) =>
-                setStartDate(date ? dayjs(date).format("YYYY-MM-DD") : "")
-              }
+              onChange={(date) => handleStartDateChange(date)}
             />
             <DatePicker
               label="End date"
               sx={{ width: 180 }}
-              onChange={(date) =>
-                setEndDate(date ? dayjs(date).format("YYYY-MM-DD") : "")
-              }
+              onChange={(date) => handleEndDateChange(date)}
             />
           </LocalizationProvider>
 
@@ -80,6 +106,7 @@ export default function UserLanding() {
           {/* Search Button */}
           <IconButton
             type="button"
+            disabled={Boolean(error)}
             sx={{
               p: "10px",
               backgroundColor: "rgb(251, 200, 255)",
@@ -92,6 +119,11 @@ export default function UserLanding() {
             <SearchIcon />
           </IconButton>
         </Box>
+        {error && (
+          <Typography color="error" sx={{ marginTop: "1rem" }}>
+            {error}
+          </Typography>
+        )}
       </div>
 
       {/* Carousel Section */}

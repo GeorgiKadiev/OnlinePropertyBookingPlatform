@@ -20,7 +20,7 @@ function CarouselProperties() {
       setErrorMessage(""); // Reset error message
 
       const filters = {
-        IsEcoFriendly: true, 
+        IsEcoFriendly: true,
       };
 
       try {
@@ -142,11 +142,21 @@ function CarouselProperties() {
                 }}
               >
                 <Paper elevation={3} sx={{ p: 4 }}>
+                  <Box>
+                    <img
+                      src={property.photos || "https://via.placeholder.com/150"}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </Box>
                   <Typography variant="body1">
-                    <strong>Location:</strong> {property.location}
+                    <strong> {property.title} </strong>
                   </Typography>
                   <Typography variant="body1">
-                    <strong>Price per night:</strong> ${property.pricePerNight}
+                    Price per night: ${property.pricePerNight}
                   </Typography>
                   <Box mt={2}>
                     <Button

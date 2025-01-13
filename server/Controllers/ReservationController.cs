@@ -197,7 +197,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         }
 
         // Детайли за резервация (само клиенти и администратори)
-        [Authorize(Roles = "Customer,Admin")]
+        [Authorize(Roles = "Customer,Admin,Owner")]
         [HttpGet("details/{id}")]
         public async Task<ActionResult<ReservationDto>> GetReservationDetails(int id)
         {

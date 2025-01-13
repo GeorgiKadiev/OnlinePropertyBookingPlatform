@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
+  APIProvider,
+  Map,
+  MapCameraChangedEvent,
+} from "@vis.gl/react-google-maps";
+import {
   Box,
   InputBase,
   IconButton,
@@ -8,8 +13,10 @@ import {
   Stack,
   Typography,
   Button,
+  Modal,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import MapIcon from "@mui/icons-material/Map";
 import FiltersSideBar from "../../../components/FiltersSideBar/FiltersSideBar";
 import FilterResults from "../../../components/FilterResults/FilterResults";
 
@@ -27,6 +34,31 @@ export default function ResultsPage() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [error, setError] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  // const handelMap = () => {
+  //   return (
+  //     <APIProvider
+  //       apiKey={"Your API key here"}
+  //       onLoad={() => console.log("Maps API has loaded.")}
+  //     >
+  //       <Map
+  //         defaultZoom={13}
+  //         defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
+  //         onCameraChanged={(ev) =>
+  //           console.log(
+  //             "camera changed:",
+  //             ev.detail.center,
+  //             "zoom:",
+  //             ev.detail.zoom
+  //           )
+  //         }
+  //       ></Map>
+  //     </APIProvider>
+  //   );
+  // };
 
   // Navigate to property details page
   const handleMoreInfo = (id) => {
@@ -90,13 +122,16 @@ export default function ResultsPage() {
 
     const fetchEstates = async () => {
       try {
-        const response = await fetch("http://localhost:5076/api/estate/filter", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(initialFilters),
-        });
+        const response = await fetch(
+          "http://localhost:5076/api/estate/filter",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(initialFilters),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch estates");
@@ -122,8 +157,8 @@ export default function ResultsPage() {
     <div>
       <NavBar />
       <Box className="sidebar-results">
+        {/* <FilterResults/> */}
         {/* Sidebar Section */}
-        <FilterResults/>
         <FiltersSideBar
           filters={filters}
           setFilters={(newFilters) => {
@@ -164,6 +199,48 @@ export default function ResultsPage() {
               <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
                 <SearchIcon />
               </IconButton>
+              <IconButton
+                sx={{ p: "10px", color: "rgb(60, 12, 63)" }}
+                aria-label="map"
+                onClick={handleOpen} // Open the modal
+              >
+                <MapIcon />
+              </IconButton>
+              {/* Modal to display the map */}
+              <Modal open={open} onClose={handleClose}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: "80%",
+                    height: "80%",
+                    bgcolor: "background.paper",
+                    boxShadow: 24,
+                    p: 4,
+                    overflow: "hidden",
+                  }}
+                >
+                  <APIProvider
+                    apiKey={"Your API key here"}
+                    onLoad={() => console.log("Maps API has loaded.")}
+                  >
+                    <Map
+                      defaultZoom={13}
+                      defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
+                      onCameraChanged={(ev) =>
+                        console.log(
+                          "camera changed:",
+                          ev.detail.center,
+                          "zoom:",
+                          ev.detail.zoom
+                        )
+                      }
+                    />
+                  </APIProvider>
+                </Box>
+              </Modal>
             </Box>
 
             {/* Property List */}

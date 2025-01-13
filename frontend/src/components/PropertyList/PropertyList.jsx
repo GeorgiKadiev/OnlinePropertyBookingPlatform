@@ -8,6 +8,11 @@ import {
   Button,
   Menu,
   MenuItem,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import DeleteConfirmationDialog from "../DeleteConfirmationDialog/DeleteConfirmationDialog";
@@ -22,10 +27,13 @@ export default function LandingPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [menuState, setMenuState] = useState({});
   const [successMessage, setSuccessMessage] = useState(null);
+  const [selectedEstateId, setSelectedEstateId] = useState(null);
 
   const userId = useSelector((state) => state.id);
   const token = useSelector((state) => state.token);
   const open = Boolean(anchorEl);
+  const [photoLink, setPhotoLink] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
 
   // Set success message if available in location state
   useEffect(() => {
@@ -70,6 +78,16 @@ export default function LandingPage() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleOpenDialog = (estateId) => {
+    setSelectedEstateId(estateId); // Set the selected estate ID for adding a photo
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setPhotoLink(""); // Clear the input field when the dialog is closed
+  };
+
   const handleClick = (event, cardId) => {
     setMenuState({ [cardId]: event.currentTarget });
   };
@@ -82,9 +100,39 @@ export default function LandingPage() {
     console.log("estateid  " + estateId);
     navigate(`/add-room/${estateId}`);
   };
-  const handleAddPhotos = (estateId) => {
+
+  const handleAddPhotos = async (estateId) => {
+    if (!photoLink) {
+      alert("Please provide a valid photo link.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/estate/${estateId}/add-photo`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ Url: photoLink }), // Send the photo link in the request body
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to add photo.");
+      }
+
+      alert("Photo added successfully!");
+      handleCloseDialog();
+    } catch (error) {
+      console.error("Error adding photo:", error);
+      alert("Failed to add photo. Please try again.");
+    }
     setAnchorEl(null);
   };
+
   const handleRemove = async (estateId) => {
     try {
       const response = await fetch(
@@ -183,13 +231,40 @@ export default function LandingPage() {
                     "aria-labelledby": `menu-button-${card.id}`,
                   }}
                 >
-                  <MenuItem onClick={() => handleAddRoom(card.id)}>
+                  <MenuItem
+                    onClick={handleOpenDialog}
+                    // onClick={() => handleAddRoom(card.id)}
+                  >
                     Add room
                   </MenuItem>
-                  <MenuItem onClick={() => handleAddPhotos(card.id)}>
+                  <MenuItem onClick={() => handleOpenDialog(card.id)}>
                     Add photos
                   </MenuItem>
                 </Menu>
+                {/* Dialog for adding photo */}
+                <Dialog open={openDialog} onClose={handleCloseDialog}>
+                  <DialogTitle>Add Photo</DialogTitle>
+                  <DialogContent>
+                    <TextField
+                      autoFocus
+                      margin="dense"
+                      label="Photo URL"
+                      type="url"
+                      fullWidth
+                      value={photoLink}
+                      onChange={(e) => setPhotoLink(e.target.value)}
+                      placeholder="Enter the photo URL"
+                    />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleCloseDialog} color="secondary">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleAddPhotos} color="primary">
+                      Add Photo
+                    </Button>
+                  </DialogActions>
+                </Dialog>
                 <Button
                   className="card-button"
                   onClick={() => navigate("/reservations")}

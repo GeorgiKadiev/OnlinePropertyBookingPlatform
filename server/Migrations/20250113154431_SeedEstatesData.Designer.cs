@@ -12,8 +12,8 @@ using OnlinePropertyBookingPlatform;
 namespace OnlinePropertyBookingPlatform.Migrations
 {
     [DbContext(typeof(PropertyManagementContext))]
-    [Migration("20250113110954_deletecascade")]
-    partial class deletecascade
+    [Migration("20250113154431_SeedEstatesData")]
+    partial class SeedEstatesData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

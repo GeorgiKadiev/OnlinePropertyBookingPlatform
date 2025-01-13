@@ -18,6 +18,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
         private readonly PropertyManagementContext _context;
         private readonly CrudRepository<Reservation> _reservationRepository;
         private readonly InputSanitizer _sanitizer;
+        private readonly IEmailSender _emailSender;
 
 
 
@@ -67,6 +68,20 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             _context.Reservations.Add(reservation);
             _context.SaveChanges();
+
+
+            // Email notification
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId); // Retrieve user details
+            if (user != null)
+            {
+                _emailSender.SendEmailAsync(
+                    email: user.Email,
+                    subject: "Reservation Confirmation",
+                    message: $"Dear {user.Username},<br><br>Your reservation for Estate ID {estateId} has been confirmed.<br>Check-in: {reservation.CheckInDate}<br>Check-out: {reservation.CheckOutDate}.<br><br>Thank you for booking with us!"
+                );
+            }
+
+
             return Ok();
             
 
@@ -78,13 +93,32 @@ namespace OnlinePropertyBookingPlatform.Controllers
         public IActionResult Delete(int id)
         {
             //добавено Панчо
-            var reservation = _context.Reservations.FirstOrDefault(r => r.Id == id);
+            var reservation = _context.Reservations
+        .Include(r => r.Customer) 
+        .FirstOrDefault(r => r.Id == id);
             if (reservation == null)
             {
                 return BadRequest("Reservation doesn't exist.");
             }
+
+            var user = reservation.Customer;
+
             _context.Reservations.Remove(reservation);
             _context.SaveChanges();
+
+            // Send email notification if the user exists
+            if (user != null)
+            {
+                _emailSender.SendEmailAsync(
+                    email: user.Email,
+                    subject: "Reservation Canceled",
+                    message: $"Dear {user.Username},<br><br>Your reservation for Estate ID {reservation.EstateId} has been canceled.<br><br>If you have any questions, please contact support."
+                );
+            }
+
+
+
+
             return Ok(); 
         }
 

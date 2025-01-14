@@ -27,4 +27,7 @@ public partial class Estate
 
     public virtual ICollection<Room> Rooms { get; set; } = new List<Room>();
     public virtual ICollection<EstatePhoto> Photos { get; set; } = new List<EstatePhoto>();
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public List<string>? AmenityNames { get; set; }
 }

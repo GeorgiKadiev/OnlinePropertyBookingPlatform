@@ -77,17 +77,17 @@ namespace OnlinePropertyBookingPlatform.Controllers
             _context.Estates.Add(estate);
             _context.SaveChanges(); // Save estate to generate EstateId
 
-            // Handle amenities as strings
-            if (estate.Amenities != null && estate.Amenities.Any())
+            // Handle amenities from AmenityNames
+            if (estate.AmenityNames != null && estate.AmenityNames.Any())
             {
-                var amenityNames = estate.Amenities.Select(a => a.AmenityName).Distinct();
-                foreach (var name in amenityNames)
+                foreach (var amenityName in estate.AmenityNames)
                 {
-                    if (!_context.Amenities.Any(a => a.AmenityName == name && a.EstateId == estate.Id))
+                    var sanitizedAmenityName = _sanitizer.Sanitize(amenityName);
+                    if (!_context.Amenities.Any(a => a.AmenityName == sanitizedAmenityName && a.EstateId == estate.Id))
                     {
                         _context.Amenities.Add(new Amenity
                         {
-                            AmenityName = _sanitizer.Sanitize(name),
+                            AmenityName = sanitizedAmenityName,
                             EstateId = estate.Id
                         });
                     }
@@ -97,6 +97,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             return Ok();
         }
+
 
 
 

@@ -169,7 +169,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
             {
                 var users = await _context.Estates
                     .Include(e => e.EstateOwner) // Include EstateOwner
-                    .Include(e => e.Amenities) //inclusion of amenities
+                    .Include(e => e.Amenities)
                     .Include(e => e.Photos)// Include Amenities
                     .Select(e => new EstateDto
                     {
@@ -303,7 +303,6 @@ namespace OnlinePropertyBookingPlatform.Controllers
                     .Where(e => e.EstateOwnerId == id)
                     .Include(e => e.EstateOwner)
                     .Include(e => e.Photos)
-                    .Include(e => e.Amenities) //added so amenities work fine
                     .Select(e => new EstateDto
                     {
                         Id = e.Id,

@@ -61,37 +61,47 @@ namespace OnlinePropertyBookingPlatform.Controllers
                 return BadRequest(ModelState);
             }
 
-            // Санитизация на входните данни
+            // Sanitize input data
             estate.Title = _sanitizer.Sanitize(estate.Title);
             estate.Location = _sanitizer.Sanitize(estate.Location);
             estate.Description = _sanitizer.Sanitize(estate.Description);
 
-            // Handle selected amenities
-            if (estate.Amenities != null && estate.Amenities.Any())
-            {
-                estate.Amenities = estate.Amenities
-                    .Select(a =>
-                        _context.Amenities.FirstOrDefault(dbAmenity => dbAmenity.AmenityName == a.AmenityName) 
-                        ?? new Amenity { AmenityName = _sanitizer.Sanitize(a.AmenityName) }) 
-                    .ToList();
-                // Changes: Added a check for existing amenities to avoid duplicate entries in the database.
-            }
-
-
+            // Save estate first to get the ID
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value)) 
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
             {
-                return Unauthorized("User ID is invalid or missing"); 
+                return Unauthorized("User ID is invalid or missing");
             }
-            
-            // ID на собственика на имота
             estate.EstateOwnerId = int.Parse(userIdClaim.Value);
 
-            _context.Add(estate);
-            _context.SaveChanges();
+            _context.Estates.Add(estate);
+            _context.SaveChanges(); // Save estate to generate EstateId
+
+            // Handle amenities
+            if (estate.Amenities != null && estate.Amenities.Any())
+            {
+                var updatedAmenities = estate.Amenities
+                    .Select(a =>
+                        _context.Amenities.FirstOrDefault(dbAmenity => dbAmenity.AmenityName == a.AmenityName) ??
+                        new Amenity { AmenityName = _sanitizer.Sanitize(a.AmenityName), EstateId = estate.Id })
+                    .ToList();
+
+                foreach (var amenity in updatedAmenities)
+                {
+                    if (amenity.EstateId == 0) amenity.EstateId = estate.Id;
+                    if (_context.Amenities.Any(dbAmenity =>
+                            dbAmenity.AmenityName == amenity.AmenityName && dbAmenity.EstateId == amenity.EstateId))
+                        continue;
+
+                    _context.Amenities.Add(amenity);
+                }
+
+                _context.SaveChanges();
+            }
 
             return Ok();
         }
+
 
         [Authorize(Roles = "EstateOwner")]
         [HttpPost("edit")]

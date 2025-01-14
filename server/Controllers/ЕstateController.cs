@@ -124,14 +124,26 @@ namespace OnlinePropertyBookingPlatform.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            if (!_context.Estates.Any(e => e.Id == id))
+            
+            var estate = _context.Estates
+                .Include(e => e.Amenities) 
+                .FirstOrDefault(e => e.Id == id);
+
+            if (estate == null)
             {
-                return BadRequest();
+                return BadRequest("Estate not found.");
             }
-            Estate estate = _context.Estates.Where(e => e.Id == id).First();
+
+            
+            if (estate.Amenities != null && estate.Amenities.Any())
+            {
+                _context.Amenities.RemoveRange(estate.Amenities);
+            }
+
+           
             _context.Remove(estate);
             _context.SaveChanges();
-            return Ok();
+            return Ok("Estate deleted successfully.");
         }
 
         [Authorize(Roles = "Admin")]

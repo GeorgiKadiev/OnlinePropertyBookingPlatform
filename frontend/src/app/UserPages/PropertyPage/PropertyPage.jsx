@@ -92,7 +92,10 @@ export default function PropertyPage() {
 
   const confirmBooking = async (roomId) => {
     const { startDate, endDate } = selectedDates[roomId] || {};
-
+    if (startDate > endDate) {
+      alert("Please select valid dates for booking.");
+      return;
+    }
     if (!startDate || !endDate) {
       alert("Please select start and end dates for booking.");
       return;
@@ -194,10 +197,8 @@ export default function PropertyPage() {
                   <Box className="room-info">
                     <Typography variant="h6">Room {room.name}</Typography>
                     <Typography>Max Guests: {room.maxGuests}</Typography>
-                    <Typography>
-                      Price: ${room.pricePerNight} per night
-                    </Typography>
-                    {/* Image Section */}
+                    {/* Image Section replace with image box from mui*/}
+                    
                     <Grid2 container spacing={2} className="property-images">
                       {room.photos &&
                         room.photos.map((image, index) => (
@@ -219,6 +220,7 @@ export default function PropertyPage() {
                       <Box className="date-pickers">
                         <DatePicker
                           label="Start Date"
+                          minDate={dayjs()}
                           value={selectedDates[room.id]?.startDate || null}
                           onChange={(date) =>
                             setSelectedDates((prev) => ({

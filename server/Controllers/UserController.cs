@@ -144,18 +144,24 @@ namespace OnlinePropertyBookingPlatform.Controllers
             return Ok();
             */
         }
-        [HttpDelete("{id}")]
+        [HttpDelete("delete/{id}")]
         public IActionResult Delete(int id)
         {
-            if (!_context.Users.Any(u => u.Id == id))
+            // Намери потребителя
+            var user = _context.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
             {
-                return BadRequest("User doesn't exist");
+                return NotFound($"User with ID {id} does not exist.");
             }
-            User user = _context.Users.FirstOrDefault(u=>u.Id == id);
+
+            // Премахване на потребителя
             _context.Users.Remove(user);
             _context.SaveChanges();
-            return RedirectToAction();
+
+            // Потвърждение за изтриване
+            return Ok($"User with ID {id} has been deleted.");
         }
+
         [HttpPost("login")]
         //Редактиран вариант ПАНЧО
         public IActionResult Login([FromBody] LoginModel model)

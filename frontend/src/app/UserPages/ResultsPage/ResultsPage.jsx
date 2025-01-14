@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  APIProvider,
-  Map,
-  MapCameraChangedEvent,
-} from "@vis.gl/react-google-maps";
-import {
   Box,
   InputBase,
   IconButton,
@@ -14,44 +9,64 @@ import {
   Typography,
   Button,
   Modal,
+  Chip,
+  TextField,
+  Autocomplete,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MapIcon from "@mui/icons-material/Map";
-import FiltersSideBar from "../../../components/FiltersSideBar/FiltersSideBar";
-import FilterResults from "../../../components/FilterResults/FilterResults";
-
 import NavBar from "../../../components/NavBar/NavBar";
 import "./ResultsPage.css";
+import "./FiltersSideBar.css";
+
+const amenities = [
+  { name: "Wi-Fi" },
+  { name: "Parking" },
+  { name: "Swimming Pool" },
+  { name: "Eco-Friendly" },
+  { name: "Hair Dryer" },
+  { name: "Fridge" },
+  { name: "Fireplace" },
+  { name: "Air Conditioning" },
+  { name: "Pet-Friendly" },
+  { name: "Digital Nomad Friendly" },
+  { name: "Coffe Maker" },
+  { name: "Balcony" },
+  { name: "Kitchen" },
+  { name: "Fitness Centre" },
+];
 
 export default function ResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-
-  // State for filters and properties
   const [filters, setFilters] = useState({});
   const [locationEstate, setLocationEstate] = useState("");
   const [propertyData, setPropertyData] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [numberOfPeople, setNumberOfPeople] = useState(null);
+
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
+
   // Navigate to property details page
   const handleMoreInfo = (id) => {
     navigate(`/property/${id}`);
   };
 
-  // Handle Search
-  const handleSearch = async (e) => {
-    e.preventDefault();
-
-    const searchFilters = {
+  const handleSearch = async () => {
+    const updatedFilters = {
+      ...filters,
       location: locationEstate.trim(),
       startDate,
       endDate,
+      amenities: selectedAmenities,
+      numberOfPeople,
     };
 
     try {
@@ -60,7 +75,7 @@ export default function ResultsPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(searchFilters),
+        body: JSON.stringify(updatedFilters),
       });
 
       if (!response.ok) {
@@ -70,21 +85,39 @@ export default function ResultsPage() {
       const data = await response.json();
       setPropertyData(data);
       setError(null);
-
-      // Update URL with new filters
-      const queryParams = new URLSearchParams({
-        location: searchFilters.location,
-        startDate: searchFilters.startDate,
-        endDate: searchFilters.endDate,
-      }).toString();
-      navigate(`?${queryParams}`);
+      setFilters(updatedFilters); // Update the filters state
     } catch (err) {
       setError(err.message);
       setPropertyData([]);
     }
   };
 
-  // Load initial filters from URL query parameters
+  const handleApplyFilters = async () => {
+    const updatedFilters = { ...filters, amenities: selectedAmenities };
+    setFilters(updatedFilters);
+
+    try {
+      const response = await fetch("http://localhost:5076/api/estate/filter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedFilters),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch estates");
+      }
+
+      const data = await response.json();
+      setPropertyData(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      setPropertyData([]);
+    }
+  };
+
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
 
@@ -92,12 +125,17 @@ export default function ResultsPage() {
       location: queryParams.get("location") || "",
       startDate: queryParams.get("startDate"),
       endDate: queryParams.get("endDate"),
+      amenities: queryParams.get("amenities")
+        ? queryParams.get("amenities").split(",")
+        : [],
+      numberOfPeople: queryParams.get("numberOfPeople") || null,
     };
 
     setFilters(initialFilters);
     setLocationEstate(initialFilters.location || "");
     setStartDate(initialFilters.startDate || null);
     setEndDate(initialFilters.endDate || null);
+    setSelectedAmenities(initialFilters.amenities || []);
 
     const fetchEstates = async () => {
       try {
@@ -128,6 +166,12 @@ export default function ResultsPage() {
     fetchEstates();
   }, [location.search]);
 
+  useEffect(() => {
+    if (filters.amenities) {
+      setSelectedAmenities(filters.amenities);
+    }
+  }, [filters]);
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -136,24 +180,45 @@ export default function ResultsPage() {
     <div>
       <NavBar />
       <Box className="sidebar-results">
-        {/* <FilterResults/> */}
-        {/* Sidebar Section */}
-        <FiltersSideBar
-          filters={filters}
-          setFilters={(newFilters) => {
-            // Update filters and dates when applying new filters
-            setFilters((prev) => ({ ...prev, ...newFilters }));
-            setStartDate(newFilters.startDate || startDate);
-            setEndDate(newFilters.endDate || endDate);
+        <Box className="filters-sidebar">
+          <h3>Filter Options</h3>
+          <Autocomplete
+            multiple
+            id="tags-filled"
+            options={amenities.map((option) => option.name)} // List of all available amenities
+            value={selectedAmenities} // Selected amenities
+            onChange={(event, value) => setSelectedAmenities(value)} // Update state on selection
+            className="autocomplete-input"
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  key={index}
+                  variant="outlined"
+                  label={option}
+                  {...getTagProps({ index })}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Tags"
+                placeholder="Add tags"
+              />
+            )}
+          />
 
-            // Update URL
-            const queryParams = new URLSearchParams({
-              ...filters,
-              ...newFilters,
-            }).toString();
-            navigate(`?${queryParams}`);
-          }}
-        />
+          {/* Filter Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            className="apply-button"
+            onClick={handleApplyFilters} // Call API on button click
+          >
+            Apply Filters
+          </Button>
+        </Box>
 
         {/* Main Results Section */}
         <div className="main-info">
@@ -185,41 +250,6 @@ export default function ResultsPage() {
               >
                 <MapIcon />
               </IconButton>
-              {/* Modal to display the map */}
-              <Modal open={open} onClose={handleClose}>
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: "80%",
-                    height: "80%",
-                    bgcolor: "background.paper",
-                    boxShadow: 24,
-                    p: 4,
-                    overflow: "hidden",
-                  }}
-                >
-                  <APIProvider
-                    apiKey={"Your API key here"}
-                    onLoad={() => console.log("Maps API has loaded.")}
-                  >
-                    <Map
-                      defaultZoom={13}
-                      defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
-                      onCameraChanged={(ev) =>
-                        console.log(
-                          "camera changed:",
-                          ev.detail.center,
-                          "zoom:",
-                          ev.detail.zoom
-                        )
-                      }
-                    />
-                  </APIProvider>
-                </Box>
-              </Modal>
             </Box>
 
             {/* Property List */}
@@ -237,7 +267,7 @@ export default function ResultsPage() {
                     }}
                   >
                     <img
-                      src={property.image}
+                      src={property.photos}
                       alt={property.title}
                       style={{
                         width: "150px",

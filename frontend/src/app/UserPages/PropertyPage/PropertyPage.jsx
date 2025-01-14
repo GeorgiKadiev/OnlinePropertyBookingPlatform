@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 import {
   Box,
   Typography,
   Button,
-  Grid,
+  Grid2,
   Paper,
   CircularProgress,
 } from "@mui/material";
@@ -13,20 +18,44 @@ import NavBar from "../../../components/NavBar/NavBar";
 import "./PropertyPage.css";
 
 export default function PropertyPage() {
-  const { id } = useParams(); // Get the property ID from URL parameter
-  const [property, setProperty] = useState(null); // State to store property data
-  const [loading, setLoading] = useState(true); // State to handle loading state
-  const [error, setError] = useState(null); // State to handle errors during fetching
+  const { id: estateId } = useParams();
+  const token = useSelector((state) => state.token);
+  const [property, setProperty] = useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [bookedDates, setBookedDates] = useState({}); // Track booked dates
+  const [selectedDates, setSelectedDates] = useState({});
+  const [activeRoom, setActiveRoom] = useState(null); // Room for which date pickers are shown
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch estate details and rooms
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await fetch(`http://localhost:5076/api/estate/${id}`);
-        if (!response.ok) {
+        const propertyResponse = await fetch(
+          `http://localhost:5076/api/estate/${estateId}`
+        );
+        if (!propertyResponse.ok) {
           throw new Error("Property not found");
         }
-        const data = await response.json();
-        setProperty(data);
+        const propertyData = await propertyResponse.json();
+        setProperty(propertyData);
+
+        const roomsResponse = await fetch(
+          `http://localhost:5076/api/estate/${estateId}/rooms`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!roomsResponse.ok) {
+          throw new Error("Rooms not found");
+        }
+        const roomsData = await roomsResponse.json();
+        setRooms(roomsData);
+
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -35,7 +64,72 @@ export default function PropertyPage() {
     };
 
     fetchProperty();
-  }, [id]);
+  }, [estateId, token]);
+
+  // Fetch booked dates for a room
+  const fetchBookedDates = async (roomId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/room/details/${roomId}/dates`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch booked dates");
+      }
+      const data = await response.json();
+
+      setBookedDates((prev) => ({ ...prev, [roomId]: data }));
+    } catch (err) {
+      console.error("Error fetching booked dates:", err);
+    }
+  };
+
+  const handleBooking = (roomId) => {
+    setActiveRoom(roomId); // Show date pickers for this room
+    if (!bookedDates[roomId]) {
+      fetchBookedDates(roomId); // Fetch booked dates if not already fetched
+    }
+  };
+
+  const confirmBooking = async (roomId) => {
+    const { startDate, endDate } = selectedDates[roomId] || {};
+    if (startDate > endDate) {
+      alert("Please select valid dates for booking.");
+      return;
+    }
+    if (!startDate || !endDate) {
+      alert("Please select start and end dates for booking.");
+      return;
+    }
+    const payload = JSON.stringify({
+      CheckInDate: dayjs(startDate).format("YYYY-MM-DD"),
+      CheckOutDate: dayjs(endDate).format("YYYY-MM-DD"),
+    });
+    console.log(payload);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/reservation/create/${estateId}/${roomId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: payload,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to book the room");
+      }
+
+      alert("Room booked successfully!");
+      setActiveRoom(null); // Hide date pickers
+    } catch (err) {
+      console.error("Error booking room:", err);
+      alert("Failed to book the room. Please try again.");
+    }
+  };
 
   if (loading) {
     return (
@@ -57,7 +151,7 @@ export default function PropertyPage() {
 
   return (
     <div>
-      <NavBar/>
+      <NavBar />
       <Box className="property-page">
         {/* Title */}
         <Typography variant="h4" className="property-title">
@@ -65,10 +159,10 @@ export default function PropertyPage() {
         </Typography>
 
         {/* Image Section */}
-        <Grid container spacing={2} className="property-images">
-          {property.images &&
-            property.images.map((image, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+        <Grid2 container spacing={2} className="property-images">
+          {property.photos &&
+            property.photos.map((image, index) => (
+              <Grid2 item xs={12} sm={6} md={4} key={index}>
                 <Paper elevation={3} className="image-paper">
                   <img
                     src={image}
@@ -76,33 +170,111 @@ export default function PropertyPage() {
                     className="property-image"
                   />
                 </Paper>
-              </Grid>
+              </Grid2>
             ))}
-        </Grid>
+        </Grid2>
 
-        {/* Description and Booking */}
+        {/* Description */}
         <Box className="property-details">
-          <Box className="property-info">
-            <Typography variant="body1" className="property-description">
-              {property.description}
-            </Typography>
-            <Typography variant="h6" className="property-price">
-              {property.price}
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={() => alert(`Booking Property ${id}`)}
-            className="booking-button"
-          >
-            Book
-          </Button>
+          <Typography variant="body1" className="property-description">
+            {property.description}
+          </Typography>
+          <Typography variant="h6" className="property-price">
+            Price per night: ${property.pricePerNight}
+          </Typography>
+        </Box>
+
+        {/* Rooms Section */}
+        <Box className="rooms-section">
+          <Typography variant="h5" className="rooms-title">
+            Available Rooms
+          </Typography>
+         {rooms.length === 0 && <Typography variant="h6">No rooms aveable</Typography>}
+          <Grid2 container spacing={2}>
+            {rooms.map((room) => (
+              <Grid2 item xs={12} sm={6} md={4} key={room.id}>
+                <Paper elevation={3} className="room-card">
+                  <Box className="room-info">
+                    <Typography variant="h6">Room {room.name}</Typography>
+                    <Typography>Max Guests: {room.maxGuests}</Typography>
+                    {/* Image Section replace with image box from mui*/}
+                    
+                    <Grid2 container spacing={2} className="property-images">
+                      {room.photos &&
+                        room.photos.map((image, index) => (
+                          <Grid2 item xs={12} sm={6} md={4} key={index}>
+                            <Paper elevation={3} className="image-paper">
+                              <img
+                                src={image}
+                                alt={`Property image ${index + 1}`}
+                                className="property-image"
+                              />
+                            </Paper>
+                          </Grid2>
+                        ))}
+                    </Grid2>
+                  </Box>
+
+                  {activeRoom === room.id ? (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <Box className="date-pickers">
+                        <DatePicker
+                          label="Start Date"
+                          minDate={dayjs()}
+                          value={selectedDates[room.id]?.startDate || null}
+                          onChange={(date) =>
+                            setSelectedDates((prev) => ({
+                              ...prev,
+                              [room.id]: { ...prev[room.id], startDate: date },
+                            }))
+                          }
+                          shouldDisableDate={(date) =>
+                            bookedDates[room.id]?.includes(
+                              date.format("YYYY-MM-DD")
+                            )
+                          }
+                        />
+                        <DatePicker
+                          label="End Date"
+                          value={selectedDates[room.id]?.endDate || null}
+                          onChange={(date) =>
+                            setSelectedDates((prev) => ({
+                              ...prev,
+                              [room.id]: { ...prev[room.id], endDate: date },
+                            }))
+                          }
+                          shouldDisableDate={(date) =>
+                            bookedDates[room.id]?.includes(
+                              date.format("YYYY-MM-DD")
+                            )
+                          }
+                        />
+                      </Box>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => confirmBooking(room.id)}
+                      >
+                        Confirm
+                      </Button>
+                    </LocalizationProvider>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleBooking(room.id)}
+                    >
+                      Book
+                    </Button>
+                  )}
+                </Paper>
+              </Grid2>
+            ))}
+          </Grid2>
         </Box>
 
         {/* Reviews Section */}
-        <Reviews estateId={id} />
+        <Reviews estateId={estateId} />
       </Box>
     </div>
   );

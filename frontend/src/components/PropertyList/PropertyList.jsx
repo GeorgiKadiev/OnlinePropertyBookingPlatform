@@ -8,6 +8,11 @@ import {
   Button,
   Menu,
   MenuItem,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import DeleteConfirmationDialog from "../DeleteConfirmationDialog/DeleteConfirmationDialog";
@@ -16,16 +21,19 @@ import "./PropertyList.css";
 export default function LandingPage() {
   const navigate = useNavigate();
   const location = useLocation(); // Access location to get state
-
+  const userId = useSelector((state) => state.id);
+  const role = useSelector((state) => state.role);
+  const token = useSelector((state) => state.token);
+  const [userRole, setRole] = useState(role);
   const [cards, setCards] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
   const [refreshKey, setRefreshKey] = useState(0);
   const [menuState, setMenuState] = useState({});
   const [successMessage, setSuccessMessage] = useState(null);
-
-  const userId = useSelector((state) => state.id);
-  const token = useSelector((state) => state.token);
-  const open = Boolean(anchorEl);
+  const [selectedEstateId, setSelectedEstateId] = useState(null);
+  const [photoLink, setPhotoLink] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
 
   // Set success message if available in location state
   useEffect(() => {
@@ -70,6 +78,16 @@ export default function LandingPage() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleOpenDialog = (estateId) => {
+    setSelectedEstateId(estateId); // Set the selected estate ID for adding a photo
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setPhotoLink(""); // Clear the input field when the dialog is closed
+  };
+
   const handleClick = (event, cardId) => {
     setMenuState({ [cardId]: event.currentTarget });
   };
@@ -82,9 +100,41 @@ export default function LandingPage() {
     console.log("estateid  " + estateId);
     navigate(`/add-room/${estateId}`);
   };
-  const handleAddPhotos = (estateId) => {
+
+  const handleAddPhotos = async (estateId) => {
+    if (!photoLink) {
+      alert("Please provide a valid photo link.");
+      return;
+    }
+
+    const payload = JSON.stringify({ url: photoLink });
+    console.log(payload);
+    try {
+      const response = await fetch(
+        `http://localhost:5076/api/estate/${estateId}/add-photo`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: payload, // Send the photo link in the request body
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to add photo.");
+      }
+
+      alert("Photo added successfully!");
+      handleCloseDialog();
+    } catch (error) {
+      console.error("Error adding photo:", error);
+      alert("Failed to add photo. Please try again.");
+    }
     setAnchorEl(null);
   };
+
   const handleRemove = async (estateId) => {
     try {
       const response = await fetch(
@@ -122,7 +172,7 @@ export default function LandingPage() {
         <CardContent className="card-content" sx={{ width: "60%", padding: 2 }}>
           <div className="card-buttons">
             <Button
-              className="card-button"
+              // className="card-button"
               onClick={() => navigate("/create-property")}
             >
               Add new Property
@@ -139,6 +189,7 @@ export default function LandingPage() {
       ) : (
         cards.map((card) => (
           <Card className="card" key={card.id}>
+            {console.log("photos ", card.photos)}
             <Box
               sx={{
                 width: "15%",
@@ -148,8 +199,7 @@ export default function LandingPage() {
               }}
             >
               <img
-                src={card.imageUrl || "https://via.placeholder.com/150"}
-                alt={card.name}
+                src={card.photos || "https://via.placeholder.com/150"}
                 style={{ width: "100%", height: "auto", objectFit: "cover" }}
               />
             </Box>
@@ -183,23 +233,56 @@ export default function LandingPage() {
                     "aria-labelledby": `menu-button-${card.id}`,
                   }}
                 >
-                  <MenuItem onClick={() => handleAddRoom(card.id)}>
+                  <MenuItem
+                    // onClick={handleOpenDialog}
+                    onClick={() => handleAddRoom(card.id)}
+                  >
                     Add room
                   </MenuItem>
-                  <MenuItem onClick={() => handleAddPhotos(card.id)}>
+                  <MenuItem onClick={() => handleOpenDialog(card.id)}>
                     Add photos
                   </MenuItem>
                 </Menu>
+                {/* Dialog for adding photo */}
+                <Dialog open={openDialog} onClose={handleCloseDialog}>
+                  <DialogTitle>Add Photo</DialogTitle>
+                  <DialogContent>
+                    <TextField
+                      autoFocus
+                      margin="dense"
+                      label="Photo URL"
+                      type="url"
+                      fullWidth
+                      value={photoLink}
+                      onChange={(e) => setPhotoLink(e.target.value)}
+                      placeholder="Enter the photo URL"
+                    />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleCloseDialog} color="secondary">
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => handleAddPhotos(card.id)}
+                      color="primary"
+                    >
+                      Add Photo
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+                <Button onClick={() => navigate(`/owner-rooms/${card.id}`)}>
+                  view rooms
+                </Button>
                 <Button
-                  className="card-button"
-                  onClick={() => navigate("/reservations")}
+                  onClick={() => {
+                    if (userRole == "EstateOwner") {
+                      navigate(`/reservations/${card.id}`);
+                    } else navigate(`/reservationv`);
+                  }}
                 >
                   Reservations
                 </Button>
-                <Button
-                  className="card-button"
-                  onClick={() => navigate(`/reviews/${card.id}`)}
-                >
+                <Button onClick={() => navigate(`/reviews/${card.id}`)}>
                   Reviews
                 </Button>
                 <DeleteConfirmationDialog

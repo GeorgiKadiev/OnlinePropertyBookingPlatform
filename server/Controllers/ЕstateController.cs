@@ -66,9 +66,27 @@ namespace OnlinePropertyBookingPlatform.Controllers
             estate.Location = _sanitizer.Sanitize(estate.Location);
             estate.Description = _sanitizer.Sanitize(estate.Description);
 
+            // Handle selected amenities
+            if (estate.Amenities != null && estate.Amenities.Any())
+            {
+                estate.Amenities = estate.Amenities
+                    .Select(a =>
+                        _context.Amenities.FirstOrDefault(dbAmenity => dbAmenity.AmenityName == a.AmenityName) 
+                        ?? new Amenity { AmenityName = _sanitizer.Sanitize(a.AmenityName) }) 
+                    .ToList();
+                // Changes: Added a check for existing amenities to avoid duplicate entries in the database.
+            }
+
+
             var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value)) 
+            {
+                return Unauthorized("User ID is invalid or missing"); 
+            }
+            
             // ID на собственика на имота
             estate.EstateOwnerId = int.Parse(userIdClaim.Value);
+
             _context.Add(estate);
             _context.SaveChanges();
 

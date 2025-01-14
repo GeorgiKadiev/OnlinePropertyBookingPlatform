@@ -1,3 +1,4 @@
 .env
 bin/
+server/obj/
 obj/

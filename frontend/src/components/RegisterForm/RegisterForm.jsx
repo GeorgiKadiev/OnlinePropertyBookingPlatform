@@ -111,6 +111,7 @@ export default function RegisterForm() {
 
   return (
     <Box className="form-register" component="form" onSubmit={handleSubmit}>
+      <h1>Register</h1>
       {[
         { id: "username", label: "Username", type: "text" },
         { id: "email", label: "Email", type: "email" },

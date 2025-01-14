@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Autocomplete,
+  Chip,
+} from "@mui/material";
 
 export default function PropertyForm() {
   const navigate = useNavigate();
@@ -11,9 +18,27 @@ export default function PropertyForm() {
     Title: "",
     PricePerNight: "",
     Description: "",
+    amenities: [], // Add this
   });
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  const amenitiesOptions = [
+    "Wi-Fi",
+    "Parking",
+    "Swimming Pool",
+    "Eco-Friendly",
+    "Hair Dryer",
+    "Fridge",
+    "Fireplace",
+    "Air Conditioning",
+    "Pet-Friendly",
+    "Digital Nomad Friendly",
+    "Coffee Maker",
+    "Balcony",
+    "Kitchen",
+    "Fitness Centre",
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,9 +53,9 @@ export default function PropertyForm() {
       Title: formData.Title,
       PricePerNight: Number(formData.PricePerNight),
       Description: formData.Description,
+      // Amenity: formData.amenities, // Include amenities
     };
 
-    // Validate form data
     if (
       !formData.Location ||
       !formData.Title ||
@@ -40,6 +65,8 @@ export default function PropertyForm() {
       setError("All fields are required");
       return;
     }
+
+    console.log(payload);
 
     try {
       const response = await fetch("http://localhost:5076/api/estate/create", {
@@ -57,7 +84,6 @@ export default function PropertyForm() {
         );
       }
 
-      //   setSuccessMessage("Property created successfully!");
       navigate("/success");
     } catch (error) {
       setError("Error creating property: " + error.message);
@@ -122,6 +148,31 @@ export default function PropertyForm() {
           fullWidth
           margin="normal"
         />
+      
+        {/* <Autocomplete
+          multiple
+          options={amenitiesOptions}
+          getOptionLabel={(option) => option}
+          value={formData.amenities}
+          onChange={(event, value) =>
+            setFormData({ ...formData, amenities: value })
+          }
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Chip key={index} label={option} {...getTagProps({ index })} />
+            ))
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              label="Amenities"
+              placeholder="Select amenities"
+              margin="normal"
+            />
+          )}
+          fullWidth
+        /> */}
         <Button variant="contained" color="primary" type="submit" fullWidth>
           Create Property
         </Button>

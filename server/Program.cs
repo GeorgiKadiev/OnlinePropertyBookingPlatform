@@ -72,7 +72,7 @@ public class Program
                     partitionKey: userIdentifier ?? "anonymous",
                     factory: _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 10, // Лимит на заявки
+                        PermitLimit = 20, // Лимит на заявки
                         Window = TimeSpan.FromSeconds(5), // Интервал
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                         QueueLimit = 0 // Максимум 5 заявки в опашка

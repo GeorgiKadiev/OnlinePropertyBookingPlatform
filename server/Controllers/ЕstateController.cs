@@ -80,20 +80,14 @@ namespace OnlinePropertyBookingPlatform.Controllers
             // Handle amenities
             if (estate.Amenities != null && estate.Amenities.Any())
             {
-                var updatedAmenities = estate.Amenities
-                    .Select(a =>
-                        _context.Amenities.FirstOrDefault(dbAmenity => dbAmenity.AmenityName == a.AmenityName) ??
-                        new Amenity { AmenityName = _sanitizer.Sanitize(a.AmenityName), EstateId = estate.Id })
-                    .ToList();
-
-                foreach (var amenity in updatedAmenities)
+                foreach (var amenity in estate.Amenities)
                 {
-                    if (amenity.EstateId == 0) amenity.EstateId = estate.Id;
-                    if (_context.Amenities.Any(dbAmenity =>
-                            dbAmenity.AmenityName == amenity.AmenityName && dbAmenity.EstateId == amenity.EstateId))
-                        continue;
-
-                    _context.Amenities.Add(amenity);
+                    amenity.EstateId = estate.Id; // Link amenity to the estate
+                    if (!_context.Amenities.Any(dbAmenity =>
+                            dbAmenity.AmenityName == amenity.AmenityName && dbAmenity.EstateId == estate.Id))
+                    {
+                        _context.Amenities.Add(amenity);
+                    }
                 }
 
                 _context.SaveChanges();
@@ -101,6 +95,7 @@ namespace OnlinePropertyBookingPlatform.Controllers
 
             return Ok();
         }
+
 
 
         [Authorize(Roles = "EstateOwner")]

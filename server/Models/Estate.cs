@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace OnlinePropertyBookingPlatform.Models;
 
@@ -16,7 +17,8 @@ public partial class Estate
     public int EstateOwnerId { get; set; }
 
     public string Description { get; set; }
-
+    
+    [JsonInclude]
     public virtual ICollection<Amenity> Amenities { get; set; } = new List<Amenity>();
 
     public virtual User? EstateOwner { get; set; }
